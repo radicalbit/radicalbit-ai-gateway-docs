@@ -1,0 +1,52 @@
+# GitHub Pages Configuration
+
+This repository is configured to deploy documentation to GitHub Pages using Docusaurus.
+
+## Deployment
+
+The documentation is automatically deployed to GitHub Pages when changes are pushed to the `main` branch.
+
+**Live Site**: https://radicalbit.github.io/radicalbit-ai-gateway-docs/
+
+## Local Development
+
+To run the documentation site locally:
+
+```bash
+npm install
+npm start
+```
+
+## Build and Deploy
+
+To build the site:
+
+```bash
+npm run build
+```
+
+To deploy to GitHub Pages:
+
+```bash
+npm run deploy
+```
+
+## Configuration
+
+The site is configured in `docusaurus.config.ts` with:
+
+- **Base URL**: `/radicalbit-ai-gateway-docs/`
+- **Organization**: `radicalbit`
+- **Project**: `radicalbit-ai-gateway-docs`
+
+## Content Sync
+
+Documentation content is automatically synchronized from the main repository using GitHub Actions.
+
+## Custom Domain (Optional)
+
+To use a custom domain:
+
+1. Add a `CNAME` file to the `static/` directory
+2. Configure DNS settings
+3. Update the `url` field in `docusaurus.config.ts`
