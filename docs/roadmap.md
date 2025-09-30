@@ -2,21 +2,21 @@
 
 This page outlines the planned features and improvements for the Radicalbit AI Gateway.
 
-## Current Version (v2.0.0)
+## Current Version (v0.1.0)
 
 ### ✅ Completed Features
 
-- **Enhanced Guardrails System**: AI-powered content evaluation with `judge` and `classifier` types
-- **Improved Configuration**: Model ID validation and enhanced error messages
-- **Weighted Round-Robin Load Balancing**: Sophisticated load balancing with configurable weights
-- **Performance Optimization**: Reduced overhead and improved caching
-- **Comprehensive Monitoring**: Enhanced Prometheus metrics and observability
-- **Security Enhancements**: Improved API key handling and rate limiting
-- **Complete Documentation**: Comprehensive documentation and examples
+- **Guardrails System**: Content safety with `judge` and `classifier` types
+- **Configuration**: Model ID validation and error messages
+- **Load Balancing**: Round-robin and weighted round-robin algorithms
+- **Performance Optimization**: Caching and reduced overhead
+- **Monitoring**: Prometheus metrics and observability
+- **Security**: API key handling and rate limiting
+- **Documentation**: Comprehensive documentation and examples
 
 ## Upcoming Releases
 
-### Version 2.1.0 (Q1 2024)
+### Version 0.2.0 (Q1 2024)
 
 #### 🚀 New Features
 
@@ -32,7 +32,7 @@ This page outlines the planned features and improvements for the Radicalbit AI G
 - **Documentation**: Additional examples and use cases
 - **Testing**: Expanded test coverage and integration tests
 
-### Version 2.2.0 (Q2 2024)
+### Version 0.3.0 (Q2 2024)
 
 #### 🚀 New Features
 
@@ -48,7 +48,7 @@ This page outlines the planned features and improvements for the Radicalbit AI G
 - **Monitoring**: Advanced monitoring and alerting
 - **Documentation**: Comprehensive API reference
 
-### Version 2.3.0 (Q3 2024)
+### Version 0.4.0 (Q3 2024)
 
 #### 🚀 New Features
 
@@ -66,7 +66,7 @@ This page outlines the planned features and improvements for the Radicalbit AI G
 
 ## Long-Term Vision
 
-### Version 3.0.0 (Q4 2024)
+### Version 1.0.0 (Q4 2024)
 
 #### 🚀 Major Features
 

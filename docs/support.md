@@ -14,7 +14,6 @@ The first place to look for help is our comprehensive documentation:
 - **[Guardrails](./features/guardrails.md)** - Content safety implementation
 - **[API Reference](./api-reference/endpoints.md)** - Complete API documentation
 - **[Monitoring](./monitoring.md)** - Observability and metrics setup
-- **[Performance Benchmarking](./performance-benchmarking.md)** - Performance optimization
 - **[Best Practices](./best-practices.md)** - Production guidelines
 - **[Production Deployment](./deployment/production.md)** - Production deployment guide
 - **[FAQ](./faq.md)** - Frequently asked questions

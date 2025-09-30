@@ -354,11 +354,9 @@ balancing:
 
 ### 3. Support Resources
 
-- Check the [Performance Benchmarking](../performance-benchmarking.md) guide for optimization tips
 - Use the [Monitoring](../monitoring.md) setup for observability
 
 ## Next Steps
 
 - **[Configuration Guide](../configuration/advanced-configuration.md)** - Complete configuration reference
 - **[Monitoring](../monitoring.md)** - Set up observability and metrics
-- **[Performance Benchmarking](../performance-benchmarking.md)** - Optimize your gateway performance

@@ -33,7 +33,7 @@ To become the leading AI gateway solution that enables organizations to safely a
 - **PII Protection**: Automatic detection and anonymization of sensitive data
 - **Rate Limiting**: Control costs and prevent abuse
 - **Token Management**: Comprehensive token counting and limiting
-- **Audit Logging**: Complete audit trail for compliance
+- **Audit Logging**: Request and response logging
 
 ### 📊 Observability
 
@@ -57,7 +57,7 @@ To become the leading AI gateway solution that enables organizations to safely a
 
 - **Docker**: Containerization
 - **Docker Compose**: Local development and testing
-- **Kubernetes**: Production orchestration
+- **Docker Compose**: Production deployment
 - **Prometheus**: Metrics collection
 - **Grafana**: Metrics visualization
 - **Nginx**: Load balancing and reverse proxy
@@ -74,7 +74,7 @@ To become the leading AI gateway solution that enables organizations to safely a
 ### Design Principles
 
 - **Modularity**: Modular architecture for easy extension
-- **Scalability**: Horizontal scaling capabilities
+- **Scalability**: Load balancing across models
 - **Reliability**: High availability and fault tolerance
 - **Security**: Security-first design
 - **Performance**: Optimized for performance
@@ -98,7 +98,7 @@ To become the leading AI gateway solution that enables organizations to safely a
 - **Engineering Team**: Backend and infrastructure engineers
 - **Product Team**: Product management and design
 - **DevOps Team**: Infrastructure and deployment
-- **Security Team**: Security and compliance
+- **Security Team**: Security and development
 - **Documentation Team**: Technical writing and documentation
 
 ### Contributors
@@ -136,7 +136,7 @@ The Radicalbit AI Gateway is open source and community-driven:
 - **Custom Solutions**: Tailored implementations
 - **Professional Services**: Consulting and implementation
 - **Training**: Custom training programs
-- **Compliance**: Regulatory compliance support
+- **Security**: Security features and best practices
 
 ### Enterprise Customers
 
@@ -154,7 +154,7 @@ Our enterprise customers include:
 
 - **Cloud Providers**: AWS, Azure, GCP
 - **AI Model Providers**: OpenAI, Anthropic
-- **Infrastructure Partners**: Docker, Kubernetes
+- **Infrastructure Partners**: Docker, Prometheus
 - **Monitoring Partners**: Prometheus, Grafana
 
 ### Integration Partners

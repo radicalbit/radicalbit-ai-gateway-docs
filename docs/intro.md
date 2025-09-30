@@ -4,87 +4,81 @@ slug: /
 
 # Radicalbit AI Gateway
 
-**A unified gateway for secure and intelligent AI model access**
+**A unified gateway for secure AI model access**
 
-The **Radicalbit AI Gateway** is an enterprise-grade solution that centralizes and secures access to artificial intelligence models, offering advanced controls, intelligent load balancing, and robust security mechanisms for modern organizations.
+The **Radicalbit AI Gateway** is a commercial solution that centralizes access to artificial intelligence models, offering content safety controls, load balancing, and monitoring capabilities.
 
 ## 🎯 Why Radicalbit AI Gateway?
 
-### **Advanced Security**
-- **Intelligent Guardrails**: AI-powered controls for safe content
-- **PII Protection**: Automatic detection and anonymization of sensitive data
-- **Access Control**: Centralized API key management and authentication
-- **Complete Audit**: Detailed logging for compliance and monitoring
+### **Content Safety**
+- **Guardrails**: AI-powered controls for safe content
+- **Content Filtering**: Automated content safety checks
+- **Request Validation**: Input validation and sanitization
 
-### **High Availability**
-- **Automatic Failover**: Seamless transition between backup models
-- **Intelligent Load Balancing**: Optimized distribution with configurable weights
-- **Real-time Monitoring**: Complete metrics and observability
-- **Horizontal Scaling**: Multi-replica deployment support
+### **Reliability**
+- **Automatic Failover**: Transition between backup models
+- **Load Balancing**: Request distribution across models
+- **Caching**: Redis and in-memory caching support
 
-### **Unified Integration**
-- **Standardized API**: Single interface for all AI providers
-- **Multi-Provider**: OpenAI, Anthropic, Ollama and more
-- **Flexible Configuration**: Quick and customizable setup
+### **Integration**
+- **Standardized API**: Single interface for AI providers
+- **Multi-Provider**: OpenAI, Anthropic, Ollama support
+- **Flexible Configuration**: Customizable setup
 - **OpenAI Compatibility**: Drop-in replacement for existing APIs
 
 ## 🚀 Key Use Cases
 
 ### **🏢 Enterprise AI**
-- **Centralization**: Unified access to all organization AI models
-- **Governance**: Centralized security policies and compliance
-- **Cost Control**: AI usage monitoring and optimization
-- **Audit Trail**: Complete traceability for regulatory compliance
+- **Centralization**: Unified access to AI models
+- **Cost Control**: Usage monitoring and limiting
+- **Audit Trail**: Request and response logging
 
 ### **🔄 Multi-Provider Strategy**
-- **Vendor Independence**: Reduce vendor lock-in
-- **Cost Optimization**: Intelligent use of different providers
-- **Service Continuity**: Automatic failover for high availability
-- **Performance**: Optimal model selection for each request
+- **Vendor Independence**: Support for multiple providers
+- **Service Continuity**: Automatic failover between models
+- **Load Distribution**: Distribute requests across models
 
-### **🛡️ Security & Compliance**
-- **Content Safety**: Advanced filters for appropriate content
-- **GDPR Compliance**: Automatic personal data protection
-- **Prompt Injection**: Protection against attacks and manipulation
-- **Data Loss Prevention**: Prevent sensitive data leakage
+### **🛡️ Security**
+- **Content Safety**: Filters for appropriate content
+- **API Key Management**: Secure credential handling
+- **Request Monitoring**: Track and log all requests
 
-### **⚡ Development & Testing**
-- **Rapid Prototyping**: Testing with multiple models
-- **A/B Testing**: Performance comparison between models
+### **⚡ Development**
+- **Rapid Testing**: Test with multiple models
 - **API Consistency**: Uniform interface for all teams
-- **CI/CD Integration**: Seamless integration in DevOps pipelines
+- **Configuration Management**: Flexible model configuration
 
 ## 🏗️ Architecture
 
-The Radicalbit AI Gateway acts as an intelligent proxy between your applications and AI providers, offering:
+The Radicalbit AI Gateway acts as a proxy between your applications and AI providers, offering:
 
 - **🔗 Unified Interface**: Single API endpoint for all AI models
-- **🛡️ Security Layer**: Comprehensive guardrails and access control
-- **⚖️ Intelligent Load Balancing**: Request distribution with configurable weights
-- **📊 Monitoring**: Real-time metrics and complete observability
-- **📈 Scalability**: Horizontal scaling and high availability
+- **🛡️ Security Layer**: Content safety and access control
+- **⚖️ Load Balancing**: Request distribution across models
+- **📊 Monitoring**: Metrics and observability
+- **💾 Caching**: Performance optimization through caching
 
 ## 🚀 Get Started
 
 ### **For Developers**
-- **[Installation](./getting-started/installation.md)** - Quick setup of your first gateway
+- **[Installation](./getting-started/installation.md)** - Set up your gateway
 - **[Basic Configuration](./configuration/basic-setup.md)** - Essential configuration
-- **[Practical Examples](./configuration/examples.md)** - Real-world tested configurations
+- **[Configuration Examples](./configuration/examples.md)** - Practical configurations
 
-### **For Architects**
-- **[Technical Overview](./technical-overview.md)** - Architecture and features
+### **For Configuration**
+- **[Model Configuration](./configuration/models.md)** - Configure AI models
+- **[Load Balancing](./configuration/load-balancing.md)** - Set up load balancing
+- **[Fallback](./configuration/fallback.md)** - Configure automatic failover
 - **[Advanced Configuration](./configuration/advanced-configuration.md)** - Enterprise setup
-- **[Production Deployment](./deployment/production.md)** - Production environment deployment
 
-### **For DevOps**
+### **For Operations**
 - **[Monitoring](./monitoring.md)** - Observability and metrics
-- **[Performance](./performance-benchmarking.md)** - Performance optimization
 - **[Best Practices](./best-practices.md)** - Production guidelines
+- **[Troubleshooting](./troubleshooting/common-issues.md)** - Common issues and solutions
 
 ### **For Security**
 - **[Guardrails](./features/guardrails.md)** - Content safety implementation
 - **[Guardrails Reference](./features/guardrails-reference.md)** - Complete documentation
-- **[FAQ](./faq.md)** - Frequently asked questions and troubleshooting
 
 ---
 
@@ -92,8 +86,7 @@ The Radicalbit AI Gateway acts as an intelligent proxy between your applications
 
 - **[API Reference](./api-reference/endpoints.md)** - Complete API documentation
 - **[Support](./support.md)** - Technical assistance and support
-- **[Enterprise](./enterprise.md)** - Enterprise features and services
-- **[Changelog](./changelog.md)** - Version history and migration guide
-- **[Roadmap](./roadmap.md)** - Planned features and improvements
+- **[Enterprise](./enterprise.md)** - Commercial licensing and services
+- **[FAQ](./faq.md)** - Frequently asked questions
 
 **🎯 Ready to get started?** Begin with the [installation guide](./getting-started/installation.md)!

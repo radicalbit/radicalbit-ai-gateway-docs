@@ -29,8 +29,6 @@ const sidebars: SidebarsConfig = {
       items: [
         'configuration/basic-setup',
         'configuration/models',
-        'configuration/load-balancing',
-        'configuration/fallback',
         'configuration/advanced-configuration',
         'configuration/examples',
       ],
@@ -41,6 +39,11 @@ const sidebars: SidebarsConfig = {
       items: [
         'features/guardrails',
         'features/guardrails-reference',
+        'features/caching',
+        'features/rate-limiting',
+        'features/budget-limiting',
+        'configuration/load-balancing',
+        'configuration/fallback',
       ],
     },
     {
@@ -48,7 +51,6 @@ const sidebars: SidebarsConfig = {
       label: 'Operations',
       items: [
         'monitoring',
-        'performance-benchmarking',
         'best-practices',
       ],
     },
