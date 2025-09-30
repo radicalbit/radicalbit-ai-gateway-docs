@@ -307,6 +307,40 @@ monitoring:
 - **Data Transformation**: Data transformation integration
 - **Data Validation**: Data validation integration
 
+## Commercial Licensing
+
+### License Information
+
+The Radicalbit AI Gateway is available under commercial licensing terms for enterprise use. For detailed licensing information and commercial terms, please contact our commercial team.
+
+### Contact Commercial Team
+
+For licensing inquiries, commercial terms, and enterprise agreements:
+
+- **Email**: sales@radicalbit.ai
+- **Phone**: +39 02 37920598
+- **Website**: https://radicalbit.ai
+- **Sales Team**: sales@radicalbit.ai
+
+### Enterprise Licensing Options
+
+#### Commercial License
+
+- **Commercial Use**: Full commercial usage rights
+- **Enterprise Features**: Access to enterprise features
+- **Priority Support**: Dedicated support channels
+- **SLA Guarantees**: Service level agreements
+- **Custom Terms**: Flexible licensing terms
+- **Volume Discounts**: Volume-based pricing
+
+#### Professional License
+
+- **Professional Use**: Professional usage rights
+- **Standard Support**: Standard support channels
+- **Basic Features**: Core gateway features
+- **Standard Terms**: Standard licensing terms
+- **Renewal Options**: Flexible renewal terms
+
 ## Pricing
 
 ### Enterprise Licensing

@@ -28,6 +28,9 @@ const sidebars: SidebarsConfig = {
       label: 'Configuration',
       items: [
         'configuration/basic-setup',
+        'configuration/models',
+        'configuration/load-balancing',
+        'configuration/fallback',
         'configuration/advanced-configuration',
         'configuration/examples',
       ],
@@ -67,6 +70,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Troubleshooting',
       items: [
+        'troubleshooting/common-issues',
         'faq',
       ],
     },
@@ -80,7 +84,6 @@ const sidebars: SidebarsConfig = {
         'roadmap',
         'contributing',
         'support',
-        'license',
         'privacy-policy',
         'terms-of-service',
       ],

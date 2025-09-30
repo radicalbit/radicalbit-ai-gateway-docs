@@ -579,6 +579,6 @@ df -h
 
 ## Next Steps
 
-- **[Monitoring](./monitoring.md)** - Set up comprehensive monitoring
-- **[Performance Benchmarking](./performance-benchmarking.md)** - Optimize performance
-- **[API Reference](./api-reference/endpoints.md)** - Complete API documentation
+- **[Monitoring](../monitoring.md)** - Set up comprehensive monitoring
+- **[Performance Benchmarking](../performance-benchmarking.md)** - Optimize performance
+- **[API Reference](../api-reference/endpoints.md)** - Complete API documentation

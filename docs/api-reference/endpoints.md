@@ -369,6 +369,6 @@ X-RateLimit-Reset: 1640995200
 
 ## Next Steps
 
-- **[Configuration Guide](./configuration/advanced-configuration.md)** - Complete configuration reference
-- **[Guardrails Reference](./features/guardrails-reference.md)** - Content safety implementation
-- **[Monitoring](./monitoring.md)** - Set up observability and metrics
+- **[Configuration Guide](../configuration/advanced-configuration.md)** - Complete configuration reference
+- **[Guardrails Reference](../features/guardrails-reference.md)** - Content safety implementation
+- **[Monitoring](../monitoring.md)** - Set up observability and metrics

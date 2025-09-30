@@ -234,6 +234,6 @@ Track guardrail performance through metrics:
 
 ## Next Steps
 
-- **[Configuration Guide](./configuration/advanced-configuration.md)** - Complete configuration reference
-- **[API Reference](./api-reference/endpoints.md)** - API documentation
-- **[Monitoring](./monitoring.md)** - Set up observability
+- **[Configuration Guide](../configuration/advanced-configuration.md)** - Complete configuration reference
+- **[API Reference](../api-reference/endpoints.md)** - API documentation
+- **[Monitoring](../monitoring.md)** - Set up observability

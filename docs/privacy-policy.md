@@ -242,4 +242,4 @@ For data protection questions:
 - **[Configuration Guide](./configuration/advanced-configuration.md)** - Learn about privacy configuration
 - **[Best Practices](./best-practices.md)** - Follow privacy best practices
 - **[Support](./support.md)** - Get help with privacy questions
-- **[License](./license.md)** - Review licensing information
+- **[Enterprise](./enterprise.md)** - Review commercial licensing information

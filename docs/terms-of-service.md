@@ -8,7 +8,14 @@ By using the Radicalbit AI Gateway, you agree to be bound by these Terms of Serv
 
 ## License
 
-The Radicalbit AI Gateway is licensed under the Apache License 2.0. See our [License](./license.md) page for complete licensing information.
+The Radicalbit AI Gateway is a commercial product. For licensing information, commercial terms, and enterprise agreements, please contact our commercial team:
+
+- **Email**: sales@radicalbit.ai
+- **Phone**: +39 02 37920598
+- **Website**: https://radicalbit.ai
+- **Sales Team**: sales@radicalbit.ai
+
+See our [Enterprise](../enterprise.md) page for detailed commercial licensing options.
 
 ## Use of the Software
 
@@ -236,7 +243,7 @@ These terms constitute the entire agreement between you and Radicalbit regarding
 
 ## Next Steps
 
-- **[License](./license.md)** - Review licensing information
+- **[Enterprise](../enterprise.md)** - Review commercial licensing information
 - **[Privacy Policy](./privacy-policy.md)** - Review privacy practices
 - **[Support](./support.md)** - Get help and support
 - **[Contributing](./contributing.md)** - Learn how to contribute

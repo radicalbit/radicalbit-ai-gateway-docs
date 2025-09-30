@@ -287,6 +287,6 @@ cache:
 
 ## Next Steps
 
-- **[Guardrails](./features/guardrails.md)** - Implement content safety and filtering
-- **[API Reference](./api-reference/endpoints.md)** - Complete API documentation
-- **[Monitoring](./monitoring.md)** - Set up observability and metrics
+- **[Guardrails](../features/guardrails.md)** - Implement content safety and filtering
+- **[API Reference](../api-reference/endpoints.md)** - Complete API documentation
+- **[Monitoring](../monitoring.md)** - Set up observability and metrics

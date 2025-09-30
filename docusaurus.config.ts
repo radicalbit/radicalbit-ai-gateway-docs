@@ -107,6 +107,10 @@ const config: Config = {
               label: 'GitHub',
               href: 'https://github.com/radicalbit/radicalbit-ai-gateway-docs',
             },
+            {
+              label: 'Commercial Licensing',
+              to: '/enterprise',
+            },
           ],
         },
       ],

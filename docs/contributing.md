@@ -275,7 +275,12 @@ We use semantic versioning (MAJOR.MINOR.PATCH):
 
 ## License
 
-By contributing to the Radicalbit AI Gateway, you agree that your contributions will be licensed under the same license as the project.
+By contributing to the Radicalbit AI Gateway, you agree that your contributions will be subject to the commercial licensing terms of the project. For detailed licensing information, please contact our commercial team:
+
+- **Email**: sales@radicalbit.ai
+- **Website**: https://radicalbit.com
+
+See our [Enterprise](../enterprise.md) page for detailed commercial licensing options.
 
 ## Next Steps
 

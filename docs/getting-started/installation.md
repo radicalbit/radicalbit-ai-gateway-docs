@@ -1,52 +1,34 @@
 # Installation
 
-This guide will help you install and set up the Radicalbit AI Gateway on your system.
+This guide assumes you have already obtained a commercial license for the Radicalbit AI Gateway by contacting our sales team and have the software installed and operational on your host system.
 
 ## Prerequisites
 
-Before installing the gateway, ensure you have:
+Before configuring the gateway, ensure you have:
 
-- **Docker** installed on your system
+- **Radicalbit AI Gateway** installed and licensed on your system
+- **Docker** installed (if using containerized deployment)
 - **Docker Compose** (included with Docker Desktop)
 - Basic knowledge of YAML configuration files
+- Valid API keys for your AI providers
 
-## Installation Method
+## Verification
 
-### Docker Deployment (Recommended)
+To verify your installation is working correctly:
 
-The Radicalbit AI Gateway is distributed as a Docker container for easy deployment and management.
-
-1. **Create a project directory:**
+1. **Check gateway status:**
    ```bash
-   mkdir ai-gateway-project
-   cd ai-gateway-project
+   curl http://localhost:8000/health
    ```
 
-2. **Create a Docker Compose file:**
-   ```yaml
-   # docker-compose.yml
-   version: '3.8'
-   services:
-     gateway:
-       image: radicalbit/ai-gateway:latest
-       ports:
-         - "8000:8000"
-       volumes:
-         - ./config.yaml:/app/config.yaml
-         - ./secrets.yaml:/app/secrets.yaml
-       environment:
-         - CONFIG_PATH=/app/config.yaml
-         - SECRETS_PATH=/app/secrets.yaml
-   ```
-
-3. **Start the gateway:**
+2. **Verify configuration:**
    ```bash
-   docker compose up -d
+   curl http://localhost:8000/v1/models
    ```
 
-## Quick Start
+## Quick Configuration Test
 
-Once the Docker container is running, you can test the gateway with a basic configuration:
+Once you've confirmed the gateway is running, test it with a basic configuration:
 
 1. **Create a basic configuration file:**
    ```yaml
@@ -66,8 +48,9 @@ Once the Docker container is running, you can test the gateway with a basic conf
    OPENAI_API_KEY: "your-openai-api-key"
    ```
 
-3. **Restart the container with your configuration:**
+3. **Apply your configuration:**
    ```bash
+   # Restart the gateway with your configuration
    docker compose down
    docker compose up -d
    ```
@@ -93,16 +76,18 @@ The gateway requires a YAML configuration file. See the [Configuration Guide](..
 - **[Basic Configuration](../configuration/basic-setup.md)** - Set up your first route
 - **[Model Configuration](../configuration/models.md)** - Add multiple AI models
 - **[Guardrails Setup](../features/guardrails.md)** - Implement content safety
-- **[Production Deployment](../configuration/production.md)** - Deploy to production
+- **[Production Deployment](../deployment/production.md)** - Deploy to production
 
 ## Troubleshooting
 
-If you encounter issues during installation:
+If you encounter issues with your licensed installation:
 
-- **Docker Issues**: Ensure Docker is running and you have sufficient permissions
-- **Port Conflicts**: Check if port 8000 is already in use
-- **Configuration Errors**: Verify your YAML syntax is correct
+- **Gateway Not Responding**: Check if the gateway service is running
+- **Port Conflicts**: Verify port 8000 is available and not blocked
+- **Configuration Errors**: Validate your YAML syntax and file paths
+- **API Key Issues**: Ensure your AI provider API keys are valid and accessible
+- **License Issues**: Contact sales@radicalbit.ai for licensing support
 - **Container Logs**: Use `docker compose logs gateway` to view error messages
-- **Network Issues**: Ensure you can access external AI providers from the container
+- **Network Issues**: Ensure external AI providers are accessible from your network
 
-For more help, see the [FAQ](../faq.md).
+For more help, see the [FAQ](../faq.md) or contact our support team.

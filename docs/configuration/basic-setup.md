@@ -86,5 +86,5 @@ export ANTHROPIC_API_KEY="sk-ant-your-key"
 
 - **[Model Configuration](./models.md)** - Add multiple models and providers
 - **[Load Balancing](./load-balancing.md)** - Distribute requests across models
-- **[Guardrails](./guardrails.md)** - Implement content safety
-- **[Production Setup](./production.md)** - Deploy to production
+- **[Guardrails](../features/guardrails.md)** - Implement content safety
+- **[Production Setup](../deployment/production.md)** - Deploy to production

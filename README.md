@@ -74,4 +74,9 @@ This documentation is maintained manually in this public repository. Content is 
 
 ## 📄 License
 
-This documentation is licensed under the same terms as the main Radicalbit AI Gateway project.
+This documentation is for the Radicalbit AI Gateway, a commercial product. For licensing information, please contact our commercial team:
+
+- **Email**: sales@radicalbit.ai
+- **Website**: https://radicalbit.com
+
+See our [Enterprise](docs/enterprise.md) page for detailed commercial licensing options.

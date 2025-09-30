@@ -525,7 +525,7 @@ routes:
 
 ## Next Steps
 
-- **[Configuration Guide](./configuration/advanced-configuration.md)** - Complete configuration reference
-- **[Guardrails Reference](./features/guardrails-reference.md)** - Detailed guardrail configuration
-- **[Production Deployment](./deployment/production.md)** - Deploy to production environments
-- **[Monitoring](./monitoring.md)** - Set up observability and metrics
+- **[Configuration Guide](./advanced-configuration.md)** - Complete configuration reference
+- **[Guardrails Reference](../features/guardrails-reference.md)** - Detailed guardrail configuration
+- **[Production Deployment](../deployment/production.md)** - Deploy to production environments
+- **[Monitoring](../monitoring.md)** - Set up observability and metrics
