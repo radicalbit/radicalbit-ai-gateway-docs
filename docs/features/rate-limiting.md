@@ -1,0 +1,200 @@
+# Rate Limiting
+
+This page covers rate limiting configuration and features in the Radicalbit AI Gateway.
+
+## Overview
+
+Rate limiting in the Radicalbit AI Gateway controls the number of requests that can be made within a specific time window, helping to manage costs and prevent abuse.
+
+## Rate Limiting Types
+
+### Request Rate Limiting
+Limit the number of requests per time window:
+
+```yaml
+routes:
+  production:
+    chat_models:
+      - model_id: gpt-4o
+        model: openai/gpt-4o
+    rate_limiting:
+      algorithm: fixed_window
+      window_size: 1 minute
+      max_requests: 100
+```
+
+### Token Rate Limiting
+Limit the number of tokens consumed per time window:
+
+```yaml
+routes:
+  production:
+    chat_models:
+      - model_id: gpt-4o
+        model: openai/gpt-4o
+    token_limiting:
+      algorithm: fixed_window
+      window_size: 1 hour
+      max_tokens: 1000000
+```
+
+## Rate Limiting Algorithms
+
+### Fixed Window
+Count requests/tokens within fixed time windows:
+
+```yaml
+rate_limiting:
+  algorithm: fixed_window
+  window_size: 1 minute
+  max_requests: 100
+```
+
+### Sliding Window
+More precise limiting using sliding time windows:
+
+```yaml
+rate_limiting:
+  algorithm: sliding_window
+  window_size: 1 minute
+  max_requests: 100
+```
+
+## Configuration Examples
+
+### Basic Rate Limiting
+```yaml
+routes:
+  api:
+    chat_models:
+      - model_id: gpt-3.5-turbo
+        model: openai/gpt-3.5-turbo
+    rate_limiting:
+      algorithm: fixed_window
+      window_size: 1 minute
+      max_requests: 60  # 1 request per second
+```
+
+### Token-Based Limiting
+```yaml
+routes:
+  production:
+    chat_models:
+      - model_id: gpt-4o
+        model: openai/gpt-4o
+    token_limiting:
+      algorithm: fixed_window
+      window_size: 1 hour
+      max_tokens: 500000  # 500K tokens per hour
+```
+
+### Combined Limiting
+```yaml
+routes:
+  enterprise:
+    chat_models:
+      - model_id: gpt-4o
+        model: openai/gpt-4o
+    rate_limiting:
+      algorithm: fixed_window
+      window_size: 1 minute
+      max_requests: 1000
+    token_limiting:
+      algorithm: fixed_window
+      window_size: 1 hour
+      max_tokens: 2000000
+```
+
+## Advanced Configuration
+
+### Custom Window Sizes
+```yaml
+rate_limiting:
+  algorithm: fixed_window
+  window_size: 5 minutes
+  max_requests: 500
+```
+
+### Different Algorithms
+```yaml
+# Fixed window (default)
+rate_limiting:
+  algorithm: fixed_window
+  window_size: 1 minute
+  max_requests: 100
+
+# Sliding window (more precise)
+rate_limiting:
+  algorithm: sliding_window
+  window_size: 1 minute
+  max_requests: 100
+```
+
+## Rate Limiting Behavior
+
+### When Limits Are Exceeded
+- **HTTP 429**: Too Many Requests status code
+- **Retry-After**: Header indicating when to retry
+- **Error Message**: Descriptive error message
+
+### Response Headers
+```
+HTTP/1.1 429 Too Many Requests
+Retry-After: 60
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 1640995200
+```
+
+## Monitoring
+
+### Rate Limiting Metrics
+- **Requests Blocked**: Number of requests blocked by rate limiting
+- **Rate Limit Utilization**: Percentage of rate limit used
+- **Window Resets**: Number of rate limit window resets
+
+### Monitoring Setup
+```yaml
+# Enable rate limiting metrics
+rate_limiting:
+  metrics_enabled: true
+```
+
+## Best Practices
+
+### Window Size Selection
+- **Short Windows (1-5 minutes)**: For burst protection
+- **Medium Windows (1 hour)**: For daily limits
+- **Long Windows (24 hours)**: For monthly limits
+
+### Limit Configuration
+- Start with conservative limits
+- Monitor usage patterns
+- Adjust based on actual usage
+
+### Error Handling
+- Implement proper retry logic
+- Handle 429 responses gracefully
+- Provide user feedback
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Too Restrictive**: Increase limits or window sizes
+2. **Not Working**: Verify rate limiting is enabled
+3. **Inconsistent Behavior**: Check algorithm selection
+
+### Debug Configuration
+```yaml
+rate_limiting:
+  debug: true
+  log_level: debug
+```
+
+## Next Steps
+
+- **[Token Limiting](./token-limiting.md)** - Configure token-based limits
+- **[Budget Limiting](./budget-limiting.md)** - Set up cost controls
+- **[Monitoring](../monitoring.md)** - Set up observability and metrics
+- **[API Reference](../api-reference/endpoints.md)** - Complete API documentation
