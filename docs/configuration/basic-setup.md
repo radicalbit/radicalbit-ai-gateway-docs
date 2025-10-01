@@ -10,8 +10,8 @@ The gateway uses YAML configuration files. Here's the basic structure:
 routes:
   your-route-name:
     chat_models:
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
         credentials:
           api_key: !secret OPENAI_API_KEY
 ```
@@ -36,8 +36,8 @@ Routes are the main building blocks of the gateway. Each route represents a diff
 routes:
   customer-service:
     chat_models:
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
         credentials:
           api_key: "sk-your-openai-key"
         params:
