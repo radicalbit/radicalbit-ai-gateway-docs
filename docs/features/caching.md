@@ -18,12 +18,8 @@ cache:
 ```
 
 ### In-Memory Caching
-Fast caching using local memory for single-instance deployments:
+Fast caching using local memory for single-instance deployments can be enabled without the Redis setting host.
 
-```yaml
-cache:
-  type: in_memory
-```
 
 ## Route-Level Caching
 
@@ -51,8 +47,6 @@ routes:
     caching:
       enabled: true
       ttl: 7200  # Cache for 2 hours
-      key_prefix: "prod_chat"
-      exclude_params: ["temperature", "top_p"]  # Don't cache based on these params
 ```
 
 ## Cache Configuration
@@ -68,10 +62,7 @@ cache:
 ### Cache Keys
 
 Cache keys are automatically generated based on:
-- Route name
-- Model ID
-- Request parameters
-- Message content
+- Route name + Message content hash
 
 ## Best Practices
 
