@@ -98,13 +98,6 @@ Cache keys are automatically generated based on:
 - **Cache Size**: Current cache size in memory/Redis
 - **Cache Evictions**: Number of items evicted from cache
 
-### Monitoring Setup
-```yaml
-# Enable cache metrics
-cache:
-  metrics_enabled: true
-```
-
 ## Troubleshooting
 
 ### Common Issues
@@ -112,13 +105,6 @@ cache:
 1. **Cache Not Working**: Verify cache is enabled and Redis is accessible
 2. **High Memory Usage**: Adjust TTL values and monitor cache size
 3. **Redis Connection Issues**: Check Redis server status and credentials
-
-### Debug Configuration
-```yaml
-cache:
-  debug: true
-  log_level: debug
-```
 
 ## Next Steps
 
