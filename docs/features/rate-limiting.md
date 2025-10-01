@@ -23,21 +23,6 @@ routes:
       max_requests: 100
 ```
 
-### Token Rate Limiting
-Limit the number of tokens consumed per time window:
-
-```yaml
-routes:
-  production:
-    chat_models:
-      - model_id: gpt-4o
-        model: openai/gpt-4o
-    token_limiting:
-      algorithm: fixed_window
-      window_size: 1 hour
-      max_tokens: 1000000
-```
-
 ## Rate Limiting Algorithms
 
 ### Fixed Window
@@ -73,19 +58,6 @@ routes:
       algorithm: fixed_window
       window_size: 1 minute
       max_requests: 60  # 1 request per second
-```
-
-### Token-Based Limiting
-```yaml
-routes:
-  production:
-    chat_models:
-      - model_id: gpt-4o
-        model: openai/gpt-4o
-    token_limiting:
-      algorithm: fixed_window
-      window_size: 1 hour
-      max_tokens: 500000  # 500K tokens per hour
 ```
 
 ### Combined Limiting
@@ -153,13 +125,6 @@ X-RateLimit-Reset: 1640995200
 - **Rate Limit Utilization**: Percentage of rate limit used
 - **Window Resets**: Number of rate limit window resets
 
-### Monitoring Setup
-```yaml
-# Enable rate limiting metrics
-rate_limiting:
-  metrics_enabled: true
-```
-
 ## Best Practices
 
 ### Window Size Selection
@@ -184,13 +149,6 @@ rate_limiting:
 1. **Too Restrictive**: Increase limits or window sizes
 2. **Not Working**: Verify rate limiting is enabled
 3. **Inconsistent Behavior**: Check algorithm selection
-
-### Debug Configuration
-```yaml
-rate_limiting:
-  debug: true
-  log_level: debug
-```
 
 ## Next Steps
 
