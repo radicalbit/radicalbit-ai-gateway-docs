@@ -9,8 +9,8 @@ This page provides practical configuration examples for common use cases with th
 routes:
   openai-route:
     chat_models:
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
         credentials:
           api_key: !secret OPENAI_API_KEY
         system_prompt: "You are a helpful assistant."
@@ -39,8 +39,8 @@ routes:
         model: openai/gpt-4o-mini
         credentials:
           api_key: !secret OPENAI_API_KEY
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
         credentials:
           api_key: !secret OPENAI_API_KEY
       - model_id: claude-3-sonnet
@@ -50,9 +50,9 @@ routes:
     fallback:
       - target: gpt-4o-mini
         fallbacks:
-          - gpt-3.5-turbo
+          - gpt-4o-mini
           - claude-3-sonnet
-      - target: gpt-3.5-turbo
+      - target: gpt-4o-mini
         fallbacks:
           - claude-3-sonnet
 ```
@@ -66,8 +66,8 @@ routes:
         model: openai/gpt-4o-mini
         credentials:
           api_key: !secret OPENAI_API_KEY
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
         credentials:
           api_key: !secret OPENAI_API_KEY
     embedding_models:
@@ -96,8 +96,8 @@ routes:
 routes:
   filtered-route:
     chat_models:
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
         credentials:
           api_key: !secret OPENAI_API_KEY
     guardrails:
@@ -127,8 +127,8 @@ guardrails:
 routes:
   pii-protected:
     chat_models:
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
         credentials:
           api_key: !secret OPENAI_API_KEY
     guardrails:
@@ -159,8 +159,8 @@ guardrails:
 routes:
   ai-judged:
     chat_models:
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
         credentials:
           api_key: !secret OPENAI_API_KEY
     guardrails:
@@ -175,7 +175,7 @@ guardrails:
     parameters:
       judge_config:
         prompt_ref: "toxicity_check.md"
-        model_id: "gpt-3.5-turbo"
+        model_id: "gpt-4o-mini"
         temperature: 0.0
         max_tokens: 100
         threshold: 0.01
@@ -189,7 +189,7 @@ guardrails:
       threshold: 0.7
       judge_config:
         prompt_ref: "business_context_check.md"
-        model_id: "gpt-3.5-turbo"
+        model_id: "gpt-4o-mini"
         temperature: 0.0
         max_tokens: 50
         action_on_fail: "block"
@@ -203,8 +203,8 @@ guardrails:
 routes:
   rate-limited:
     chat_models:
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
         credentials:
           api_key: !secret OPENAI_API_KEY
     rate_limiting:
@@ -218,8 +218,8 @@ routes:
 routes:
   token-limited:
     chat_models:
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
         credentials:
           api_key: !secret OPENAI_API_KEY
     token_limiting:
@@ -236,8 +236,8 @@ routes:
 routes:
   fully-limited:
     chat_models:
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
         credentials:
           api_key: !secret OPENAI_API_KEY
     rate_limiting:
@@ -260,8 +260,8 @@ routes:
 routes:
   cached-route:
     chat_models:
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
         credentials:
           api_key: !secret OPENAI_API_KEY
     caching:
@@ -278,8 +278,8 @@ cache:
 routes:
   long-cached:
     chat_models:
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
         credentials:
           api_key: !secret OPENAI_API_KEY
     caching:
@@ -298,8 +298,8 @@ cache:
 routes:
   customer-service:
     chat_models:
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
         credentials:
           api_key: !secret OPENAI_API_KEY
         system_prompt: "You are a helpful customer service assistant. Be polite and professional."
@@ -408,8 +408,8 @@ routes:
 routes:
   production:
     chat_models:
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o
+        model: openai/gpt-4o
         credentials:
           api_key: !secret OPENAI_API_KEY
         system_prompt: "You are a helpful assistant."
@@ -430,12 +430,12 @@ routes:
     balancing:
       algorithm: weighted_round_robin
       weights:
-        - model_id: gpt-3.5-turbo
+        - model_id: gpt-4o
           weight: 3
         - model_id: gpt-4o-mini
           weight: 1
     fallback:
-      - target: gpt-3.5-turbo
+      - target: gpt-4o
         fallbacks:
           - gpt-4o-mini
       - target: gpt-4o-mini
@@ -484,7 +484,7 @@ guardrails:
     parameters:
       judge_config:
         prompt_ref: "toxicity_check.md"
-        model_id: "gpt-3.5-turbo"
+        model_id: "gpt-4o-mini"
         temperature: 0.0
         max_tokens: 100
         threshold: 0.01
@@ -502,8 +502,8 @@ cache:
 routes:
   load-balanced:
     chat_models:
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o
+        model: openai/gpt-4o
         credentials:
           api_key: !secret OPENAI_API_KEY
       - model_id: gpt-4o-mini
@@ -517,7 +517,7 @@ routes:
     balancing:
       algorithm: weighted_round_robin
       weights:
-        - model_id: gpt-3.5-turbo
+        - model_id: gpt-4o
           weight: 3  # Gets 3 out of every 4 requests
         - model_id: gpt-4o-mini
           weight: 1  # Gets 1 out of every 4 requests
