@@ -15,7 +15,6 @@ Persistent caching using Redis for distributed deployments:
 cache:
   redis_host: localhost
   redis_port: 6379
-  redis_password: !secret REDIS_PASSWORD
 ```
 
 ### In-Memory Caching
@@ -64,10 +63,6 @@ routes:
 cache:
   redis_host: redis-server
   redis_port: 6379
-  redis_password: !secret REDIS_PASSWORD
-  redis_db: 0
-  connection_pool_size: 10
-  timeout: 5
 ```
 
 ### Cache Keys
