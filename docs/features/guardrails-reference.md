@@ -136,7 +136,7 @@ guardrails:
       threshold: 0.7
       judge_config:
         prompt_ref: "classification_check.md"
-        model_id: "gpt-3.5-turbo"
+        model_id: "gpt-4o-mini"
         temperature: 0.0
         max_tokens: 50
         action_on_fail: "block"
@@ -189,7 +189,7 @@ guardrails:
     behavior: block
     parameters:
       judge_config:
-        model_id: "gpt-3.5-turbo"
+        model_id: "gpt-4o-mini"
         threshold: 0.01
 ```
 
