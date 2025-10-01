@@ -41,7 +41,7 @@ Used for conversational AI and text generation:
 fallback:
   - target: gpt-4o
     fallbacks:
-      - gpt-3.5-turbo
+      - gpt-4o-mini
       - claude-3-sonnet
     type: CHAT
 ```
@@ -66,12 +66,12 @@ routes:
     chat_models:
       - model_id: gpt-4o
         model: openai/gpt-4o
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
     fallback:
       - target: gpt-4o
         fallbacks:
-          - gpt-3.5-turbo
+          - gpt-4o-mini
 ```
 
 ### Multiple Fallbacks
@@ -81,14 +81,14 @@ routes:
     chat_models:
       - model_id: gpt-4o
         model: openai/gpt-4o
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
       - model_id: claude-3-sonnet
         model: anthropic/claude-3-sonnet
     fallback:
       - target: gpt-4o
         fallbacks:
-          - gpt-3.5-turbo
+          - gpt-4o-mini
           - claude-3-sonnet
 ```
 
@@ -99,8 +99,8 @@ routes:
     chat_models:
       - model_id: gpt-4o
         model: openai/gpt-4o
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
     embedding_models:
       - model_id: openai-embedding
         model: openai/text-embedding-3-small
@@ -132,7 +132,7 @@ Fallbacks are tried in the order specified in the configuration:
 fallback:
   - target: gpt-4o
     fallbacks:
-      - gpt-3.5-turbo    # First fallback
+      - gpt-4o-mini    # First fallback
       - claude-3-sonnet  # Second fallback
       - local-model      # Third fallback
 ```
@@ -160,8 +160,8 @@ routes:
         model: openai/gpt-4o
         credentials:
           api_key: !secret OPENAI_API_KEY
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
         credentials:
           api_key: !secret OPENAI_API_KEY
       - model_id: claude-3-sonnet
@@ -171,7 +171,7 @@ routes:
     fallback:
       - target: gpt-4o
         fallbacks:
-          - gpt-3.5-turbo
+          - gpt-4o-mini
           - claude-3-sonnet
 ```
 
