@@ -16,8 +16,8 @@ routes:
     chat_models:
       - model_id: gpt-4o
         model: openai/gpt-4o
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
     balancing:
       algorithm: ROUND_ROBIN
 ```
@@ -37,7 +37,7 @@ Distributes requests evenly across all models:
 ```yaml
 balancing:
   algorithm: ROUND_ROBIN
-  models: ["gpt-4o", "gpt-3.5-turbo"]
+  models: ["gpt-4o", "gpt-4o-mini"]
 ```
 
 ### Weighted Round Robin
@@ -46,11 +46,11 @@ Distributes requests based on assigned weights:
 ```yaml
 balancing:
   algorithm: WEIGHTED_ROUND_ROBIN
-  models: ["gpt-4o", "gpt-3.5-turbo"]
+  models: ["gpt-4o", "gpt-4o-mini"]
   weights:
     - model_id: gpt-4o
       weight: 2
-    - model_id: gpt-3.5-turbo
+    - model_id: gpt-4o-mini
       weight: 1
 ```
 
@@ -60,7 +60,7 @@ Routes requests based on client IP hash for session affinity:
 ```yaml
 balancing:
   algorithm: IP_HASH
-  models: ["gpt-4o", "gpt-3.5-turbo"]
+  models: ["gpt-4o", "gpt-4o-mini"]
 ```
 
 ### Least Connections
@@ -69,7 +69,7 @@ Routes requests to the model with the fewest active connections:
 ```yaml
 balancing:
   algorithm: LEAST_CONNECTIONS
-  models: ["gpt-4o", "gpt-3.5-turbo"]
+  models: ["gpt-4o", "gpt-4o-mini"]
 ```
 
 ### Least Response Time
@@ -78,7 +78,7 @@ Routes requests to the model with the fastest response time:
 ```yaml
 balancing:
   algorithm: LEAST_RESPONSE_TIME
-  models: ["gpt-4o", "gpt-3.5-turbo"]
+  models: ["gpt-4o", "gpt-4o-mini"]
 ```
 
 ## Configuration Options
@@ -89,7 +89,7 @@ Specify which models to include in load balancing:
 ```yaml
 balancing:
   algorithm: ROUND_ROBIN
-  models: ["gpt-4o", "gpt-3.5-turbo"]  # Only these models will be balanced
+  models: ["gpt-4o", "gpt-4o-mini"]  # Only these models will be balanced
 ```
 
 ### Weight Configuration
@@ -101,7 +101,7 @@ balancing:
   weights:
     - model_id: gpt-4o
       weight: 3  # Gets 3 out of every 4 requests
-    - model_id: gpt-3.5-turbo
+    - model_id: gpt-4o-mini
       weight: 1  # Gets 1 out of every 4 requests
 ```
 
@@ -128,8 +128,8 @@ routes:
         model: openai/gpt-4o
         credentials:
           api_key: !secret OPENAI_API_KEY
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
         credentials:
           api_key: !secret OPENAI_API_KEY
     balancing:
@@ -137,7 +137,7 @@ routes:
       weights:
         - model_id: gpt-4o
           weight: 70
-        - model_id: gpt-3.5-turbo
+        - model_id: gpt-4o-mini
           weight: 30
 ```
 
@@ -146,14 +146,14 @@ routes:
 routes:
   cost-optimized:
     chat_models:
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o
+        model: openai/gpt-4o
       - model_id: gpt-4o-mini
         model: openai/gpt-4o-mini
     balancing:
       algorithm: WEIGHTED_ROUND_ROBIN
       weights:
-        - model_id: gpt-3.5-turbo
+        - model_id: gpt-4o
           weight: 80
         - model_id: gpt-4o-mini
           weight: 20
