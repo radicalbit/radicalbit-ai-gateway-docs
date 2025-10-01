@@ -72,9 +72,7 @@ Cache keys are automatically generated based on:
 - **Long TTL (7200-86400s)**: For static content
 
 ### Memory Management
-- Monitor Redis memory usage
 - Set appropriate TTL values
-- Use cache prefixes for organization
 
 ### Performance Optimization
 - Enable caching for frequently used models
@@ -84,10 +82,7 @@ Cache keys are automatically generated based on:
 ## Monitoring
 
 ### Cache Metrics
-- **Cache Hit Rate**: Percentage of requests served from cache
-- **Cache Miss Rate**: Percentage of requests requiring model calls
-- **Cache Size**: Current cache size in memory/Redis
-- **Cache Evictions**: Number of items evicted from cache
+- **Cache Hit Counter**: Number of times the gateway hits the cache
 
 ## Troubleshooting
 
