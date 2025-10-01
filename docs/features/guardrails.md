@@ -156,7 +156,7 @@ guardrails:
     parameters:
       judge_config:
         prompt_ref: "business_context_check.md"
-        model_id: "gpt-3.5-turbo"
+        model_id: "gpt-4o-mini"
         temperature: 0.7
         max_tokens: 150
         threshold: 0.001
@@ -231,7 +231,7 @@ guardrails:
     parameters:
       judge_config:
         model_id: "gpt-4o-mini"
-        fallback_model_id: "gpt-3.5-turbo"
+        fallback_model_id: "gpt-4o"
         fallback_duration_seconds: 60
 ```
 
