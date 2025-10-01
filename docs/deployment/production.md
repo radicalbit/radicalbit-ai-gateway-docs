@@ -147,8 +147,8 @@ routes:
         params:
           temperature: 0.7
           max_tokens: 1000
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
         credentials:
           api_key: !secret OPENAI_API_KEY
         params:
@@ -163,7 +163,7 @@ routes:
       weights:
         - model_id: gpt-4o
           weight: 70
-        - model_id: gpt-3.5-turbo
+        - model_id: gpt-4o-mini
           weight: 30
     rate_limiting:
       algorithm: fixed_window
