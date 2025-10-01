@@ -26,3 +26,9 @@ routes:
         max_tokens: 1000000
 ```
 
+## Next Steps
+
+- **[Rate Limiting](./rate-limiting.md)** - Configure rate-based limits
+- **[Budget Limiting](./budget-limiting.md)** - Set up cost controls
+- **[Monitoring](../monitoring.md)** - Set up observability and metrics
+- **[API Reference](../api-reference/endpoints.md)** - Complete API documentation
