@@ -13,8 +13,8 @@ The top-level key is `routes`. Each key under `routes` defines a separate API en
 routes:
   customer-service:
     chat_models:
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
         credentials:
           api_key: !secret OPENAI_API_KEY
         system_prompt: "You are a helpful customer service assistant."
@@ -37,8 +37,8 @@ routes:
     
   search-and-analytics:
     chat_models:
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - model_id: gpt-4o-mini
+        model: openai/gpt-4o-mini
         credentials:
           api_key: !secret OPENAI_API_KEY
         system_prompt: "You are a search and analytics assistant."
