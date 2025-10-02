@@ -42,6 +42,7 @@ const sidebars: SidebarsConfig = {
         'features/caching',
         'features/rate-limiting',
         'features/budget-limiting',
+        'features/semantic-caching',
         'configuration/load-balancing',
         'configuration/fallback',
       ],
