@@ -280,7 +280,7 @@ By contributing to the Radicalbit AI Gateway, you agree that your contributions 
 - **Email**: sales@radicalbit.ai
 - **Website**: https://radicalbit.com
 
-See our [Enterprise](../enterprise.md) page for detailed commercial licensing options.
+See our [Enterprise](./enterprise.md) page for detailed commercial licensing options.
 
 ## Next Steps
 
