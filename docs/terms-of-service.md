@@ -15,7 +15,7 @@ The Radicalbit AI Gateway is a commercial product. For licensing information, co
 - **Website**: https://radicalbit.ai
 - **Sales Team**: sales@radicalbit.ai
 
-See our [Enterprise](../enterprise.md) page for detailed commercial licensing options.
+See our [Enterprise](./enterprise.md) page for detailed commercial licensing options.
 
 ## Use of the Software
 
@@ -243,7 +243,7 @@ These terms constitute the entire agreement between you and Radicalbit regarding
 
 ## Next Steps
 
-- **[Enterprise](../enterprise.md)** - Review commercial licensing information
+- **[Enterprise](./enterprise.md)** - Review commercial licensing information
 - **[Privacy Policy](./privacy-policy.md)** - Review privacy practices
 - **[Support](./support.md)** - Get help and support
 - **[Contributing](./contributing.md)** - Learn how to contribute

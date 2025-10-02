@@ -94,7 +94,7 @@ Cache keys are automatically generated based on:
 
 ## Next Steps
 
-- **[Load Balancing](./load-balancing.md)** - Configure load balancing across models
-- **[Fallback](./fallback.md)** - Set up automatic failover
+- **[Load Balancing](../configuration/load-balancing.md)** - Configure load balancing across models
+- **[Fallback](../configuration/fallback.md)** - Set up automatic failover
 - **[Monitoring](../monitoring.md)** - Set up observability and metrics
 - **[API Reference](../api-reference/endpoints.md)** - Complete API documentation
