@@ -26,7 +26,8 @@ routes:
 ## Rate Limiting Algorithms
 
 ### Fixed Window
-Count requests/tokens within fixed time windows:
+
+The gateway currently uses the fixed window algorithm for rate limiting. This counts requests/tokens within fixed time windows:
 
 ```yaml
 rate_limiting:
@@ -35,15 +36,7 @@ rate_limiting:
   max_requests: 100
 ```
 
-### Sliding Window
-More precise limiting using sliding time windows:
-
-```yaml
-rate_limiting:
-  algorithm: sliding_window
-  window_size: 1 minute
-  max_requests: 100
-```
+**Note**: Other algorithms (`sliding_window`, `sliding_window_counter`) are defined in the configuration schema but are not yet implemented in the code. The gateway will always use fixed window limiting regardless of the `algorithm` value specified in the configuration.
 
 ## Configuration Examples
 
@@ -87,20 +80,16 @@ rate_limiting:
   max_requests: 500
 ```
 
-### Different Algorithms
+### Algorithm Configuration
 ```yaml
-# Fixed window (default)
+# Fixed window (currently implemented)
 rate_limiting:
   algorithm: fixed_window
   window_size: 1 minute
   max_requests: 100
-
-# Sliding window (more precise)
-rate_limiting:
-  algorithm: sliding_window
-  window_size: 1 minute
-  max_requests: 100
 ```
+
+**Note**: While you can specify `sliding_window` or `sliding_window_counter` in the configuration, the gateway currently only implements fixed window algorithm and will use fixed window regardless of the specified algorithm.
 
 ## Rate Limiting Behavior
 

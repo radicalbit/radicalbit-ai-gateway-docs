@@ -9,7 +9,7 @@ Budget limiting in the Radicalbit AI Gateway controls costs by setting limits on
 ## Budget Limiting Configuration
 
 ### Basic Budget Limiting
-Set limits on input and output tokens:
+Set cost limits on input and output tokens:
 
 ```yaml
 routes:
@@ -20,8 +20,12 @@ routes:
     budget_limiting:
       input:
         algorithm: fixed_window
-        window_size: 1 minute
-        max_budget: 100
+        window_size: 1 hour
+        max_budget: 50.0  # $50 per hour maximum cost
+      output:
+        algorithm: fixed_window
+        window_size: 1 hour
+        max_budget: 100.0  # $100 per hour maximum cost
 ```
 
 ### Advanced Budget Configuration
@@ -46,27 +50,22 @@ routes:
 
 ## Budget Limiting Types
 
-### Input Token Limiting
-Control the number of input tokens consumed:
+### Cost-Based Budget Limiting
+Control costs by setting maximum budget (in dollars) per time window:
 
 ```yaml
     budget_limiting:
       input:
         algorithm: fixed_window
-        window_size: 1 minute
-        max_budget: 100
-```
-
-### Output Token Limiting
-Control the number of output tokens generated:
-
-```yaml
-    budget_limiting:
+        window_size: 1 hour
+        max_budget: 50.0  # $50 per hour for input tokens
       output:
         algorithm: fixed_window
-        window_size: 1 minute
-        max_budget: 100
+        window_size: 1 hour
+        max_budget: 100.0  # $100 per hour for output tokens
 ```
+
+Note: Budget limiting uses cost calculations based on model pricing. You can set either `max_token` (for token-based limits) or `max_budget` (for cost-based limits), but not both in the same configuration.
 
 ## Budget Limiting Behavior
 

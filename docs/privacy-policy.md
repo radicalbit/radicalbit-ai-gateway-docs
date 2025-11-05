@@ -41,28 +41,18 @@ The gateway includes built-in privacy features:
 
 ### Data Protection
 
-- **Encryption**: All data transmission is encrypted
-- **Access Control**: Configurable access controls and authentication
-- **Audit Logging**: Comprehensive audit logging for compliance
+- **PII Detection and Masking**: Automatic detection and anonymization of sensitive data using Presidio guardrails
+- **Access Control**: API key-based authentication with groups and route associations
+- **Audit Logging**: Request and response logging for monitoring and analysis
 
-## Compliance
+## Privacy Features
 
-### GDPR Compliance
+The gateway provides tools to help protect privacy:
 
-The gateway supports GDPR compliance through:
-
-- **Data Minimization**: Only process necessary data
-- **Right to Erasure**: Configurable data retention policies
-- **Data Portability**: Export capabilities for user data
-- **Consent Management**: Configurable consent handling
-
-### CCPA Compliance
-
-The gateway supports CCPA compliance through:
-
-- **Data Transparency**: Clear data handling practices
-- **User Rights**: Support for user data rights
-- **Opt-out Mechanisms**: Configurable opt-out options
+- **PII Detection**: Use Presidio guardrails to detect personally identifiable information (PII) in input and output
+- **PII Anonymization**: Automatically mask or replace PII with placeholders before processing or returning responses
+- **Content Filtering**: Apply guardrails to filter sensitive content
+- **Request Logging**: Track and log requests for security and compliance monitoring
 
 ## Configuration
 
@@ -118,10 +108,10 @@ guardrails:
 
 ### Data Security
 
-- **Encryption**: All data is encrypted in transit and at rest
-- **Access Control**: Role-based access control
-- **Authentication**: Multiple authentication methods
-- **Network Security**: Configurable network security
+- **API Key Authentication**: Secure API key-based authentication with route-level access control
+- **Groups and Keys**: Organize and manage API keys through groups for access control
+- **Network Security**: Use HTTPS/TLS for production deployments
+- **PII Protection**: Use Presidio guardrails for automatic PII detection and anonymization
 
 ### Security Best Practices
 

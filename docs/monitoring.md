@@ -248,6 +248,30 @@ sum by (route_name) (rate(gateway_requests_total[1h]))
 sum(rate(gateway_tokens_total_input_tokens_total[1h])) / sum(rate(gateway_requests_total[1h]))
 ```
 
+## UI Monitoring
+
+The Radicalbit AI Gateway provides a web-based UI for monitoring and managing your gateway:
+
+### Features
+
+- **Routes Management**: View all configured routes and their features
+- **Groups and Keys**: Create and manage API key groups and associate them with routes
+- **Cost Tracking**: Monitor costs by groups and keys
+- **Event Tracking**: View events that occurred on specific routes with time filters
+- **Route Details**: View configuration, test with curl commands, and see associations
+- **Alerts**: View summaries of the last 10 events related to specific features
+
+### Visual Indicators
+
+Each route in the UI displays configured features with visual indicators:
+- **Gray icon**: Feature not configured
+- **White icon with blue outline**: Feature configured, but no events in selected time window
+- **Solid blue icon**: Feature configured with events in the selected time window
+
+### Access
+
+The UI is typically available at the same host as the gateway, on a separate port or path configured in your deployment.
+
 ## Troubleshooting
 
 ### Common Issues

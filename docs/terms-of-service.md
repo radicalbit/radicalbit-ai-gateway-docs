@@ -102,10 +102,10 @@ Users are responsible for:
 
 The gateway includes security features:
 
-- **Authentication**: Multiple authentication methods
-- **Authorization**: Role-based access control
-- **Encryption**: Data encryption in transit and at rest
-- **Monitoring**: Security monitoring and logging
+- **Authentication**: API key-based authentication with groups
+- **Authorization**: Route-level access control through API key associations
+- **Content Safety**: Guardrails for content filtering and PII protection
+- **Monitoring**: Security monitoring and logging through metrics and events
 
 ### User Security
 

@@ -8,7 +8,7 @@ Guardrails act as a security layer between user input and AI models, providing:
 
 - **Content Filtering**: Block or modify inappropriate content
 - **Security Protection**: Prevent prompt injection and misuse
-- **Compliance**: Ensure adherence to data protection regulations
+- **Privacy Protection**: Detect and mask PII using Presidio guardrails
 - **Custom Rules**: Implement business-specific content policies
 
 ## Execution Flow

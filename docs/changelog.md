@@ -2,7 +2,7 @@
 
 This page tracks the version history and changes for the Radicalbit AI Gateway.
 
-## Version 2.0.0 (Latest)
+## Version 0.1.0 (Current)
 
 ### 🚀 New Features
 

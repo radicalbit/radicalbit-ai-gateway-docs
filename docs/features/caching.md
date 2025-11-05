@@ -4,7 +4,12 @@ This page covers caching configuration and features in the Radicalbit AI Gateway
 
 ## Overview
 
-Caching in the Radicalbit AI Gateway improves performance and reduces costs by storing responses for frequently repeated requests. The gateway supports both Redis and in-memory caching.
+Caching in the Radicalbit AI Gateway improves performance and reduces costs by storing responses for frequently repeated requests. The gateway supports two types of caching:
+
+- **Semantic Cache**: Intelligent caching based on content similarity
+- **Exact Cache**: Precise response caching to avoid redundancy
+
+The gateway supports both Redis and in-memory caching backends.
 
 ## Cache Types
 

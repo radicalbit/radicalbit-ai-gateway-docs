@@ -210,27 +210,14 @@ ufw deny 8000/tcp  # Block direct gateway access
 
 ### 3. Access Control
 
-#### Implement Authentication
-```yaml
-# Good: Multiple authentication methods
-authentication:
-  methods:
-    - api_key
-    - oauth2
-    - jwt
-```
+#### API Key Management
+Use the Gateway UI to create groups and API keys, then associate them with specific routes:
 
-#### Use Role-Based Access
-```yaml
-# Good: Different access levels
-routes:
-  admin-route:
-    access_level: admin
-    chat_models: [...]
-  user-route:
-    access_level: user
-    chat_models: [...]
-```
+- **Groups**: Organize API keys by team or application
+- **API Keys**: Generate keys through the UI and associate them with routes
+- **Route Association**: Link groups/keys to specific routes for access control
+
+This allows you to track which groups and keys are using specific applications and control access at the route level.
 
 ## Performance Best Practices
 

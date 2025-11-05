@@ -4,59 +4,53 @@ slug: /
 
 # Radicalbit AI Gateway
 
-**A unified gateway for secure AI model access**
+**A simple and streamlined tool for managing your Generative AI applications**
 
-The **Radicalbit AI Gateway** is a commercial solution that centralizes access to artificial intelligence models, offering content safety controls, load balancing, and monitoring capabilities.
+The Radicalbit AI Gateway connects to the models used in your Generative AI application, offering the ability to apply guardrails, load balancing, and management of inbound and outbound traffic.
 
-## 🎯 Why Radicalbit AI Gateway?
+## 🎯 Key Capabilities
 
-### **Content Safety**
-- **Guardrails**: AI-powered controls for safe content
-- **Content Filtering**: Automated content safety checks
-- **Request Validation**: Input validation and sanitization
+The Radicalbit AI Gateway enables you to:
 
-### **Reliability**
-- **Automatic Failover**: Transition between backup models
-- **Load Balancing**: Request distribution across models
-- **Caching**: Redis and in-memory caching support
+### **Guardrails**
+- **Text Control**: Contains, starts with, ends with, regex patterns
+- **PII Detection and Masking**: Automatic detection and anonymization of sensitive data
+- **LLM-as-a-Judge**: Custom logic evaluation using AI models
 
-### **Integration**
-- **Standardized API**: Single interface for AI providers
-- **Multi-Provider**: OpenAI, Anthropic, Ollama support
-- **Flexible Configuration**: Customizable setup
-- **OpenAI Compatibility**: Drop-in replacement for existing APIs
+### **Caching**
+- **Semantic Cache**: Intelligent caching based on content similarity
+- **Exact Cache**: Precise response caching to avoid redundancy
 
-## 🚀 Key Use Cases
+### **Traffic Management**
+- **Rate Limits**: Control requests per time interval
+- **Token Limits**: Cap tokens processed by models
+- **Model Fallbacks**: Automatic failover for error handling
+- **Load Balancing**: Traffic distribution across models
 
-### **🏢 Enterprise AI**
-- **Centralization**: Unified access to AI models
-- **Cost Control**: Usage monitoring and limiting
-- **Audit Trail**: Request and response logging
+### **Monitoring & Observability**
+- **Authenticated UI**: Monitor and manage your applications
+- **Groups and Keys**: Create and manage API keys and groups
+- **Cost Control**: Track costs by groups and keys
+- **Event Notifications**: Receive alerts based on configured logic
+- **Detailed Metrics**: Investigate performance and usage
+- **Gateway Tracing**: Total observability through distributed tracing
 
-### **🔄 Multi-Provider Strategy**
-- **Vendor Independence**: Support for multiple providers
-- **Service Continuity**: Automatic failover between models
-- **Load Distribution**: Distribute requests across models
+## 🔌 OpenAI Compatibility
 
-### **🛡️ Security**
-- **Content Safety**: Filters for appropriate content
-- **API Key Management**: Secure credential handling
-- **Request Monitoring**: Track and log all requests
+The Radicalbit AI Gateway is agnostic to the type of application and supports any model that adheres to the OpenAI standard. This makes the tool usable in the vast majority of Generative AI applications without requiring changes to your application code.
 
-### **⚡ Development**
-- **Rapid Testing**: Test with multiple models
-- **API Consistency**: Uniform interface for all teams
-- **Configuration Management**: Flexible model configuration
+## 🏗️ How It Works
 
-## 🏗️ Architecture
+The Radicalbit AI Gateway is designed to be agnostic to any GenAI framework and application. Application development and Gateway configuration are two independent processes:
 
-The Radicalbit AI Gateway acts as a proxy between your applications and AI providers, offering:
+1. **Develop Your Application**: Build your chat assistant, RAG application, or any other GenAI solution without worrying about guardrails, caching, or metrics
+2. **Configure the Gateway**: Write the `config.yaml` file to define routes, models, and control logic
+3. **Connect Your Application**: Point your LLM client to the Gateway by using:
+   - The Route name instead of the model name
+   - The Gateway base URL
+   - The Gateway API Key (generated in the UI)
 
-- **🔗 Unified Interface**: Single API endpoint for all AI models
-- **🛡️ Security Layer**: Content safety and access control
-- **⚖️ Load Balancing**: Request distribution across models
-- **📊 Monitoring**: Metrics and observability
-- **💾 Caching**: Performance optimization through caching
+All traffic is then sent and processed by the Gateway, which handles guardrails, caching, monitoring, and cost control transparently.
 
 ## 🚀 Get Started
 
@@ -67,23 +61,22 @@ The Radicalbit AI Gateway acts as a proxy between your applications and AI provi
 
 ### **For Configuration**
 - **[Model Configuration](./configuration/models.md)** - Configure AI models
-- **[Load Balancing](./configuration/load-balancing.md)** - Set up load balancing
-- **[Fallback](./configuration/fallback.md)** - Configure automatic failover
-- **[Advanced Configuration](./configuration/advanced-configuration.md)** - Enterprise setup
+- **[Guardrails](./features/guardrails.md)** - Content safety implementation
+- **[Caching](./features/caching.md)** - Semantic and exact caching
+- **[Rate Limiting](./features/rate-limiting.md)** - Request and token limits
+- **[Load Balancing](./configuration/load-balancing.md)** - Traffic distribution
+- **[Fallback](./configuration/fallback.md)** - Automatic failover
 
 ### **For Operations**
 - **[Monitoring](./monitoring.md)** - Observability and metrics
 - **[Best Practices](./best-practices.md)** - Production guidelines
 - **[Troubleshooting](./troubleshooting/common-issues.md)** - Common issues and solutions
 
-### **For Security**
-- **[Guardrails](./features/guardrails.md)** - Content safety implementation
-- **[Guardrails Reference](./features/guardrails-reference.md)** - Complete documentation
-
 ---
 
 ## 📖 Complete Documentation
 
+- **[Technical Overview](./technical-overview.md)** - Architecture and components
 - **[API Reference](./api-reference/endpoints.md)** - Complete API documentation
 - **[Support](./support.md)** - Technical assistance and support
 - **[Enterprise](./enterprise.md)** - Commercial licensing and services

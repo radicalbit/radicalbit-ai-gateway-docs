@@ -48,7 +48,11 @@ Reduce latency and costs by caching responses for frequently repeated requests.
 ### **Observability**
 Exposes detailed metrics via a Prometheus endpoint for easy integration with monitoring tools like Grafana.
 
-## Architecture Overview
+## Components
+
+The Radicalbit AI Gateway is composed of several integrated components that work together to manage, secure, and monitor AI applications. Each component has a specific role, and together they form a flexible and observable architecture designed for management and control.
+
+### The config.yaml File
 
 The gateway's entire behavior is controlled by a single YAML configuration file. This file defines all routes, models, and the features applied to them.
 
@@ -87,6 +91,49 @@ cache:
   redis_host: '...'
   redis_port: ...
 ```
+
+### UI (User Interface)
+
+The Gateway's UI provides administrative and monitoring features:
+
+- **Groups and API Keys**: Create groups and API keys, and associate them with routes
+- **Route Information**: View detailed information for each route
+- **Event Tracking**: Track events that occurred on a specific route and when they happened
+- **Time Filters**: Apply time filters to focus on specific time windows
+- **Cost Analysis**: Analyze cost trends across routes
+
+Each route in the UI displays configured features (caching, fallback, guardrails, limiters) with visual indicators:
+- Gray icon → Feature not configured
+- White icon with blue outline → Feature configured, but no events in selected time window
+- Solid blue icon → Feature configured with events in the selected time window
+
+### Authentication, Groups and Keys
+
+To ensure security, the Gateway provides route-level authentication. Each API Key must be associated with a Group, which in turn is linked to one or more routes. This setup allows you to track which groups and keys are using specific applications.
+
+The Gateway can also integrate with your Identity Provider (IDP), allowing it to import existing users and groups managed within your organization.
+
+### Routes
+
+A Route represents the set of models used within your application, along with the logic and controls managed by the gateway. Each route can include all models (both chat and embedding) used in your application, or it can be segmented according to your specific needs.
+
+### Cost Management
+
+The Gateway provides tools to monitor and control costs:
+- **Rate Limiting**: Restrict the number of requests per time interval
+- **Token Limits**: Cap the number of tokens processed by a model
+- **Caching**: Use semantic or exact cache to reduce redundant model calls
+
+Cost monitoring is available through a dedicated section in the UI, where you can track consumption metrics and identify optimization areas.
+
+### Logs and Metrics
+
+All events managed by the Gateway generate logs and metrics:
+
+- **Logs**: Can be captured and aggregated by external Log Management systems (Loki, Splunk) for centralization, search, and correlation with other system components
+- **Metrics**: Provide real-time insights in the UI and in-depth analysis through Prometheus integration
+
+Prometheus enables querying key performance indicators (request rates, latency, cache hit ratio, token consumption) and building detailed dashboards in tools like Grafana for advanced observability.
 
 ## How It Works
 
