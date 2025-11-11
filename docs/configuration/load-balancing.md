@@ -1,4 +1,4 @@
-# Load Balancing
+# Intelligent Routing
 
 This page covers load balancing configuration for the Radicalbit AI Gateway based on the actual implementation.
 

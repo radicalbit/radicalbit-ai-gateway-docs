@@ -1,62 +1,14 @@
-# Technical Overview
 
-The Radicalbit AI Gateway is a powerful, flexible, and feature-rich service designed to act as a standardized, centralized, intelligent entry point for all your interactions with Large Language Models (LLMs).
 
-## What is the Radicalbit AI Gateway?
+The Radicalbit AI Gateway is composed of several integrated components that work together to manage, secure, and monitor AI applications.
+Each component has a specific role, and together they form a flexible and observable architecture designed for management and control.
 
-The Radicalbit AI Gateway provides a unified interface (standard OpenAI specification) to multiple AI models, abstracting away the complexity of dealing with different providers and adding a layer of control, security, and resilience to your AI applications.
 
-### A Non-Technical Overview
 
-Think of the AI Gateway as a smart traffic controller for AI requests. When your application needs to talk to an AI model (like `gpt-4o` or `claude-sonnet-4`), instead of connecting directly, it goes through the gateway. The gateway then:
+### The config.yaml file
 
-- **Filters content** to prevent sensitive information from being processed
-- **Provides backup options** if one model fails
-- **Routes requests** across multiple AI models using weighted round-robin
-- **Protects against abuse** by limiting how many requests can be made
-- **Caches responses** to improve performance and reduce costs
-- **Monitors everything** to provide insights into usage patterns
-
-## Key Features
-
-### **OpenAI Compliant**
-Completions endpoint is OpenAI compliant which means that the gateway is compatible with OpenAI specification (and libraries) so no additional libraries or custom configurations are needed.
-
-### **Multiple Route Definition**
-Create different "routes" or endpoints within the same gateway, each with its unique configuration for models, security, and traffic management.
-
-### **Multiple Model Support**
-Connect to a variety of AI models, including those from OpenAI, Anthropic, and any OpenAI-compatible services like Ollama, vLLM, or OpenRouter.
-
-### **Guardrails**
-Apply powerful content filters and safety measures. Check for and block/warn about specific content, or redact sensitive information (like PII) before it's processed by a model or returned to a user.
-
-### **Fallback Mechanisms**
-Ensure high availability by automatically retrying failed requests with a series of predefined backup models.
-
-### **High Availability**
-- Weighted Round-Robin Load Balancing: Distribute incoming requests across multiple models using weighted round-robin algorithm to manage load and optimize cost
-- Health monitoring and metrics
-- Automatic failover and recovery
-
-### **Rate & Token Limiting**
-Manage costs and prevent abuse by setting limits on the number of requests or tokens consumed over a specific time window.
-
-### **Caching**
-Reduce latency and costs by caching responses for frequently repeated requests.
-
-### **Observability**
-Exposes detailed metrics via a Prometheus endpoint for easy integration with monitoring tools like Grafana.
-
-## Components
-
-The Radicalbit AI Gateway is composed of several integrated components that work together to manage, secure, and monitor AI applications. Each component has a specific role, and together they form a flexible and observable architecture designed for management and control.
-
-### The config.yaml File
-
-The gateway's entire behavior is controlled by a single YAML configuration file. This file defines all routes, models, and the features applied to them.
-
-### High-Level Structure
+To configure the Gateway, you need to create a YAML configuration file (you can choose any name, but throughout this documentation we’ll refer to it as `config.yaml`).
+This single file controls the entire behavior of the Gateway, defining all routes, models, and the features applied to them.
 
 ```yaml
 # Definition of all routes
@@ -92,85 +44,121 @@ cache:
   redis_port: ...
 ```
 
-### UI (User Interface)
+At the route level, you must define the route name (e.g., `customer-service` in the example above).
+This name is important because you’ll refer to it in your model client during application development — and it also appears in the UI.
+Choose a clear, descriptive name.
 
-The Gateway's UI provides administrative and monitoring features:
+Each key under `routes` defines a separate API endpoint with its own configuration.
 
-- **Groups and API Keys**: Create groups and API keys, and associate them with routes
-- **Route Information**: View detailed information for each route
-- **Event Tracking**: Track events that occurred on a specific route and when they happened
-- **Time Filters**: Apply time filters to focus on specific time windows
-- **Cost Analysis**: Analyze cost trends across routes
+Within each route, you can define two model types:
 
-Each route in the UI displays configured features (caching, fallback, guardrails, limiters) with visual indicators:
-- Gray icon → Feature not configured
-- White icon with blue outline → Feature configured, but no events in selected time window
-- Solid blue icon → Feature configured with events in the selected time window
+  * `chat_models`
+  * `embedding_models`
+
+Both are fully compliant with the OpenAI standard. Their detailed configuration will be explained later.
+
+At the same level, you can configure the following features:
+
+  * `balancing`
+  * `fallback`
+  * `guardrails`
+  * `rate_limiting`
+  * `token_limiting`
+  * `caching`
+
+Since `guardrails` and `caching` are used across multiple routes, they can also be defined globally at the root level, and then referenced in specific routes.
+
+### UI
+
+The Gateway’s UI provides a set of administrative and monitoring features covering several aspects of your system:
+
+  * Create groups and API keys, and associate them with routes
+  * View detailed information for each route
+  * Track events that occurred on a specific route and when they happened
+  * Apply time filters to focus on specific time windows
+  * Analyze cost trends across routes
+
+In the Routes section, you’ll find one row for each route defined in your `config.yaml` file.
+For each route, the UI displays which features — such as `caching`, `fallback`, `guardrails`, and `limiters` — are configured.
+
+These features are represented by icons, each with a specific color and meaning:
+
+  * Gray icon → The feature is not configured
+  * White icon with blue outline → The feature is configured, but no related events occurred during the selected time window
+  * Solid blue icon → The feature is configured, and events have occurred within the selected time window
+
+Clicking on a route row opens a detail panel, which provides the following sections:
+
+  * **Configuration** — Displays the YAML configuration for the selected feature
+  * **Curl** — Provides a ready-to-use Curl command to test the route
+  * **Associations** — Lists the groups and API keys linked to the route
+  * **Alerts** — Shows a summary of the last 10 events related to a specific feature
 
 ### Authentication, Groups and Keys
 
-To ensure security, the Gateway provides route-level authentication. Each API Key must be associated with a Group, which in turn is linked to one or more routes. This setup allows you to track which groups and keys are using specific applications.
+To ensure the security of your AI applications, the Gateway provides route-level authentication.
+This means that in order to access an application managed by the Gateway, the client must include an API Key generated through the UI.
+
+```python
+openai_client = openai.OpenAI(
+    base_url="http://localhost:9000/v1",
+    api_key="sk-rb-*******************"  # get the API KEY from the UI
+)
+```
+
+Each API Key must be associated with a Group, which in turn is linked to one or more routes.
+This setup allows you to track which groups and keys are using a specific application.
 
 The Gateway can also integrate with your Identity Provider (IDP), allowing it to import existing users and groups managed within your organization.
 
+Regardless of whether an IDP is used, the following operations are available:
+
+  * Create an API Key — to be used as the client key for your model within your application.
+  * Create a Group — which can then be associated with one or more API Keys and routes.
+
 ### Routes
 
-A Route represents the set of models used within your application, along with the logic and controls managed by the gateway. Each route can include all models (both chat and embedding) used in your application, or it can be segmented according to your specific needs.
+A Route represents the set of models used within your application, along with the logic and controls managed by the gateway.
+A route can include all the models (both chat and embedding) used in your application, or it can be segmented according to your specific needs.
 
-### Cost Management
+The key concept to understand is that each route is displayed as a separate entry in the “Routes” section of the UI.
 
-The Gateway provides tools to monitor and control costs:
-- **Rate Limiting**: Restrict the number of requests per time interval
-- **Token Limits**: Cap the number of tokens processed by a model
-- **Caching**: Use semantic or exact cache to reduce redundant model calls
+To configure a Route, you must define it in the `config.yaml` file. Within this configuration, you can specify:
 
-Cost monitoring is available through a dedicated section in the UI, where you can track consumption metrics and identify optimization areas.
+  * The Route name
+  * The model to use and its parameters
+  * Any guardrails to apply
+  * Caching policies, either semantic or exact
+  * Rate limits and token limits
+  * Fallback logic for error handling or model unavailability
+  * Load balancing strategies across models or endpoints
+
+Once configured, the Route becomes visible and traceable from the UI, allowing you to monitor and manage it directly.
+
+### Costs Management
+
+The Gateway provides a set of tools to monitor and control the costs associated with your models and applications.
+
+To help keep expenses under control, you can apply the following cost-management strategies:
+
+  * Rate limiting — to restrict the number of requests per time interval
+  * Token limits — to cap the number of tokens processed by a model
+  * Caching — using either semantic or exact cache to reduce redundant model calls
+
+Cost monitoring is available through a dedicated section in the UI, where you can track consumption metrics and identify potential optimization areas.
 
 ### Logs and Metrics
 
-All events managed by the Gateway generate logs and metrics:
+All events managed by the Gateway generate logs and metrics, which can be accessed and analyzed in multiple ways.
 
-- **Logs**: Can be captured and aggregated by external Log Management systems (Loki, Splunk) for centralization, search, and correlation with other system components
-- **Metrics**: Provide real-time insights in the UI and in-depth analysis through Prometheus integration
+Logs can be captured and aggregated by external Log Management systems such as Loki or Splunk, allowing you to centralize, search, and correlate the Gateway activity with other system components.
 
-Prometheus enables querying key performance indicators (request rates, latency, cache hit ratio, token consumption) and building detailed dashboards in tools like Grafana for advanced observability.
+Metrics, on the other hand, are used to provide both real-time insights in the UI and in-depth analysis through Prometheus.
+Prometheus integration enables you to query key performance indicators — such as request rates, latency, cache hit ratio, and token consumption — and to build detailed dashboards in tools like Grafana for advanced observability.
 
-## How It Works
+In summary:
 
-### Making API Requests
+  * Logs focus on event-level details (requests, errors, and operational traces).
+  * Metrics focus on quantitative monitoring (performance, usage, and cost trends).
 
-Once the gateway server is running, you can send requests to it as if it were an OpenAI server. The gateway uses the OpenAI Chat Completions API specification.
-
-The most important concept to understand is that **you specify the target `route` from your configuration file in the `model` field of your API request.**
-
-### API Endpoint
-
-- **Endpoint:** `/v1/chat/completions`
-- **Method:** `POST`
-
-### Example Request
-
-Given a `config.yaml` with a route named `customer-service`, you would make the following request:
-
-```bash
-curl http://127.0.0.1:8000/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "customer-service",
-    "messages": [
-      {
-        "role": "user",
-        "content": "Hello, can you help me with my order?"
-      }
-    ]
-  }'
-```
-
-The gateway receives this request, looks up the `customer-service` configuration, and processes the request according to the rules defined for that route.
-
-## Next Steps
-
-- **[Installation](./getting-started/installation.md)** - Set up your gateway instance
-- **[Configuration Guide](./configuration/basic-setup.md)** - Learn how to configure routes and models
-- **[Guardrails](./features/guardrails.md)** - Implement content safety and filtering
-- **[API Reference](./api-reference/endpoints.md)** - Complete API documentation
+This dual approach ensures full visibility into your Gateway’s behavior, simplifying troubleshooting, performance tuning, and cost optimization.
