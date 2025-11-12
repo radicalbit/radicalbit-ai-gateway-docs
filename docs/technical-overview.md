@@ -25,7 +25,6 @@ routes:
         # embedding model configuration...
       - model_id: ...
         # embedding model configuration...
-    balancing: { ... } # How to distribute requests among the models
     fallback: { ... } # What to do if a model fails
     guardrails: { ... } # Guardrails list for the route
     rate_limiting: { ... } # Limits on requests over time
@@ -59,7 +58,6 @@ Both are fully compliant with the OpenAI standard. Their detailed configuration 
 
 At the same level, you can configure the following features:
 
-  * `balancing`
   * `fallback`
   * `guardrails`
   * `rate_limiting`
@@ -131,7 +129,6 @@ To configure a Route, you must define it in the `config.yaml` file. Within this 
   * Caching policies, either semantic or exact
   * Rate limits and token limits
   * Fallback logic for error handling or model unavailability
-  * Load balancing strategies across models or endpoints
 
 Once configured, the Route becomes visible and traceable from the UI, allowing you to monitor and manage it directly.
 

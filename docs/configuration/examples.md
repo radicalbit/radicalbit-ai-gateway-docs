@@ -381,8 +381,6 @@ routes:
         credentials:
           api_key: "dummy-key"
           base_url: "http://ollama:11434/v1"
-    balancing:
-      algorithm: round_robin
 ```
 
 ### vLLM Integration
@@ -427,13 +425,6 @@ routes:
       - profanity_filter
       - pii_analyzer
       - toxicity_judge
-    balancing:
-      algorithm: weighted_round_robin
-      weights:
-        - model_id: gpt-4o
-          weight: 3
-        - model_id: gpt-4o-mini
-          weight: 1
     fallback:
       - target: gpt-4o
         fallbacks:
@@ -495,33 +486,6 @@ cache:
   redis_port: 6379
 ```
 
-## Multi-Model Load Balancing
-
-### Weighted Round-Robin Load Balancing
-```yaml
-routes:
-  load-balanced:
-    chat_models:
-      - model_id: gpt-4o
-        model: openai/gpt-4o
-        credentials:
-          api_key: !secret OPENAI_API_KEY
-      - model_id: gpt-4o-mini
-        model: openai/gpt-4o-mini
-        credentials:
-          api_key: !secret OPENAI_API_KEY
-      - model_id: claude-3-sonnet
-        model: anthropic/claude-3-5-sonnet-latest
-        credentials:
-          api_key: !secret ANTHROPIC_API_KEY
-    balancing:
-      algorithm: weighted_round_robin
-      weights:
-        - model_id: gpt-4o
-          weight: 3  # Gets 3 out of every 4 requests
-        - model_id: gpt-4o-mini
-          weight: 1  # Gets 1 out of every 4 requests
-```
 
 ## Next Steps
 

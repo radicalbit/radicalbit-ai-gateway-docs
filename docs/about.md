@@ -4,7 +4,7 @@ This page provides information about the Radicalbit AI Gateway project and the t
 
 ## Project Overview
 
-The Radicalbit AI Gateway is a simple and streamlined tool that connects to the models used in your Generative AI application, offering the ability to apply guardrails, load balancing, and management of inbound and outbound traffic.
+The Radicalbit AI Gateway is a simple and streamlined tool that connects to the models used in your Generative AI application, offering the ability to apply guardrails, routing, and management of inbound and outbound traffic.
 
 ### Mission
 
@@ -24,7 +24,6 @@ To become the leading AI gateway solution that enables organizations to safely a
 - **Robust Fallback Mechanisms**: Automatic failover and recovery
 - **API Key Management**: Groups and keys management through UI
 - **Monitoring UI**: Web interface for managing routes, groups, keys, and monitoring costs
-- **Load Balancing**: Distribute requests across multiple models with configurable weights
 - **Caching**: Semantic and exact caching for improved performance and reduced costs
 
 ### 🛡️ Security Features
@@ -74,7 +73,6 @@ To become the leading AI gateway solution that enables organizations to safely a
 ### Design Principles
 
 - **Modularity**: Modular architecture for easy extension
-- **Scalability**: Load balancing across models
 - **Reliability**: High availability and fault tolerance
 - **Security**: Security-first design
 - **Performance**: Optimized for performance
@@ -86,7 +84,6 @@ To become the leading AI gateway solution that enables organizations to safely a
 - **Route Manager**: Route configuration and management
 - **Model Manager**: AI model integration and management
 - **Guardrail Engine**: Content filtering and safety
-- **Load Balancer**: Weighted round-robin request distribution
 - **Fallback Manager**: Automatic failover
 - **Cache Manager**: Response caching
 - **Metrics Collector**: Performance monitoring

@@ -74,7 +74,7 @@ routes:
 routes:
   my-route:
     chat_models:
-      - model_id: gpt-3.5-turbo  # Must be referenced in balancing/fallback
+      - model_id: gpt-3.5-turbo  # Must be referenced in fallback
         model: openai/gpt-3.5-turbo
         credentials:
           api_key: "your-api-key"
@@ -142,26 +142,6 @@ guardrails:
         threshold: 0.01  # Adjust threshold
 ```
 
-### 4. Load Balancing Issues
-
-**Symptoms:**
-- Uneven distribution
-- Models not being used
-- Fallback not working
-
-**Solutions:**
-
-#### Weighted Round Robin Not Working
-```yaml
-# Ensure weights are properly configured
-balancing:
-  algorithm: weighted_round_robin
-  weights:
-    - model_id: gpt-3.5-turbo  # Must match model_id in chat_models
-      weight: 1
-    - model_id: gpt-4o-mini
-      weight: 3  # This model gets 3x more requests
-```
 
 #### Fallback Chain Issues
 ```yaml
@@ -317,22 +297,6 @@ routes:
       # ttl: 3600  # 1 hour for static content
 ```
 
-### 3. Load Balancing
-
-```yaml
-# Use round-robin for simple cases
-balancing:
-  algorithm: round_robin
-
-# Use weighted round-robin for cost optimization
-balancing:
-  algorithm: weighted_round_robin
-  weights:
-    - model_id: gpt-3.5-turbo
-      weight: 3  # Cheaper model gets more requests
-    - model_id: gpt-4o-mini
-      weight: 1  # Expensive model gets fewer requests
-```
 
 ## Getting Help
 

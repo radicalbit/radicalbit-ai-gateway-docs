@@ -38,33 +38,9 @@ chat_models:
     system_prompt: "You are helpful."
 ```
 
-### 2. Load Balancing Strategy
 
-#### Cost Optimization
-```yaml
-# Use cheaper models for most requests
-balancing:
-  algorithm: weighted_round_robin
-  weights:
-    - model_id: gpt-3.5-turbo
-      weight: 4  # 80% of requests
-    - model_id: gpt-4o-mini
-      weight: 1  # 20% of requests
-```
 
-#### Performance Optimization
-```yaml
-# Use faster models for time-sensitive requests
-balancing:
-  algorithm: weighted_round_robin
-  weights:
-    - model_id: gpt-3.5-turbo
-      weight: 3  # Faster model gets more requests
-    - model_id: claude-3-sonnet
-      weight: 1  # Slower model gets fewer requests
-```
-
-### 3. Fallback Configuration
+### 2. Fallback Configuration
 
 #### Comprehensive Fallback Chains
 ```yaml
@@ -86,7 +62,7 @@ fallback:
       - gpt-3.5-turbo
 ```
 
-### 4. Guardrails Configuration
+### 3. Guardrails Configuration
 
 #### Layer Defense Strategy
 ```yaml
@@ -124,7 +100,7 @@ guardrails:
         threshold: 0.01
 ```
 
-### 5. Rate Limiting Strategy
+### 4. Rate Limiting Strategy
 
 #### Appropriate Limits
 ```yaml

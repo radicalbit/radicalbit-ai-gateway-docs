@@ -6,7 +6,7 @@ This page answers common questions about the Radicalbit AI Gateway.
 
 ### What is the Radicalbit AI Gateway?
 
-The Radicalbit AI Gateway is a unified interface that provides seamless access to multiple AI models with advanced features like comprehensive guardrails, robust fallback mechanisms, weighted round-robin load balancing, and enterprise-grade security.
+The Radicalbit AI Gateway is a unified interface that provides seamless access to multiple AI models with advanced features like comprehensive guardrails, robust fallback mechanisms,  and enterprise-grade security.
 
 ### How does it differ from calling AI APIs directly?
 
@@ -16,7 +16,6 @@ The gateway provides several advantages over direct API calls:
 - **Guardrails**: Content filtering and safety measures
 - **Fallback Mechanisms**: Automatic failover if a model fails
 - **High Availability**: 
-  - Weighted Load Balancing: Distribute requests across multiple models with configurable weights
   - Health monitoring and metrics
 - **Rate Limiting**: Control costs and prevent abuse
 - **Caching**: Reduce latency and costs
@@ -60,23 +59,7 @@ fallback:
 
 If `gpt-4o-mini` fails, the gateway will automatically retry with `gpt-3.5-turbo`, then `claude-3-sonnet` if needed.
 
-## High Availability Questions
 
-### How does weighted round-robin load balancing work?
-
-The gateway supports weighted round-robin load balancing to distribute requests across multiple models:
-
-```yaml
-balancing:
-  algorithm: weighted_round_robin
-  weights:
-    - model_id: gpt-3.5-turbo
-      weight: 3  # Gets 3 out of every 4 requests
-    - model_id: gpt-4o-mini
-      weight: 1  # Gets 1 out of every 4 requests
-```
-
-This ensures optimal resource utilization and cost management.
 
 ## Guardrails Questions
 
@@ -86,7 +69,7 @@ The gateway supports several guardrail types:
 
 - **Traditional Guardrails**: Fast pattern matching (`contains`, `regex`, `starts_with`, `ends_with`)
 - **Presidio Guardrails**: Privacy and PII protection (`presidio_analyzer`, `presidio_anonymizer`)
-- **LLM Judge Guardrails**: AI-powered content evaluation (`judge`, `classifier`)
+- **LLM Judge Guardrails**: AI-powered content evaluation (`judge`)
 
 ### How do I implement content filtering?
 
@@ -309,22 +292,7 @@ routes:
       - profanity_filter  # Must match name above
 ```
 
-### Why is load balancing not working?
 
-Check that model IDs match between `chat_models` and `balancing`:
-
-```yaml
-routes:
-  my-route:
-    chat_models:
-      - model_id: gpt-3.5-turbo  # Must match below
-        model: openai/gpt-3.5-turbo
-    balancing:
-      algorithm: weighted_round_robin
-      weights:
-        - model_id: gpt-3.5-turbo  # Must match above
-          weight: 1
-```
 
 ### How do I debug performance issues?
 
@@ -349,18 +317,8 @@ routes:
 
 Several strategies help control costs:
 
-1. **Use cheaper models for most requests**:
-   ```yaml
-   balancing:
-     algorithm: weighted_round_robin
-     weights:
-       - model_id: gpt-3.5-turbo
-         weight: 3  # Cheaper model gets more requests
-       - model_id: gpt-4o-mini
-         weight: 1  # Expensive model gets fewer requests
-   ```
 
-2. **Implement token limiting**:
+1. **Implement token limiting**:
    ```yaml
    token_limiting:
      input:
@@ -370,8 +328,7 @@ Several strategies help control costs:
        window_size: 1 minute
        max_token: 10000
    ```
-
-3. **Use caching**:
+23. **Use caching**:
    ```yaml
    caching:
      enabled: true

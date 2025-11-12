@@ -4,7 +4,7 @@ slug: /
 
 # Radicalbit AI Gateway
 
-The **Radicalbit AI Gateway** is a tool that connects to the models used in your Generative AI application, offering the ability to apply guardrails, load balancing, and management of inbound and outbound traffic.
+The **Radicalbit AI Gateway** is a tool that connects to the LLMs used in your Generative AI application, offering the ability to apply guardrails, routing and management of inbound and outbound traffic.
 
 Thanks to the Radicalbit AI Gateway, you will be able to:
 
@@ -14,7 +14,7 @@ Thanks to the Radicalbit AI Gateway, you will be able to:
   - LLM-as-a-Judge to manage custom logic
 - Configure Semantic or Exact Cache, avoiding redundancy in responses already proposed by your application
 - Configure rate limits and token limits
-- Manage model fallbacks and traffic balancing
+- Manage model fallbacks and traffic routing
 - Monitor your applications through an authenticated UI that will allow you to:
   - Create groups and keys
   - Control costs by groups and keys
@@ -22,7 +22,7 @@ Thanks to the Radicalbit AI Gateway, you will be able to:
   - Investigate detailed metrics
   - Benefit from total observability through the Gateway tracing
 
-The Radicalbit AI Gateway is agnostic to the type of application and supports any model that adheres to the OpenAI standard. This makes the tool usable in the vast majority of applications.
+The Radicalbit AI Gateway is agnostic to the type of application and supports any model that **adheres to the OpenAI standard**. This makes the tool usable in the vast majority of applications.
 
 
 
@@ -72,8 +72,6 @@ The Radicalbit AI Gateway enables you to:
 - **Cost Control**: Track costs by groups and keys
 - **Event Notifications**: Receive alerts based on configured logic
 - **Detailed Metrics**: Investigate performance and usage
-- **Gateway Tracing**: Total observability through distributed tracing
-
 
 
 ## Get Started
@@ -106,4 +104,4 @@ The Radicalbit AI Gateway enables you to:
 - **[Enterprise](./enterprise.md)** - Commercial licensing and services
 - **[FAQ](./faq.md)** - Frequently asked questions
 
-** Ready to get started?** Begin with the [installation guide](./getting-started/installation.md)!
+**Ready to get started?** Begin with the [installation guide](./getting-started/installation.md)!

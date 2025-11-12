@@ -48,14 +48,6 @@ routes:
           temperature: 0.3
           max_tokens: 2000
     
-    balancing:
-      algorithm: weighted_round_robin
-      weights:
-        - model_id: gpt-4o-mini
-          weight: 2
-        - model_id: claude-3-haiku
-          weight: 1
-    
     fallback:
       - target: gpt-4o-mini
         fallbacks:

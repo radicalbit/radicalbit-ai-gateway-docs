@@ -57,7 +57,7 @@ routes:
 
 Within each route, the `chat_models` list defines the pool of LLMs available for that route.
 
-- **`model_id`**: A unique name you assign to this model configuration within the route. This ID is used in `balancing`, `fallback`, etc.
+- **`model_id`**: A unique name you assign to this model configuration within the route. This ID is used in `guardrails`, `fallback`, etc.
 - **`model`**: The actual model identifier, formatted as `provider/model_name`.
   - **OpenAI:** Use `openai/model_name`.
   - **OpenAI-Compatible (Ollama, vLLM, OpenRouter):** Prepend with `openai/`. For example, `openai/llama3`. A dummy `api_key` is required even if the model doesn't use one.
@@ -79,29 +79,7 @@ Within each route, the `embedding_models` list defines the pool of embedding mod
 - **`credentials`**: An object containing the authentication details.
 - **`params`**: A dictionary of parameters to pass to the model with every request.
 
-## Load Balancing
 
-This section controls how requests are distributed among the models defined in the route.
-
-- **`algorithm`**: The strategy to use.
-  - `ROUND_ROBIN`: Cycles through the models in order.
-  - `WEIGHTED_ROUND_ROBIN`: Distributes requests based on assigned weights. A model with weight `2` will receive twice as many requests as a model with weight `1`.
-- **`weights`**: A list of objects, required only for `WEIGHTED_ROUND_ROBIN`.
-  - `model_id`: The ID of the model to assign a weight to.
-  - `weight`: An integer representing the model's weight in the rotation.
-
-**Example:**
-```yaml
-balancing:
-  algorithm: weighted_round_robin
-  weights:
-    - model_id: openai-4o # Gets 1 out of every 6 requests
-      weight: 1
-    - model_id: llama3.2  # Gets 3 out of every 6 requests
-      weight: 3
-    - model_id: qwen       # Gets 2 out of every 6 requests
-      weight: 2
-```
 
 ## Fallback Mechanisms
 
@@ -211,13 +189,6 @@ routes:
     guardrails:
       - presidio_analyzer
       - presidio_anonymizer
-    balancing:
-      algorithm: weighted_round_robin
-      weights:
-        - model_id: llama3.2
-          weight: 3
-        - model_id: qwen
-          weight: 2
     fallback:
       - target: qwen
         fallbacks:

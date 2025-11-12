@@ -14,7 +14,7 @@ This page provides information about enterprise features and services for the Ra
 - **Metrics**: Comprehensive monitoring and observability
 - **API Key Management**: Secure API key handling
 - **Plugin System**: Extensible architecture
-- **Load Balancing**: Request distribution across models
+
 
 ### 🛡️ Security Features
 

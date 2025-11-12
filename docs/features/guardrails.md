@@ -263,6 +263,5 @@ Track guardrail performance through:
 
 ## Next Steps
 
-- **[Load Balancing](../configuration/load-balancing.md)** - Distribute requests across models
 - **[Fallback Mechanisms](../configuration/fallback.md)** - Implement automatic failover
 - **[API Reference](../api-reference/endpoints.md)** - Complete API documentation
