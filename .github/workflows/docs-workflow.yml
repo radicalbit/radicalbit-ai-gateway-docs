@@ -8,13 +8,25 @@ on:
     - "main"
     paths:
       - "docs/**"
-      - ".github/workflows/docs-**"
+      - ".github/workflows/**"
+      - "docusaurus.config.ts"
+      - "sidebars.ts"
+      - "package.json"
+      - "package-lock.json"
+      - "static/**"
+      - "src/**"
   pull_request:
     branches:
     - "*"
     paths:
       - "docs/**"
-      - ".github/workflows/docs-**"
+      - ".github/workflows/**"
+      - "docusaurus.config.ts"
+      - "sidebars.ts"
+      - "package.json"
+      - "package-lock.json"
+      - "static/**"
+      - "src/**"
 
 jobs:
   build-doc:
