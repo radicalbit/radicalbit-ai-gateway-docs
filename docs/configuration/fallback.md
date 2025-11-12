@@ -260,6 +260,5 @@ fallback:
 ## Next Steps
 
 - **[Model Configuration](./models.md)** - Detailed model setup guide
-- **[Load Balancing](./load-balancing.md)** - Advanced load balancing strategies
 - **[Advanced Configuration](./advanced-configuration.md)** - Enterprise configuration options
 - **[Monitoring](../monitoring.md)** - Observability and metrics setup

@@ -233,7 +233,6 @@ chat_models:
 
 ## Next Steps
 
-- **[Load Balancing](../configuration/load-balancing.md)** - Configure load balancing across models
 - **[Fallback Configuration](../configuration/fallback.md)** - Set up automatic failover
 - **[Advanced Configuration](../configuration/advanced-configuration.md)** - Enterprise configuration options
 - **[API Reference](../api-reference/endpoints.md)** - Complete API documentation

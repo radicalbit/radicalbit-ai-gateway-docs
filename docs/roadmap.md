@@ -8,7 +8,6 @@ This page outlines the planned features and improvements for the Radicalbit AI G
 
 - **Guardrails System**: Content safety with `judge` and `classifier` types
 - **Configuration**: Model ID validation and error messages
-- **Load Balancing**: Round-robin and weighted round-robin algorithms
 - **Performance Optimization**: Caching and reduced overhead
 - **Monitoring**: Prometheus metrics and observability
 - **Security**: API key handling and rate limiting

@@ -1,4 +1,4 @@
-# Installation
+# Installation for Enterprise Users
 
 This guide assumes you have already obtained a commercial license for the Radicalbit AI Gateway by contacting our sales team and have the software installed and operational on your host system.
 

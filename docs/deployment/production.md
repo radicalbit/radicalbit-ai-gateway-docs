@@ -158,13 +158,6 @@ routes:
       - target: gpt-4o
         fallbacks:
           - gpt-3.5-turbo
-    balancing:
-      algorithm: WEIGHTED_ROUND_ROBIN
-      weights:
-        - model_id: gpt-4o
-          weight: 70
-        - model_id: gpt-4o-mini
-          weight: 30
     rate_limiting:
       algorithm: fixed_window
       window_size: 1 minute
