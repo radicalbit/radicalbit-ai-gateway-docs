@@ -17,8 +17,9 @@ const config: Config = {
   // Set the production url of your site here
   url: 'https://docs.ai-gateway.radicalbit.ai',
   // Set the /<baseUrl>/ pathname under which your site is served
-  // For custom domain, use '/' (for GitHub pages without custom domain, use '/<projectName>/')
-  baseUrl: '/',
+  // Temporarily using GitHub Pages path until custom domain DNS is configured
+  // TODO: Change back to '/' once custom domain is verified
+  baseUrl: '/radicalbit-ai-gateway-docs/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
