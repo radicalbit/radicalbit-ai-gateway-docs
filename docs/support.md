@@ -106,8 +106,8 @@ guardrails:
   - name: invalid-judge
     type: judge
     parameters:
-      judge_config:
-        model_id: non-existent-model  # This model doesn't exist
+      model_id: non-existent-model  # This model doesn't exist
+        
 ```
 
 ## Logs

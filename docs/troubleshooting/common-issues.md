@@ -135,11 +135,9 @@ guardrails:
     where: input
     behavior: block
     parameters:
-      judge_config:
-        model_id: gpt-3.5-turbo  # Use faster model
-        temperature: 0.0  # Lower temperature for consistency
-        max_tokens: 50  # Limit response length
-        threshold: 0.01  # Adjust threshold
+      model_id: gpt-3.5-turbo  # Use faster model
+      temperature: 0.0  # Lower temperature for consistency
+      max_tokens: 50  # Limit response length
 ```
 
 
@@ -279,10 +277,10 @@ guardrails:
   - name: content_check
     type: judge
     parameters:
-      judge_config:
-        model_id: gpt-3.5-turbo  # Use faster model
-        temperature: 0.0
-        max_tokens: 50
+      model_id: gpt-3.5-turbo  # Use faster model
+      temperature: 0.0
+      max_tokens: 50
+        
 ```
 
 ### 2. Optimize Caching

@@ -74,7 +74,7 @@ guardrails:
 
 # Avoid: Single guardrail type
 guardrails:
-  - toxicity_judge  # Only AI-powered, slower
+  - toxicity_judge  # Only AI-powered
 ```
 
 #### Performance-Optimized Guardrails
@@ -93,11 +93,10 @@ guardrails:
     where: input
     behavior: block
     parameters:
-      judge_config:
-        model_id: gpt-3.5-turbo  # Use faster model
-        temperature: 0.0
-        max_tokens: 50
-        threshold: 0.01
+      prompt_ref: "toxicity_check.md"
+      model_id: gpt-3.5-turbo  # Use faster model
+      temperature: 0.0
+      max_tokens: 50
 ```
 
 ### 4. Rate Limiting Strategy
