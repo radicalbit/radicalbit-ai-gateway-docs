@@ -6,7 +6,7 @@ This page outlines the planned features and improvements for the Radicalbit AI G
 
 ### ✅ Completed Features
 
-- **Guardrails System**: Content safety with `judge` and `classifier` types
+- **Guardrails System**: Content safety with `judge`
 - **Configuration**: Model ID validation and error messages
 - **Performance Optimization**: Caching and reduced overhead
 - **Monitoring**: Prometheus metrics and observability

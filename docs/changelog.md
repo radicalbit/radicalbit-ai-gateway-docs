@@ -7,7 +7,7 @@ This page tracks the version history and changes for the Radicalbit AI Gateway.
 ### 🚀 New Features
 
 #### Enhanced Guardrails System
-- **LLM Judge Guardrails**: AI-powered content evaluation using `judge` and `classifier` types
+- **LLM Judge Guardrails**: AI-powered content evaluation using `judge`
 - **Enhanced Presidio Integration**: Improved PII detection and anonymization
 - **Custom Response Messages**: Configurable error messages for blocked content
 - **Guardrail Performance Optimization**: Faster processing and reduced latency
@@ -137,8 +137,7 @@ This page tracks the version history and changes for the Radicalbit AI Gateway.
          - name: content_check
            type: judge
            parameters:
-             judge_config:
-               model_id: gpt-3.5-turbo  # Must exist in route
+            model_id: gpt-3.5-turbo  # Must exist in route
    ```
 
 #### Breaking Changes

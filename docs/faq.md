@@ -86,26 +86,6 @@ guardrails:
     response_message: "Content blocked due to inappropriate language"
 ```
 
-### What's the difference between `judge` and `classifier` guardrails?
-
-- **`judge`**: In-depth evaluation for critical decisions, returns a score
-- **`classifier`**: Lightweight classification with confidence threshold
-
-```yaml
-# Judge example
-- name: toxicity_judge
-  type: judge
-  parameters:
-    judge_config:
-      threshold: 0.01  # Lower threshold for stricter filtering
-
-# Classifier example
-- name: content_classifier
-  type: classifier
-  parameters:
-    threshold: 0.7  # Higher threshold for classification
-```
-
 ## Performance Questions
 
 ### What's the overhead of using the gateway?
@@ -128,8 +108,7 @@ Several strategies can help reduce latency:
      - name: content_check
        type: judge
        parameters:
-         judge_config:
-           model_id: gpt-3.5-turbo  # Use faster model
+         model_id: gpt-3.5-turbo  # Use faster model
    ```
 
 2. **Optimize caching**:

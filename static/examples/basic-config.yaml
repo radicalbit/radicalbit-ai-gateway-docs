@@ -61,14 +61,12 @@ guardrails:
     type: judge
     where: input
     behavior: block
-    parameters:
-      judge_config:
-        prompt_ref: "business_context_check.md"
-        model_id: "gpt-3.5-turbo"
-        temperature: 0.7
-        max_tokens: 150
-        threshold: 0.001
     response_message: "Request not aligned with business context"
+    parameters:
+      prompt_ref: "business_context_check.md"
+      model_id: "gpt-3.5-turbo"
+      temperature: 0.7
+      max_tokens: 150
 ```
 
 ## Advanced Configuration with Guardrails
@@ -100,14 +98,12 @@ guardrails:
     type: judge
     where: input
     behavior: soft_block
-    parameters:
-      judge_config:
-        prompt_ref: "toxicity_check.md"
-        model_id: "gpt-3.5-turbo"
-        temperature: 0.0
-        max_tokens: 100
-        threshold: 0.01
     response_message: "🚨 BLOCKED - Toxic content detected"
+    parameters:
+      prompt_ref: "toxicity_check.md"
+      model_id: "gpt-3.5-turbo"
+      temperature: 0.0
+      max_tokens: 100
 
   - name: pii_anonymizer
     type: presidio_anonymizer
@@ -121,14 +117,12 @@ guardrails:
     type: judge
     where: input
     behavior: block
-    parameters:
-      judge_config:
-        prompt_ref: "business_context_check.md"
-        model_id: "gpt-3.5-turbo"
-        temperature: 0.7
-        max_tokens: 150
-        threshold: 0.001
     response_message: "Request not aligned with business context"
+    parameters:
+      prompt_ref: "business_context_check.md"
+      model_id: "gpt-3.5-turbo"
+      temperature: 0.7
+      max_tokens: 150        
 ```
 
 ## Environment Variables

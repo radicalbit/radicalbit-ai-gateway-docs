@@ -37,7 +37,9 @@ graph LR
 
 ## Types of Guardrails
 
-### Guardrail Types Architecture
+### Guardrail Architecture
+
+The Radicalbit AI Gateway supports multiple guardrail families:
 
 ```mermaid
 graph TD
@@ -50,8 +52,7 @@ graph TD
     B --> B3[CONTAINS]
     B --> B4[REGEX]
     
-    C --> C1[CLASSIFIER]
-    C --> C2[JUDGE]
+    C --> C1[JUDGE]
     
     D --> D1[PRESIDIO_ANALYZER]
     D --> D2[PRESIDIO_ANONYMIZER]
@@ -71,99 +72,106 @@ Fast, rule-based content filtering using pattern matching:
 - **Regex**: Use regular expressions for complex patterns
 
 ### LLM Judge Guardrails
-AI-powered intelligent content evaluation:
+LLM-based semantic evaluators, executed by the `JudgeEngine`.  
+They use a **language model as a “judge”** to reason over user inputs or model outputs and determine whether they violate safety or policy rules.
 
-- **Classifier**: Lightweight classification with confidence thresholds
-- **Judge**: In-depth evaluation for critical security decisions
+### How It Works
 
-#### CLASSIFIER vs JUDGE Decision Flow
+1. The user input (or output) is extracted and normalized.  
+2. The text is inserted into a **prompt template** (`prompt_ref`).  
+3. The LLM defined in `model_id` is invoked via LangChain’s `init_chat_model()`.  
+4. The LLM response is parsed into a `JudgeResult` Pydantic object.  
+5. The decision (`is_triggered`, optional `reasoning`) determines the guardrail behavior.  
+6. Optionally, a **fallback model** (`fallback_model_id`) is invoked if the primary fails.
 
-```mermaid
-graph TD
-    A[User Input] --> B{CLASSIFIER}
-    B -->|Safe| C[Continue]
-    B -->|Suspicious| D{JUDGE}
-    B -->|Unsafe| E[Block]
-    
-    D -->|Pass| C
-    D -->|Fail| E
-    
-    F[CLASSIFIER Logic] --> G[is_triggered AND confidence >= threshold]
-    H[JUDGE Logic] --> I[is_triggered only]
-    
-    style B fill:#e1f5fe
-    style D fill:#fff3e0
-    style E fill:#ffebee
-    style C fill:#e8f5e8
-```
+---
 
-### Presidio Guardrails
-Privacy and PII protection:
+### Engine Internals
 
-- **Analyzer**: Detect personally identifiable information
-- **Anonymizer**: Replace PII with placeholders
+The `JudgeEngine` is responsible for executing guardrails that rely on large language models.  
+It integrates with `LangChain` and the Radicalbit model abstraction layer (`Model`) and supports dynamic model configuration.
 
-## Optimal Guardrail Processing Flow
+| Component | Description |
+|------------|-------------|
+| **JudgePromptManager** | Loads built-in and user-defined prompt templates |
+| **PromptTemplate** | Defines structured LLM prompts with formatting and output schema |
+| **PydanticOutputParser** | Parses the model output into a `JudgeResult` object |
+| **Model Cache** | Optimizes repeated model usage by caching initialized instances |
+| **Fallback Logic** | Automatically retries with a fallback model if the primary fails |
 
-For maximum security and efficiency, guardrails should be processed in this order:
+---
 
-1. **Traditional Filters** → Fast pattern matching
-2. **Presidio Analysis** → PII detection and anonymization
-3. **CLASSIFIER Guardrails** → Lightweight AI classification
-4. **JUDGE Guardrails** → Final security decisions
+### Built-in Prompt Templates
 
-```mermaid
-graph LR
-    A[User Input] --> B[Traditional Filters]
-    B --> C[Presidio Analysis]
-    C --> D[CLASSIFIER]
-    D --> E{JUDGE}
-    E -->|Pass| F[Allow]
-    E -->|Fail| G[Block/Fallback]
-    
-    style A fill:#e3f2fd
-    style B fill:#f3e5f5
-    style C fill:#fff3e0
-    style D fill:#e8f5e8
-    style E fill:#ffebee
-    style F fill:#e8f5e8
-    style G fill:#ffebee
-```
+The following templates are included by default:
 
-## Configuration Examples
+| Prompt | Purpose |
+|--------|----------|
+| **toxicity_check.md** | Detects offensive, abusive, or harmful content |
+| **business_context_check.md** | Validates if the request aligns with your business domain |
+| **prompt_injection_check.md** | Identifies potential prompt injection or jailbreak attempts |
 
-### Basic Content Filtering
+Users can also add **custom prompts** by creating Markdown files and referencing them via `prompt_ref`.
+
+---
+
+### Configuration Example
+
+#### Toxicity Detection
 
 ```yaml
 guardrails:
-  - name: profanity_filter
-    type: contains
-    where: input
-    behavior: block
-    parameters:
-      values: ["inappropriate", "offensive"]
-    response_message: "Content blocked due to inappropriate language"
-```
-
-### Business Context Validation
-
-```yaml
-guardrails:
-  - name: business_context_judge
+  - name: toxicity_judge
     type: judge
+    description: In-depth toxic content evaluation using LLM judge
     where: input
-    behavior: block
+    behavior: soft_block
+    response_message: "🚨 BLOCKED - Toxic content detected."
     parameters:
-      judge_config:
-        prompt_ref: "business_context_check.md"
-        model_id: "gpt-4o-mini"
-        temperature: 0.7
-        max_tokens: 150
-        threshold: 0.001
-    response_message: "Request not aligned with business context"
+      prompt_ref: "toxicity_check.md"
+      model_id: "gpt-4o-mini"
+      temperature: 0.7
+      max_tokens: 100
+      fallback_model_id: "gpt-3.5-turbo"
 ```
 
-### PII Protection
+#### Custom Ethical Policy Check
+
+```yaml
+guardrails:
+  - name: ethical_guardrail
+    type: judge
+    where: io
+    behavior: block
+    parameters:
+      prompt_ref: "custom_ethical_check.md"
+      model_id: "gpt-4o-mini"
+      temperature: 0.3
+      max_tokens: 150
+```
+
+**Example of `custom_ethical_check.md`:**
+
+```md
+You are a compliance officer ensuring that all AI responses adhere to ethical standards.
+Evaluate the following user input and decide if it violates company ethical policies.
+
+Return JSON:
+{
+  "is_triggered": boolean,
+  "reasoning": string | null
+}
+```
+
+---
+
+
+## Presidio Guardrails
+
+Guardrails for **PII detection and anonymization**, powered by Microsoft Presidio.
+
+- **Analyzer:** Detects sensitive entities (e.g. email, phone number, SSN)  
+- **Anonymizer:** Masks detected entities with placeholders  
 
 ```yaml
 guardrails:
@@ -176,81 +184,52 @@ guardrails:
       entities: ["EMAIL_ADDRESS", "PHONE_NUMBER"]
 ```
 
-## User Input Processing Flow
+---
 
-LLM Judge guardrails process user input through a specific extraction and template filling process:
+## Recommended Guardrail Order
+
+1. **Traditional Filters** → Fast rule-based screening  
+2. **Presidio Analysis** → PII detection and masking  
+3. **Judge Guardrails** → Deep semantic safety validation  
 
 ```mermaid
-graph TD
-    A["Messages List"] --> B["_extract_user_input"]
-    B --> C["Filter Human Messages"]
-    C --> D["Extract Text Content"]
-    D --> E["Join with Newlines"]
-    E --> F["user_input string"]
-    
-    G["Prompt Template"] --> H["_fill_template"]
-    F --> H
-    H --> I["Replace {user_input}"]
-    I --> J["Final Prompt"]
-    
-    J --> K["Send to LLM Judge"]
-    K --> L["JSON Response"]
+graph LR
+    A[User Input] --> B[Traditional Filters]
+    B --> C[Presidio Analysis]
+    C --> D[LLM Judge Guardrail]
+    D -->|Pass| E[Allow]
+    D -->|Fail| F[Block / Soft Block / Fallback]
     
     style A fill:#e3f2fd
-    style F fill:#e8f5e8
-    style J fill:#fff3e0
-    style L fill:#f3e5f5
+    style B fill:#f3e5f5
+    style C fill:#fff3e0
+    style D fill:#e8f5e8
+    style E fill:#e8f5e8
+    style F fill:#ffebee
 ```
+
+---
 
 ## Guardrail Behaviors
 
-- **Block**: Completely block the request
-- **Soft Block**: Block with custom message
-- **Warn**: Log warning but allow request
-- **Fallback**: Switch to safer model
-- **Degrade**: Temporarily reduce model capabilities
+| Behavior | Action | Description |
+|-----------|---------|-------------|
+| **block** | ❌ | Fully reject the request |
+| **soft_block** | ⚠️ | Reject but show a user-friendly message |
+| **warn** | 🟡 | Log a warning but allow continuation |
+| **fallback** | 🔄 | Retry using a safer or fallback model |
+
+---
 
 ## Best Practices
 
-1. **Layer Defense**: Use multiple guardrail types together
-2. **Test Thoroughly**: Validate guardrails with various inputs
-3. **Monitor Performance**: Track guardrail effectiveness
-4. **Regular Updates**: Keep guardrail rules current
-5. **User Experience**: Provide clear feedback for blocked content
+1. **Combine Layers:** Stack fast filters with semantic checks  
+2. **Use Fallbacks:** Provide fallback models for robustness  
+3. **Keep Prompts Modular:** Reuse and version prompt templates  
+4. **Explain Decisions:** Enable `include_reasoning` for auditability  
+5. **Monitor and Tune:** Track latency and guardrail trigger frequency  
 
-## Advanced Features
-
-### Fallback Mechanisms
-When guardrails detect suspicious content, automatically switch to safer models:
-
-```yaml
-guardrails:
-  - name: toxicity_judge_fallback
-    type: judge
-    behavior: fallback
-    parameters:
-      judge_config:
-        model_id: "gpt-4o-mini"
-        fallback_model_id: "gpt-4o"
-        fallback_duration_seconds: 60
-```
-
-### Time-based Degradation
-Temporarily reduce model capabilities for suspicious content:
-
-```yaml
-guardrails:
-  - name: suspicious_content_degrade
-    type: judge
-    behavior: degrade
-    parameters:
-      judge_config:
-        action_on_fail: "degrade"
-        degrade_params:
-          temperature: 0.1
-          max_tokens: 100
-          duration_seconds: 300
-```
+---
 
 ## Monitoring and Analytics
 

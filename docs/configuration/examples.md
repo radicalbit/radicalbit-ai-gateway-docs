@@ -172,28 +172,13 @@ guardrails:
     type: judge
     where: input
     behavior: block
-    parameters:
-      judge_config:
-        prompt_ref: "toxicity_check.md"
-        model_id: "gpt-4o-mini"
-        temperature: 0.0
-        max_tokens: 100
-        threshold: 0.01
     response_message: "🚨 Toxic content detected and blocked"
-  
-  - name: business_context_judge
-    type: classifier
-    where: input
-    behavior: soft_block
     parameters:
-      threshold: 0.7
-      judge_config:
-        prompt_ref: "business_context_check.md"
-        model_id: "gpt-4o-mini"
-        temperature: 0.0
-        max_tokens: 50
-        action_on_fail: "block"
-    response_message: "⚠️ Content may not be appropriate for business context"
+      prompt_ref: "toxicity_check.md"
+      model_id: "gpt-4o-mini"
+      temperature: 0.0
+      max_tokens: 100
+
 ```
 
 ## Rate Limiting Examples
@@ -472,14 +457,12 @@ guardrails:
     type: judge
     where: input
     behavior: block
-    parameters:
-      judge_config:
-        prompt_ref: "toxicity_check.md"
-        model_id: "gpt-4o-mini"
-        temperature: 0.0
-        max_tokens: 100
-        threshold: 0.01
     response_message: "🚨 Toxic content detected and blocked"
+    parameters:
+      prompt_ref: "toxicity_check.md"
+      model_id: "gpt-4o-mini"
+      temperature: 0.0
+      max_tokens: 100
 
 cache:
   redis_host: 'redis'
