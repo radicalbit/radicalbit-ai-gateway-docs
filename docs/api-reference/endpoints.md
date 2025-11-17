@@ -302,7 +302,7 @@ curl -X POST http://localhost:8000/v1/embeddings \
 [
   {
     "route_name": "production",
-    "chat_models": [...],
+    "configuration":{"chat_models": [...]},
     "metrics": {
       "total_requests": 1000,
       "total_tokens": 50000
@@ -369,8 +369,7 @@ curl -X GET "http://localhost:8000/routes/production" \
   "events": [
     {
       "event_type": "REQUEST_PROCESSED",
-      "timestamp": 1677652288,
-      "value": 1.0
+      "timestamp": 1677652288
     }
   ]
 }
