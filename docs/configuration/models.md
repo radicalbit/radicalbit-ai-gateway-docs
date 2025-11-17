@@ -65,13 +65,43 @@ routes:
   prompt: 'Do what the user asks without thinking.'
 ```
 
+### Google Gemini
+```yaml
+- model_id: gemini-pro
+  model: google-genai/gemini-1.5-pro
+  credentials:
+    api_key: !secret GOOGLE_API_KEY
+  params:
+    temperature: 0.7
+    max_output_tokens: 1024
+```
+
+**Important**: The `api_key` is **required** for Gemini models. Unlike some other providers, Gemini does not support fallback to environment variables.
+
+**Gemini Embedding Models:**
+```yaml
+- model_id: gemini-embedding
+  model: google-genai/models/gemini-embedding-001
+  credentials:
+    api_key: !secret GOOGLE_API_KEY
+  params:
+    task_type: RETRIEVAL_QUERY  # Optional: RETRIEVAL_DOCUMENT, SEMANTIC_SIMILARITY, CLASSIFICATION, CLUSTERING
+```
+
+**Key differences:**
+- **Provider identifier**: Use `google-genai` (consistent with other providers)
+- **API key requirement**: `api_key` is mandatory (no environment variable fallback)
+- **Model format for chat**: Use model names like `gemini-1.5-pro`, `gemini-1.5-flash`, `gemini-pro`
+- **Model format for embeddings**: Use `models/gemini-embedding-001` (with `models/` prefix)
+- **Multimodal support**: Gemini models support multimodal content (text, images, files)
+
 ### Mock Models (Testing)
 ```yaml
 - model_id: mock-chat
   model: mock/gateway
   params:
     latency_ms: 150
-    response_text: "risposta dal mock"
+    response_text: "mocked response"
 ```
 
 ## Model Types

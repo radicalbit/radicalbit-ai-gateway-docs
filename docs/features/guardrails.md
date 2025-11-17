@@ -113,6 +113,41 @@ The following templates are included by default:
 
 Users can also add **custom prompts** by creating Markdown files and referencing them via `prompt_ref`.
 
+### Custom Prompts Configuration
+
+Custom prompts can be configured using the `JUDGE_PROMPTS_DIR` environment variable:
+
+1. **Create custom prompt files**: Create Markdown files with your prompt templates
+2. **Mount the directory**: Mount your custom prompts directory in Docker
+3. **Set environment variable**: Set `JUDGE_PROMPTS_DIR` to the path inside the container
+
+**Example Docker Compose configuration:**
+```yaml
+services:
+  gateway:
+    environment:
+      - JUDGE_PROMPTS_DIR=/radicalbit_ai_gateway/guardrails/judges/custom-prompts
+    volumes:
+      - ./custom-prompts:/radicalbit_ai_gateway/guardrails/judges/custom-prompts
+```
+
+**Prompt file structure:**
+- Default prompts: `/radicalbit_ai_gateway/guardrails/judges/prompts` (bundled in image)
+- Custom prompts: Path specified by `JUDGE_PROMPTS_DIR`
+- Search order: Custom prompts are checked first; if not found, defaults are used
+
+**Custom prompt template example** (`custom_ethical_check.md`):
+```markdown
+You are a compliance officer ensuring that all AI responses adhere to ethical standards.
+Evaluate the following user input and decide if it violates company ethical policies.
+
+Return JSON:
+{
+  "is_triggered": boolean,
+  "reasoning": string | null
+}
+```
+
 ---
 
 ### Configuration Example

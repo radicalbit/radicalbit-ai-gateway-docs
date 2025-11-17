@@ -283,6 +283,124 @@ curl -X POST http://localhost:8000/v1/embeddings \
   }'
 ```
 
+### Routes Endpoint
+
+**Endpoint:** `GET /routes`
+
+**Description:** Returns all routes with their configuration and metrics.
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `_from` | integer | No | Start timestamp (Unix timestamp) |
+| `_to` | integer | No | End timestamp (Unix timestamp) |
+| `include_groups` | boolean | No | Include group information (default: false) |
+
+**Response:**
+```json
+[
+  {
+    "route_name": "production",
+    "chat_models": [...],
+    "metrics": {
+      "total_requests": 1000,
+      "total_tokens": 50000
+    }
+  }
+]
+```
+
+**Example:**
+```bash
+curl -X GET "http://localhost:8000/routes?include_groups=true" \
+  -H "Authorization: Bearer your-api-key"
+```
+
+### Route Details Endpoint
+
+**Endpoint:** `GET /routes/{route_name}`
+
+**Description:** Returns detailed configuration and metrics for a specific route.
+
+**Path Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `route_name` | string | Yes | Name of the route |
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `_from` | integer | No | Start timestamp (Unix timestamp) |
+| `_to` | integer | No | End timestamp (Unix timestamp) |
+| `include_groups` | boolean | No | Include group information (default: false) |
+
+**Example:**
+```bash
+curl -X GET "http://localhost:8000/routes/production" \
+  -H "Authorization: Bearer your-api-key"
+```
+
+### Events Endpoint
+
+**Endpoint:** `GET /routes/{route_name}/events`
+
+**Description:** Returns the latest N events for a specific route.
+
+**Path Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `route_name` | string | Yes | Name of the route |
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `n` | integer | No | Number of events to return (default: 10) |
+| `_from` | integer | No | Start timestamp (Unix timestamp) |
+| `_to` | integer | No | End timestamp (Unix timestamp) |
+
+**Response:**
+```json
+{
+  "events": [
+    {
+      "event_type": "REQUEST_PROCESSED",
+      "timestamp": 1677652288,
+      "value": 1.0
+    }
+  ]
+}
+```
+
+**Example:**
+```bash
+curl -X GET "http://localhost:8000/routes/production/events?n=20&_from=1677652000&_to=1677653000" \
+  -H "Authorization: Bearer your-api-key"
+```
+
+### Metrics Endpoint
+
+**Endpoint:** `GET /metrics`
+
+**Description:** Returns total metrics across all routes.
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `_from` | integer | No | Start timestamp (Unix timestamp) |
+| `_to` | integer | No | End timestamp (Unix timestamp) |
+
+**Example:**
+```bash
+curl -X GET "http://localhost:8000/metrics?_from=1677652000&_to=1677653000" \
+  -H "Authorization: Bearer your-api-key"
+```
+
 ## SDK Compatibility
 
 The gateway is compatible with popular OpenAI SDKs:
