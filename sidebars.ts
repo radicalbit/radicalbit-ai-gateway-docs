@@ -53,6 +53,16 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
+      label: 'UI',
+      items: [
+        'ui/overview',
+        'ui/dashboard',
+        'ui/groups',
+        'ui/keys',
+      ],
+    },
+    {
+      type: 'category',
       label: 'Operations',
       items: [
         'monitoring',
