@@ -87,7 +87,6 @@ const sidebars: SidebarsConfig = {
       items: [
         'about',
         'enterprise',
-        'changelog',
         'roadmap',
         'contributing',
         'support',
