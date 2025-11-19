@@ -126,13 +126,13 @@ Custom prompts can be configured using the `JUDGE_PROMPTS_DIR` environment varia
 services:
   gateway:
     environment:
-      - JUDGE_PROMPTS_DIR=/radicalbit_ai_gateway/guardrails/judges/custom-prompts
+      - JUDGE_PROMPTS_DIR=/radicalbit_ai_gateway/radicalbit_ai_gateway/guardrails/judges/custom-prompts
     volumes:
-      - ./custom-prompts:/radicalbit_ai_gateway/guardrails/judges/custom-prompts
+      - ./custom-prompts:/radicalbit_ai_gateway/radicalbit_ai_gateway/guardrails/judges/custom-prompts
 ```
 
 **Prompt file structure:**
-- Default prompts: `/radicalbit_ai_gateway/guardrails/judges/prompts` (bundled in image)
+- Default prompts: `/radicalbit_ai_gateway/radicalbit_ai_gateway/guardrails/judges/prompts` (bundled in image)
 - Custom prompts: Path specified by `JUDGE_PROMPTS_DIR`
 - Search order: Custom prompts are checked first; if not found, defaults are used
 
@@ -140,12 +140,6 @@ services:
 ```markdown
 You are a compliance officer ensuring that all AI responses adhere to ethical standards.
 Evaluate the following user input and decide if it violates company ethical policies.
-
-Return JSON:
-{
-  "is_triggered": boolean,
-  "reasoning": string | null
-}
 ```
 
 ---
