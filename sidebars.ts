@@ -56,6 +56,7 @@ const sidebars: SidebarsConfig = {
       label: 'Operations',
       items: [
         'monitoring',
+        'telemetry',
         'best-practices',
       ],
     },

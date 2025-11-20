@@ -30,7 +30,7 @@ Routes are the main building blocks of the gateway. Each route represents a diff
 2. **Get API credentials**: Obtain API keys from your chosen provider
 3. **Configure the model**: Add model configuration to your route
 
-### Example: OpenAI GPT-3.5 Turbo
+### Example: OpenAI GPT-4o mini
 
 ```yaml
 routes:

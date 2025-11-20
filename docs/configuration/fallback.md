@@ -109,7 +109,7 @@ routes:
     fallback:
       - target: gpt-4o
         fallbacks:
-          - gpt-3.5-turbo
+          - gpt-4o-mini
         type: CHAT
       - target: openai-embedding
         fallbacks:
@@ -173,42 +173,6 @@ routes:
         fallbacks:
           - gpt-4o-mini
           - claude-3-sonnet
-```
-
-### High Availability
-```yaml
-routes:
-  high-availability:
-    chat_models:
-      - model_id: gpt-4o-primary
-        model: openai/gpt-4o
-      - model_id: gpt-4o-secondary
-        model: openai/gpt-4o
-      - model_id: gpt-3.5-turbo-backup
-        model: openai/gpt-3.5-turbo
-    fallback:
-      - target: gpt-4o-primary
-        fallbacks:
-          - gpt-4o-secondary
-          - gpt-3.5-turbo-backup
-```
-
-### Cost Optimization
-```yaml
-routes:
-  cost-optimized:
-    chat_models:
-      - model_id: gpt-4o
-        model: openai/gpt-4o
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
-      - model_id: gpt-4o-mini
-        model: openai/gpt-4o-mini
-    fallback:
-      - target: gpt-4o
-        fallbacks:
-          - gpt-3.5-turbo
-          - gpt-4o-mini
 ```
 
 ## Best Practices
