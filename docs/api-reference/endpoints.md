@@ -19,13 +19,6 @@ curl -H "Authorization: Bearer your-api-key" \
      http://localhost:8000/v1/chat/completions
 ```
 
-### API Key Header
-```bash
-curl -H "api-key: your-api-key" \
-     -H "Content-Type: application/json" \
-     http://localhost:8000/v1/chat/completions
-```
-
 ## Endpoints
 
 ### Chat Completions
@@ -95,37 +88,6 @@ curl -H "api-key: your-api-key" \
     "total_tokens": 18
   }
 }
-```
-
-### Streaming Chat Completions
-
-**Endpoint:** `POST /v1/chat/completions`
-
-**Description:** Creates a streaming completion for the provided chat messages.
-
-**Request Body:**
-```json
-{
-  "model": "route-name",
-  "messages": [
-    {
-      "role": "user",
-      "content": "Tell me a story"
-    }
-  ],
-  "stream": true
-}
-```
-
-**Response:** Server-Sent Events (SSE) stream:
-```
-data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1677652288,"model":"route-name","choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}
-
-data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1677652288,"model":"route-name","choices":[{"index":0,"delta":{"content":"Once"},"finish_reason":null}]}
-
-data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1677652288,"model":"route-name","choices":[{"index":0,"delta":{"content":" upon"},"finish_reason":null}]}
-
-data: [DONE]
 ```
 
 ### Embeddings
@@ -209,23 +171,6 @@ curl -X POST http://localhost:8000/v1/chat/completions \
     ],
     "temperature": 0.7,
     "max_tokens": 150
-  }'
-```
-
-### Streaming Response
-```bash
-curl -X POST http://localhost:8000/v1/chat/completions \
-  -H "Authorization: Bearer your-api-key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "customer-service",
-    "messages": [
-      {
-        "role": "user",
-        "content": "Tell me about your products"
-      }
-    ],
-    "stream": true
   }'
 ```
 
@@ -477,12 +422,6 @@ The gateway implements rate limiting based on your configuration:
 - **Token-based**: Number of tokens per time window
 - **Per-route**: Different limits for different routes
 
-Rate limit headers are included in responses:
-```
-X-RateLimit-Limit: 100
-X-RateLimit-Remaining: 95
-X-RateLimit-Reset: 1640995200
-```
 
 ## Next Steps
 
