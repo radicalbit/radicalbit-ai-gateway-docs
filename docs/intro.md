@@ -4,46 +4,44 @@ slug: /
 
 # Radicalbit AI Gateway
 
-The **Radicalbit AI Gateway** is a tool that connects to the LLMs used in your Generative AI application, offering the ability to apply guardrails, routing and management of inbound and outbound traffic.
+The **Radicalbit AI Gateway** connects to the LLMs used in your Generative AI application, providing the ability to apply guardrails, routing, and management of inbound and outbound traffic.
 
 Thanks to the Radicalbit AI Gateway, you will be able to:
+* **Configure Inbound and Outbound Guardrails** based on:
+  * Text control (e.g.,‘contains’, ‘starts with’, ‘ends with’, ‘regex’).
+  * Detection and/or masking of PII.
+  * LLM-as-a-Judge to manage custom logic.
+* **Configure Semantic or Exact Cache to prevent redundant responses.**
+* **Configure rate limits and token limits.**
+* **Manage model fallbacks and traffic routing.**
+* **Monitor applications via an authenticated UI** that allows you to: to:
+  * Create groups and keys.
+  * Control costs by group and key.
+  * Receive event notifications based on configured logic.
+  * Investigate detailed metrics.
+  * Benefit from total observability through the Gateway tracing.
 
-- Configure inbound and outbound guardrails based on:
-  - Text control (contains, starts with, ends with, regex)
-  - Detection and/or masking of PII
-  - LLM-as-a-Judge to manage custom logic
-- Configure Semantic or Exact Cache, avoiding redundancy in responses already proposed by your application
-- Configure rate limits and token limits
-- Manage model fallbacks and traffic routing
-- Monitor your applications through an authenticated UI that will allow you to:
-  - Create groups and keys
-  - Control costs by groups and keys
-  - Receive event notifications based on configured logic
-  - Investigate detailed metrics
-  - Benefit from total observability through the Gateway tracing
-
-The Radicalbit AI Gateway is agnostic to the type of application and supports any model that **adheres to the OpenAI standard**. This makes the tool usable in the vast majority of applications.
+**The Radicalbit AI Gateway is application-agnostic and supports any model that adheres to the OpenAI standard.** This makes the tool usable in the vast majority of applications.
 
 
 
 
 # How to use it
 
-The Radicalbit AI Gateway is meant to be agnostic to any GenAI framework and application: for this reason, the application development and the Gateway are two independent processes. 
+**The Radicalbit AI Gateway is designed  to be agnostic to any GenAI framework and application.** For this reason, the application development and the Gateway are two independent processes.
 
-First things first, never mind the Gateway: you need to develop your application. It can be a chat assistant, a RAG application or anything else. Just focus on the main logic of your application without struggling with guardrails, caching or metrics to expose. These are complexities you can delegate to the Gateway. 
+The first step is to develop your application, regardless of the Gateway. It can be a chat assistant, a RAG application or anything else. Focus on the main logic of your application without struggling with guardrails, caching or metrics to expose. These complexities can be delegated to the Gateway.
 
-Once the application is built, let’s move to the Gateway configuration. In this step, we need to write the `config.yaml` file by choosing the route name, model to use and any logic you need to use to control, limit and monitor your application. 
+Once the application has been built, we can move on to the **Gateway [configuration](docs/configuration/advanced-configuration.md)**. At this stage, we need to write the `config.yaml` file by choosing the route name, the model to use as well as any logic required to control, limit and monitor your application.
 
-The worst is over. To hook your application in the Gateway, we have to specify into the LLM client the following information:
+The hard part is over. To integrate your application with the Gateway, we have to specify the following information in the LLM Client:
+* the Route name instead of the model name (the same as in the config.yaml).
+* the Gateway base URL.
+* the Gateway API Key (generated in the UI).
 
-- the Route name instead of the model name (the same you have in the `config.yaml`)
-- the Gateway base URL 
-- the Gateway API Key (generated in the UI)
+This ensures that all the traffic is sent to and processed by the Gateway.
+Before using your application, remember to configure  the Gateway pointing it to the `config.yaml` file.
 
-In this way, all the traffic is sent and processed by the gateway.
-
-Before starting to use your application, remember to serve the Gateway pointing to the `config.yaml` file.
 
 
 
