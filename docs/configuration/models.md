@@ -1,6 +1,6 @@
 # Model Configuration
 
-This page provides comprehensive guidance on configuring AI models in the Radicalbit AI Gateway based on the actual codebase structure.
+This section provides comprehensive guidance on configuring AI models in the Radicalbit AI Gateway based on the actual codebase structure.
 
 ## Overview
 

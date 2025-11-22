@@ -2,88 +2,51 @@
 
 This guide will help you create your first gateway configuration and understand the basic concepts.
 
-## Configuration File Structure
-
-The gateway uses YAML configuration files. Here's the basic structure:
+As a first step, create the `config.yaml` file with the following content:
 
 ```yaml
 routes:
-  your-route-name:
+  gpt-pirate-route:
     chat_models:
-      - model_id: gpt-4o-mini
-        model: openai/gpt-4o-mini
+      - model_id: 'gpt-pirate'
+        model: 'openai/gpt-4o'
         credentials:
-          api_key: !secret OPENAI_API_KEY
+          api_key: '<YOUR OPENAI_API_KEY>'
+        system_prompt: 'You are a pirate!'
 ```
 
-## Understanding Routes
+This creates a route named `gpt-pirate-route` that points to `gpt-4o`, specifying the OpenAI API Key and a system prompt.
 
-Routes are the main building blocks of the gateway. Each route represents a different API endpoint with its own configuration:
+:::tip
+Save your model API Key into a `secrets.yaml` file.
+:::
 
-- **Route Name**: The identifier you'll use in API calls
-- **Models**: The AI models available for this route
-- **Configuration**: Settings specific to this route
+Once the gateway is started, you will need to access the UI (http://localhost:9000) to view route information, create a group and a key, and finally, associate the group with the route.
 
-## Adding Your First Model
+Go to the `Groups` section to create the group, and then to the `API Key` section to create the key. 
 
-1. **Choose a model**: Select an AI model from supported providers
-2. **Get API credentials**: Obtain API keys from your chosen provider
-3. **Configure the model**: Add model configuration to your route
+:::warning
+Remember that the key will be visible only once, so handle it with care and save it securely.
+:::
 
-### Example: OpenAI GPT-4o mini
 
-```yaml
-routes:
-  customer-service:
-    chat_models:
-      - model_id: gpt-4o-mini
-        model: openai/gpt-4o-mini
-        credentials:
-          api_key: "sk-your-openai-key"
-        params:
-          temperature: 0.7
-          max_tokens: 1000
+
+As a final step, you will need to associate the group with the route and the key. In this way, we are establishing that the `pirate-crew` group holds the key to authenticate to the `gpt-pirate-route`.
+
+Next, you will need to instantiate the model client by specifying the `base_url`, using the route instead of the `model` name, and using the `api_key` retrieved from the gateway UI.
+
+```python
+from openai import OpenAI
+
+openai_client = OpenAI(
+    base_url='http://localhost:9000/v1',
+    model='gpt-pirate-route'
+    api_key='sk-rb-******',
+)
 ```
 
-## Security Best Practices
+From this moment on, input and output traffic for this model will pass through the gateway.
 
-### Secret Management
-Never put API keys directly in configuration files. Use environment variables or secret management (the default secrets file should be named `secrets.yaml`):
+**Congratulations, you have configured the gateway and integrated it into your application!**
 
-```yaml
-credentials:
-  api_key: !secret OPENAI_API_KEY
-```
 
-### Environment Variables
-Set up environment variables for sensitive data:
-
-```bash
-export OPENAI_API_KEY="sk-your-key"
-export ANTHROPIC_API_KEY="sk-ant-your-key"
-```
-
-## Testing Your Configuration
-
-1. **Start the gateway**:
-   ```bash
-   radicalbit-ai-gateway serve -c config.yaml
-   ```
-
-2. **Test with curl**:
-   ```bash
-   curl http://localhost:8000/v1/chat/completions \
-     -H "Content-Type: application/json" \
-     -d '{
-       "model": "customer-service",
-       "messages": [
-         {"role": "user", "content": "Hello!"}
-       ]
-     }'
-   ```
-
-## Next Steps
-
-- **[Model Configuration](./models.md)** - Add multiple models and providers
-- **[Guardrails](../features/guardrails.md)** - Implement content safety
-- **[Production Setup](../deployment/production.md)** - Deploy to production

@@ -17,7 +17,6 @@ Thanks to the Radicalbit AI Gateway, you will be able to:
 * **Monitor applications via an authenticated UI** that allows you to: to:
   * Create groups and keys.
   * Control costs by group and key.
-  * Receive event notifications based on configured logic.
   * Investigate detailed metrics.
   * Benefit from total observability through the Gateway tracing.
 
@@ -77,29 +76,13 @@ The Radicalbit AI Gateway enables you to:
 ### **For Developers**
 - **[Installation](./getting-started/installation.md)** - Set up your gateway
 - **[Basic Configuration](./configuration/basic-setup.md)** - Essential configuration
-- **[Configuration Examples](./configuration/examples.md)** - Practical configurations
-
-### **For Configuration**
-- **[Model Configuration](./configuration/models.md)** - Configure AI models
-- **[Guardrails](./features/guardrails.md)** - Content safety implementation
-- **[Caching](./features/caching.md)** - Semantic and exact caching
-- **[Rate Limiting](./features/rate-limiting.md)** - Request and token limits
-- **[Intelligent Routing](./configuration/intelligent-routing.md)** - Traffic distribution
-- **[Fallback](./configuration/fallback.md)** - Automatic failover
+- **[Advanced Configuration](./configuration/advanced-configuration.md)** - Practical configurations
 
 ### **For Operations**
-- **[Monitoring](./monitoring.md)** - Observability and metrics
-- **[Best Practices](./best-practices.md)** - Production guidelines
+- **[Monitoring](./operations//monitoring.md)** - Observability and exposed metrics
+- **[Telemetry](./operations//telemetry.md)** - Gateway Traces
 - **[Troubleshooting](./troubleshooting/common-issues.md)** - Common issues and solutions
 
----
 
-## Complete Documentation
-
-- **[Technical Overview](./technical-overview.md)** - Architecture and components
-- **[API Reference](./api-reference/endpoints.md)** - Complete API documentation
-- **[Support](./support.md)** - Technical assistance and support
-- **[Enterprise](./enterprise.md)** - Commercial licensing and services
-- **[FAQ](./faq.md)** - Frequently asked questions
 
 **Ready to get started?** Begin with the [installation guide](./getting-started/installation.md)!

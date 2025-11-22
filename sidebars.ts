@@ -17,8 +17,8 @@ const sidebars: SidebarsConfig = {
     'intro',
     {
       type: 'doc',
-      id: 'technical-overview',
-      label: 'Technical Overview',
+      id: 'basic-concepts',
+      label: 'Basic Concepts',
     },
     {
       type: 'category',
@@ -32,9 +32,7 @@ const sidebars: SidebarsConfig = {
       label: 'Configuration',
       items: [
         'configuration/basic-setup',
-        'configuration/models',
         'configuration/advanced-configuration',
-        'configuration/examples',
       ],
     },
     {
@@ -55,9 +53,8 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Operations',
       items: [
-        'monitoring',
-        'telemetry',
-        'best-practices',
+        'operations/monitoring',
+        'operations/telemetry',
       ],
     },
     {
@@ -79,20 +76,14 @@ const sidebars: SidebarsConfig = {
       label: 'Troubleshooting',
       items: [
         'troubleshooting/common-issues',
-        'faq',
+        'troubleshooting/faq',
       ],
     },
     {
       type: 'category',
       label: 'Reference',
       items: [
-        'about',
-        'enterprise',
-        'roadmap',
-        'contributing',
-        'support',
-        'privacy-policy',
-        'terms-of-service',
+        'reference/contacts',
       ],
     },
   ],
