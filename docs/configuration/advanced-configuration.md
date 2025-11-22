@@ -1,14 +1,30 @@
-# Configuration Guide
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Advanced Configuration
+
+:::info
+*This page is under development.*
+:::
+
+In this page we are going to explain how to configure the Gateway routes in all its component and features.
+
+- **[Routes](#routes)**
+- **[Models](#models)**
+- **[Guardrails](#guardrails)**
+- **[Fallback](#fallback)**
+- **[Caching](#caching)**
+- **[Rate Limiting](#rate-limiting)**
+- **[Token Limiting](#token-limiting)**
+
 
 The gateway's entire behavior is controlled by a single YAML configuration file. This file defines all routes, models, and the features applied to them.
 
-## Configuration Structure
 
-### Routes
-
+## Routes
 The top-level key is `routes`. Each key under `routes` defines a separate API endpoint with its own independent configuration. For example, `customer-service`, `business-development`, and `finance` could all be distinct routes you can call.
 
-**Example:**
+Example of `config.yaml`:
 ```yaml
 routes:
   customer-service:
@@ -53,36 +69,142 @@ routes:
           api_key: !secret OPENAI_API_KEY
 ```
 
-### Chat Models
 
-Within each route, the `chat_models` list defines the pool of LLMs available for that route.
+## Models
 
-- **`model_id`**: A unique name you assign to this model configuration within the route. This ID is used in `guardrails`, `fallback`, etc.
-- **`model`**: The actual model identifier, formatted as `provider/model_name`.
-  - **OpenAI:** Use `openai/model_name`.
-  - **OpenAI-Compatible (Ollama, vLLM, OpenRouter):** Prepend with `openai/`. For example, `openai/llama3`. A dummy `api_key` is required even if the model doesn't use one.
-  - **Anthropic:** Use `anthropic/claude-3-5-sonnet-latest`.
-- **`credentials`**: An object containing the authentication details. The available fields match those in `langchain-core` for maximum compatibility.
-  - `api_key`: The API key for the service.
-  - `base_url`: Crucial for self-hosted and compatible models (e.g., `http://localhost:11434/v1`). Always finish with `/v1` for OpenAI compatible models.
-  - `api_version`, `azure_ad_token`: Specific to Azure deployments.
-- **`params`**: A dictionary of parameters to pass to the model with every request, such as `temperature`, `max_tokens`, `top_p`, etc.
-- **`system_prompt`**: A default system prompt to be prepended to the message list if one is not already present.
+The Radicalbit AI Gateway supports all OpenAI-compatible models. This means that the gateway integrates with the vast majority of models on the market, both proprietary and open-source.
 
-### Embedding Models
+The Gateway supports the following types of models:
 
-Within each route, the `embedding_models` list defines the pool of embedding models available for that route.
+* **Chat Completion**
 
-- **`model_id`**: A unique name you assign to this model configuration within the route.
-- **`model`**: The actual model identifier, formatted as `provider/model_name`.
-  - **OpenAI:** Use `openai/model_name`.
-- **`credentials`**: An object containing the authentication details.
-- **`params`**: A dictionary of parameters to pass to the model with every request.
+* **Embeddings**
+
+Regardless of the model type (both those currently available and those that will be supported in the future), models are defined within the route and can be configured with various parameters.
+
+### Chat Completion
+
+<Tabs>
+  <TabItem value="openai" label="OpenAI" default>
+  ```yaml
+  routes:
+    your-route:
+      chat_models:
+        - model_id: openai-4o
+          model: openai/gpt-4o
+          credentials:
+            api_key: !secret OPENAI_API_KEY
+          params:
+            temperature: 1
+            max_tokens: 200
+  ```
+  - **`model_id`**: Unique identifier for the model within the route (Required)
+  - **`model`**: Model identifier in format `openai/model_name` (e.g., `openai/gpt-4o`) (Required)
+  - **`credentials`**: API credentials for accessing the model
+  - **`params`**: Model parameters (temperature, max_tokens, etc.)
+  - **`retry_attempts`**: Number of retry attempts (default: 3)
+  - **`prompt`**: System prompt for the model
+  - **`role`**: Role for the prompt (developer, user, system, assistant)
+  - **`input_cost_per_million_tokens`**: Cost per million input tokens
+  - **`output_cost_per_million_tokens`**: Cost per million output tokens
+  ---
+  </TabItem>
+  <TabItem value="openai-like LLMs" label="OpenAI-like LLMs">
+  ```yaml
+  route:
+    your-route:
+      chat_models:
+        - model_id: llama3
+          model: openai/llama3.2:3b
+          credentials:
+          base_url: 'http://host.docker.internal:11434/v1'
+          params:
+            temperature: 0.7
+            top_p: 0.9
+          prompt: 'You are an assistant!'
+  ```
+  ---
+  </TabItem>
+  <TabItem value="gemini" label="Gemini">
+  ```yaml
+  routes:
+    your-route:
+      chat_models:
+        - model_id: gemini-pro
+          model: google-genai/gemini-1.5-pro
+          credentials:
+          api_key: !secret GOOGLE_API_KEY
+          params:
+          temperature: 0.7
+            max_output_tokens: 1024
+  ```
+  ---
+  </TabItem>
+</Tabs>
 
 
+### Embeddings
 
-## Fallback Mechanisms
+<Tabs>
+  <TabItem value="openai" label="OpenAI" default>
+  ```yaml
+  routes:
+    your-route:
+      embedding_models:
+        - model_id: emb_model_for_caching
+          model: openai/text-embedding-3-small
+          credentials:
+            api_key: !secret OPENAI_API_KEY
+  ```
+  - **`model_id`**: Unique identifier for the model within the route (Required)
+  - **`model`**: Model identifier in format `openai/model_name` (e.g., `openai/gpt-4o`) (Required)
+  - **`credentials`**: API credentials for accessing the model
+  ---
+  </TabItem>
+  <TabItem value="openai-like LLMs" label="OpenAI-like LLMs">
+  ```yaml
+  routes:
+    your-route:
+      embedding_models:
+        - model_id: emb_model_for_caching
+          model: openai/text-embedding-3-small
+          credentials:
+            api_key: !secret OPENAI_API_KEY
+  ```
+  - **`model_id`**: Unique identifier for the model within the route (Required)
+  - **`model`**: Model identifier in format `openai/model_name` (e.g., `openai/gpt-4o`) (Required)
+  - **`credentials`**: API credentials for accessing the model
+  ---
+  </TabItem>
+  <TabItem value="gemini" label="Gemini">
+  ```yaml
+  routes:
+    your-route:
+      embedding_models:
+        - model_id: gemini-embedding
+          model: google-genai/models/gemini-embedding-001
+          credentials:
+            api_key: !secret GOOGLE_API_KEY
+          params:
+            task_type: RETRIEVAL_QUERY  # Optional: RETRIEVAL_DOCUMENT, SEMANTIC_SIMILARITY, CLASSIFICATION, CLUSTERING
+  ```
+  - **`model_id`**: Unique identifier for the model within the route (Required)
+  - **`model`**: Model identifier in format `openai/model_name` (e.g., `openai/gpt-4o`) (Required)
+  - **`credentials`**: API credentials for accessing the model
+  ---
+  </TabItem>
+</Tabs>
 
+
+## Guardrails
+
+### Text Control
+
+### PII detection and masking
+
+### LLM-as-a-Judge
+
+## Fallback
 Defines a chain of backup models to use if the primary model fails (e.g., due to an API error or downtime). The gateway will automatically try the fallbacks in the order they are listed.
 
 - **`target`**: The `model_id` of the primary model.
@@ -90,14 +212,50 @@ Defines a chain of backup models to use if the primary model fails (e.g., due to
 
 **Example:**
 ```yaml
-fallback:
-  - target: openai-4o
-    fallbacks:
-      - llama3.2
-      - qwen
+routes:
+  route-name:
+    chat_models:
+      # some model configurations
+      # ...
+  fallback:
+    - target: openai-4o
+      fallbacks:
+        - llama3.2
+        - qwen
 ```
 
 If a request is routed to `openai-4o` and it fails, the gateway will automatically retry the same request with `llama3.2`. If `llama3.2` also fails, it will try `qwen`.
+
+If a request is routed to openai-4o and it fails, the gateway will automatically retry the same request with llama3.2. If llama3.2 also fails, it will try qwen.
+
+## Caching
+
+### Exact Chache
+Enables caching for a route to serve identical requests from memory instead of calling the LLM again.
+
+- **`enabled`**: `true` or `false`.
+- **`ttl`**: Time-to-live in seconds. The cached response will be stored for this duration.
+
+At the top level of the `config.yaml`, a `cache` object must be defined if any route has caching enabled.
+
+**Example:**
+```yaml
+routes:
+  route-name:
+    chat_models:
+      # some model configurations
+      # ...
+  caching:
+    enabled: true
+    ttl: 300
+
+
+cache:
+  redis_host: 'valkey'
+  redis_port: 6379
+```
+
+### Semantic Cache
 
 ## Rate Limiting
 
@@ -109,54 +267,47 @@ Controls the number of requests allowed over a time window for a given route.
 
 **Example:**
 ```yaml
-rate_limiting:
-  algorithm: fixed_window
-  window_size: 1 minute
-  max_requests: 20
+routes:
+  route-name:
+    chat_models:
+      # some model configurations
+      # ...
+  rate_limiting:
+    algorithm: fixed_window
+    window_size: 1 minute
+    max_requests: 20
 ```
+
 
 ## Token Limiting
 
-Controls the *cumulative number of tokens* processed for a route's inputs and outputs over a time window. This is excellent for managing costs.
+Controls the cumulative number of tokens processed for a route's inputs and outputs over a time window. This is excellent for managing costs.
 
-It has two sections: `input` and `output`.
+It has two sections: input and output.
 
-- **`algorithm`**: The limiting algorithm (e.g., `fixed_window`).
-- **`window_size`**: The duration of the time window.
-- **`max_token`**: The total number of tokens that can be processed in that window.
+* **`algorithm`:** The limiting algorithm (e.g., fixed_window).
+* **`window_size`:** The duration of the time window.
+* **`max_token`:** The total number of tokens that can be processed in that window.
 
-**Example:**
+Example:
+
 ```yaml
-token_limiting:
-  input:
-    window_size: 10 seconds
-    max_token: 1000
-  output:
-    window_size: 10 minutes
-    max_token: 500
+routes:
+  route-name:
+    chat_models:
+      # some model configurations
+      # ...
+  token_limiting:
+    input:
+      window_size: 10 seconds
+      max_token: 1000
+    output:
+      window_size: 10 minutes
+      max_token: 500
 ```
 
-## Caching
 
-Enables caching for a route to serve identical requests from memory instead of calling the LLM again.
 
-- **`enabled`**: `true` or `false`.
-- **`ttl`**: Time-to-live in seconds. The cached response will be stored for this duration.
-
-At the top level of the `config.yaml`, a `cache` object must be defined if any route has caching enabled.
-
-**Example:**
-```yaml
-# In a route
-caching:
-  enabled: true
-  ttl: 300
-
-# At the top level
-cache:
-  redis_host: 'valkey'
-  redis_port: 6379
-```
 
 ## Complete Configuration Example
 
@@ -256,8 +407,3 @@ cache:
   redis_port: 6379
 ```
 
-## Next Steps
-
-- **[Guardrails](../features/guardrails.md)** - Implement content safety and filtering
-- **[API Reference](../api-reference/endpoints.md)** - Complete API documentation
-- **[Monitoring](../monitoring.md)** - Set up observability and metrics

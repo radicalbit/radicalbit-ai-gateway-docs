@@ -1,4 +1,4 @@
-# Technical Overview
+# Basic Concepts
 
 The Radicalbit AI Gateway combines  **several integrated components that work together to manage, secure, and monitor AI applications.** Each component has a specific role, and together they form a flexible and observable architecture designed for management and control.
 
