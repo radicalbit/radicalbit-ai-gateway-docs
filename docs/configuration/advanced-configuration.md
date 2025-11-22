@@ -109,7 +109,7 @@ Regardless of the model type (both those currently available and those that will
   - **`output_cost_per_million_tokens`**: Cost per million output tokens
   ---
   </TabItem>
-  <TabItem value="openai-like LLMs" label="OpenAI-like LLMs">
+  <TabItem value="openai-like" label="OpenAI-like LLMs">
   ```yaml
   route:
     your-route:
@@ -161,7 +161,7 @@ Regardless of the model type (both those currently available and those that will
   - **`credentials`**: API credentials for accessing the model
   ---
   </TabItem>
-  <TabItem value="openai-like LLMs" label="OpenAI-like LLMs">
+  <TabItem value="openai-like" label="OpenAI-like LLMs">
   ```yaml
   routes:
     your-route:

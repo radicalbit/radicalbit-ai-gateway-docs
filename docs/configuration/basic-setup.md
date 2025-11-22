@@ -17,11 +17,19 @@ routes:
 
 This creates a route named `gpt-pirate-route` that points to `gpt-4o`, specifying the OpenAI API Key and a system prompt.
 
+:::tip
+Save your model API Key into a `secrets.yaml` file.
+:::
+
 Once the gateway is started, you will need to access the UI (http://localhost:9000) to view route information, create a group and a key, and finally, associate the group with the route.
 
 Go to the `Groups` section to create the group, and then to the `API Key` section to create the key. 
 
-**Remember that the key will be visible only once, so handle it with care and save it securely.** 
+:::warning
+Remember that the key will be visible only once, so handle it with care and save it securely.
+:::
+
+
 
 As a final step, you will need to associate the group with the route and the key. In this way, we are establishing that the `pirate-crew` group holds the key to authenticate to the `gpt-pirate-route`.
 

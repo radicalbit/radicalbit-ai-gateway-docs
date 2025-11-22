@@ -24,27 +24,32 @@ routes:
         # embedding model configuration...
       - model_id: ...
         # embedding model configuration...
-    fallback: { ... } # What to do if a model fails
-    guardrails: { ... } # Guardrails list for the route
-    rate_limiting: { ... } # Limits on requests over time
-    token_limiting: { ... } # Limits on tokens over time
-    caching: { ... } # Caching rules for this specific route
+    fallback: ... # What to do if a model fails
+    guardrails: ... # Guardrails list for the route
+    rate_limiting: ... # Limits on requests over time
+    token_limiting: ... # Limits on tokens over time
+    caching: ... # Caching rules for this specific route
   
   # The name of your second route
   another-route:
     # ... configuration for this route
 
-guardrails: { ... } # Content safety and filtering rules
+guardrails: ... # Content safety and filtering rules
 
 # Cache configuration
 cache:
-  redis_host: '...'
+  redis_host: ...
   redis_port: ...
 ```
 
-At the route level, you must define the route name (e.g., ‘customer-service’ in the above example).This name is important because you will  refer to it in your model client during application development and it also appears in the UI. Always choose a clear and  descriptive name.
+At the route level, you must define the route name (e.g., ‘customer-service’ in the above example).
+**This name is important because you will refer to it in your model client during application development and it also appears in the UI**.
 
-Each key listed under ‘routes’ defines a separate API endpoint with its own configuration.
+:::tip
+Always choose a clear and  descriptive name.
+:::
+
+Each key listed under `routes` defines a separate API endpoint with its own configuration.
 
 Within each route, you can define two primary model types:
 * *chat_models*
