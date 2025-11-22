@@ -109,7 +109,7 @@ Regardless of the model type (both those currently available and those that will
   - **`output_cost_per_million_tokens`**: Cost per million output tokens
   ---
   </TabItem>
-  <TabItem value="openai-like" label="OpenAI-like LLMs">
+  <TabItem value="openai-like" label="OpenAI-like">
   ```yaml
   route:
     your-route:
@@ -161,7 +161,7 @@ Regardless of the model type (both those currently available and those that will
   - **`credentials`**: API credentials for accessing the model
   ---
   </TabItem>
-  <TabItem value="openai-like" label="OpenAI-like LLMs">
+  <TabItem value="openai-like" label="OpenAI-like">
   ```yaml
   routes:
     your-route:
@@ -231,7 +231,7 @@ If a request is routed to openai-4o and it fails, the gateway will automatically
 ## Caching
 
 ### Exact Chache
-Enables caching for a route to serve identical requests from memory instead of calling the LLM again.
+To Enable caching for a route to serve identical requests from memory instead of calling the LLM again.
 
 - **`enabled`**: `true` or `false`.
 - **`ttl`**: Time-to-live in seconds. The cached response will be stored for this duration.
@@ -249,13 +249,47 @@ routes:
     enabled: true
     ttl: 300
 
-
 cache:
   redis_host: 'valkey'
   redis_port: 6379
 ```
 
 ### Semantic Cache
+
+To enable Semantic Cache for a route, you must specify at least one `chat_model` and one `embedding_model`. The chat model is responsible for generating the response text, while the embedding model produces the vector representation that will be stored in the cache. For each new request, the embedding model is invoked, and a similarity score is computed against all stored vectors. If a cached entry exceeds the configured `similarity_threshold`, the cached response is returned instead of calling the chat model again.
+
+```yaml
+routes:
+  your-route:
+    chat_models:
+      - model_id: assistant-model
+        model: openai/gpt-4o
+        credentials:
+          api_key: !secret OPENAI_API_KEY
+    embedding_models:
+      - model_id: emb_model_for_caching
+        model: openai/text-embedding-3-small
+        credentials:
+          api_key: !secret OPENAI_API_KEY
+    caching:
+      ttl: 60
+      type: semantic
+      embedding_model_id: emb_model_for_caching
+      similarity_threshold: 0.80
+      distance_metric: cosine
+      dim: 1536
+
+cache:
+  redis_host: 'valkey'
+  redis_port: 6379
+```
+
+* **`ttl`:** The time-to-live (in seconds) for a cached entry. After this period, the cached item expires and will no longer be used.
+* **`type`:** The caching strategy. Setting it to `semantic` enables vector-based caching, where responses are retrieved based on similarity rather than exact textual matches.
+* **`embedding_model_id`:** The identifier of the embedding model used to generate and compare embeddings for caching.
+* **`similarity_threshold`:** The minimum similarity score required to consider a cached entry a valid match. Higher values make the cache more strict.
+* **`distance_metric`:** The metric used to compute similarity between vectors. Common options include `cosine`, `euclidean`, or `dot`.
+* **`dim`:** The dimensionality of the embeddings produced by the selected model. This must match the model’s output vector size.
 
 ## Rate Limiting
 
