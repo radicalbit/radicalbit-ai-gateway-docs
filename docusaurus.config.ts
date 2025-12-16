@@ -70,7 +70,8 @@ const config: Config = {
       title: 'Radicalbit AI Gateway',
       logo: {
         alt: 'Radicalbit AI Gateway Logo',
-        src: 'img/logo.svg',
+        src: 'img/logo_positivo.svg',
+        srcDark: 'img/logo_negativo.svg',
       },
       items: [
         {
