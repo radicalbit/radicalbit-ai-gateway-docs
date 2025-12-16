@@ -3,6 +3,7 @@
  * bundles Infima by default. Infima is a CSS framework designed to
  * work well for content-centric websites.
  */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap');
 
 /* You can override the default Infima variables here. */
 :root {
@@ -19,10 +20,10 @@
   --ifm-menu-color-background-hover: transparent;
   --ifm-breadcrumb-item-background-active: transparent;
 
-  --ifm-font-family-base: 'Open Sans', Helvetica, Arial, Lucida, sans-serif;
+  --ifm-font-family-base: 'Montserrat', sans-serif;
   --ifm-footer-padding-vertical: 8rem;
 
-  --rdb-font-family-headers: 'Montserrat', Helvetica, Arial, Lucida, sans-serif;
+  --rdb-font-family-headers: 'Montserrat', sans-serif;;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
