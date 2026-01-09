@@ -29,10 +29,10 @@ graph LR
     F --> G[IO Guardrails - Output]
     G --> H[Final Response]
     
-    style B fill:#e3f2fd
-    style C fill:#e8f5e8
-    style F fill:#fff3e0
-    style G fill:#e8f5e8
+    style B color:#000, fill:#e3f2fd
+    style C color:#000, fill:#e8f5e8
+    style F color:#000, fill:#fff3e0
+    style G color:#000, fill:#e8f5e8
 ```
 
 ## Types of Guardrails
@@ -57,10 +57,10 @@ graph TD
     D --> D1[PRESIDIO_ANALYZER]
     D --> D2[PRESIDIO_ANONYMIZER]
     
-    style A fill:#e3f2fd
-    style B fill:#f3e5f5
-    style C fill:#e8f5e8
-    style D fill:#fff3e0
+    style A color:#000, fill:#e3f2fd
+    style B color:#000, fill:#f3e5f5
+    style C color:#000, fill:#e8f5e8
+    style D color:#000, fill:#fff3e0
 ```
 
 ### Traditional Guardrails
@@ -229,12 +229,12 @@ graph LR
     D -->|Pass| E[Allow]
     D -->|Fail| F[Block / Soft Block / Fallback]
     
-    style A fill:#e3f2fd
-    style B fill:#f3e5f5
-    style C fill:#fff3e0
-    style D fill:#e8f5e8
-    style E fill:#e8f5e8
-    style F fill:#ffebee
+    style A color:#000, fill:#e3f2fd
+    style B color:#000, fill:#f3e5f5
+    style C color:#000, fill:#fff3e0
+    style D color:#000, fill:#e8f5e8
+    style E color:#000, fill:#e8f5e8
+    style F color:#000, fill:#ffebee
 ```
 
 ---
