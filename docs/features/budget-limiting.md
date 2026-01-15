@@ -4,7 +4,14 @@ This page covers budget limiting configuration and features in the Radicalbit AI
 
 ## Overview
 
-Budget limiting in the Radicalbit AI Gateway controls costs by setting limits on input and output tokens consumed across all models in a route, helping to manage AI usage expenses.
+Budget limiting in the Radicalbit AI Gateway controls costs by setting limits on **input and output budget** consumed across all models in a route, helping to manage AI usage expenses.
+
+With the **new configuration structure**:
+
+- Models are defined at top-level (`chat_models`, `embedding_models`)
+- Routes reference models by **model ID** (strings)
+
+---
 
 ## Budget Limiting Configuration
 
@@ -12,31 +19,40 @@ Budget limiting in the Radicalbit AI Gateway controls costs by setting limits on
 Set cost limits on input and output tokens:
 
 ```yaml
+chat_models:
+  - model_id: gpt-4o
+    model: openai/gpt-4o
+    input_cost_per_million_tokens: 5.0
+    output_cost_per_million_tokens: 15.0
+
 routes:
   production:
     chat_models:
-      - model_id: gpt-4o
-        model: openai/gpt-4o
+      - gpt-4o
     budget_limiting:
       input:
         algorithm: fixed_window
         window_size: 1 hour
-        max_budget: 50.0  # $50 per hour maximum cost
+        max_budget: 50.0   # $50 per hour maximum cost (input)
       output:
         algorithm: fixed_window
         window_size: 1 hour
-        max_budget: 100.0  # $100 per hour maximum cost
+        max_budget: 100.0  # $100 per hour maximum cost (output)
 ```
 
 ### Advanced Budget Configuration
 ```yaml
+chat_models:
+  - model_id: gpt-4o
+    model: openai/gpt-4o
+  - model_id: gpt-3.5-turbo
+    model: openai/gpt-3.5-turbo
+
 routes:
   enterprise:
     chat_models:
-      - model_id: gpt-4o
-        model: openai/gpt-4o
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
+      - gpt-4o
+      - gpt-3.5-turbo
     budget_limiting:
       input:
         algorithm: fixed_window
@@ -47,6 +63,8 @@ routes:
         window_size: 1 minute
         max_budget: 100
 ```
+
+---
 
 ## Budget Limiting Types
 
@@ -54,18 +72,20 @@ routes:
 Control costs by setting maximum budget (in dollars) per time window:
 
 ```yaml
-    budget_limiting:
-      input:
-        algorithm: fixed_window
-        window_size: 1 hour
-        max_budget: 50.0  # $50 per hour for input tokens
-      output:
-        algorithm: fixed_window
-        window_size: 1 hour
-        max_budget: 100.0  # $100 per hour for output tokens
+budget_limiting:
+  input:
+    algorithm: fixed_window
+    window_size: 1 hour
+    max_budget: 50.0   # $50 per hour for input tokens
+  output:
+    algorithm: fixed_window
+    window_size: 1 hour
+    max_budget: 100.0  # $100 per hour for output tokens
 ```
 
-Note: Budget limiting uses cost calculations based on model pricing. You can set either `max_token` (for token-based limits) or `max_budget` (for cost-based limits), but not both in the same configuration.
+**Note:** Budget limiting uses cost calculations based on model pricing. You can set either `max_token` (token-based limits) or `max_budget` (cost-based limits), but not both in the same configuration.
+
+---
 
 ## Budget Limiting Behavior
 
@@ -74,15 +94,19 @@ Note: Budget limiting uses cost calculations based on model pricing. You can set
 - **Budget Exceeded**: Clear error message
 - **Retry Information**: When budget resets
 
-### Response Headers (Roadmap 2025)
+### Response Headers (if exposed by the gateway)
 ```
 HTTP/1.1 429 Too Many Requests
-X-Budget-Limit-Input: 1000000
+X-Budget-Limit-Input: 100
 X-Budget-Remaining-Input: 0
-X-Budget-Limit-Output: 500000
-X-Budget-Remaining-Output: 250000
+X-Budget-Limit-Output: 100
+X-Budget-Remaining-Output: 25
 X-Budget-Reset: 1640995200
 ```
+
+> Header names/availability may vary depending on the deployment and gateway version.
+
+---
 
 ## Best Practices
 
@@ -93,8 +117,8 @@ X-Budget-Reset: 1640995200
 - Consider peak usage times
 
 ### Cost Management
-- Use different limits for different models
-- Implement cost alerts
+- Use different limits for different routes (and therefore workloads)
+- Ensure model costs are configured (manual or automatic price assignment)
 - Regular budget reviews
 - Cost optimization strategies
 
@@ -102,7 +126,9 @@ X-Budget-Reset: 1640995200
 - Implement proper retry logic
 - Handle budget exceeded gracefully
 - Provide user feedback
-- Fallback to cheaper models
+- Consider fallback to cheaper models (with fallback configuration)
+
+---
 
 ## Troubleshooting
 
@@ -110,8 +136,9 @@ X-Budget-Reset: 1640995200
 
 1. **Budget Too Low**: Increase limits based on actual usage
 2. **Unexpected Costs**: Check model pricing and usage
-3. **Reset Issues**: Verify reset time configuration
+3. **Reset Issues**: Verify `window_size` configuration
 
+---
 
 ## Next Steps
 

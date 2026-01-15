@@ -6,6 +6,13 @@ This page covers token limiting configuration and features in the Radicalbit AI 
 
 Token limiting controls the number of tokens consumed by requests within a specific time window, helping to manage costs and prevent abuse.
 
+With the **new configuration structure**:
+
+- Models are defined at top-level (`chat_models`, `embedding_models`)
+- Routes reference models by **model ID** (strings)
+
+---
+
 ## Token Limiting Scopes
 
 Token limiting supports three scopes to control how limits are applied:
@@ -21,11 +28,14 @@ Token limiting supports three scopes to control how limits are applied:
 When `scope: route` is set (or omitted), all requests to the route share the same token limit pool:
 
 ```yaml
+chat_models:
+  - model_id: gpt-4o
+    model: openai/gpt-4o
+
 routes:
   production:
     chat_models:
-      - model_id: gpt-4o
-        model: openai/gpt-4o
+      - gpt-4o
     token_limiting:
       scope: route  # Optional, default value
       input:
@@ -72,7 +82,11 @@ token_limiting:
     max_token: 5000000
 ```
 
+---
+
 ## Configuration
+
+Minimal route-level example:
 
 ```yaml
 routes:
@@ -89,19 +103,37 @@ routes:
 ```
 
 **Parameters:**
-- `algorithm`: Rate limiting algorithm (currently only `fixed_window` is supported)
-- `window_size`: Time window for the limit (e.g., `'10 seconds'`, `'1 minute'`, `'1 hour'`)
-- `max_token`: Maximum number of tokens allowed within the window
+- `scope`: (`route`, `user`, `group`) – optional, default `route`
+- `algorithm`: limiting algorithm (commonly `fixed_window`)
+- `window_size`: time window for the limit (e.g., `10 seconds`, `1 minute`, `1 hour`)
+- `max_token`: maximum number of tokens allowed within the window
+
+---
 
 ## Storage Backend
 
 Token limiting uses Redis (if configured) or in-memory storage:
-- **Redis**: Recommended for production with multiple gateway instances. Limits are shared across all instances.
-- **Memory**: Used when Redis is not configured. Limits are per-instance only.
+
+- **Redis**: recommended for production with multiple gateway instances. Limits are shared across all instances.
+- **Memory**: used when Redis is not configured. Limits are per-instance only.
+
+Redis configuration example:
+
+```yaml
+cache:
+  redis_host: "valkey"
+  redis_port: 6379
+```
+
+> Even if the section is called `cache`, Redis is typically reused as a shared storage backend for multiple gateway features (e.g., caching and limiting), depending on your gateway setup.
+
+---
 
 ## Error Handling
 
-When a token limit is exceeded, the gateway returns an HTTP 429 (Too Many Requests) error.
+When a token limit is exceeded, the gateway returns an HTTP **429 (Too Many Requests)** error.
+
+---
 
 ## Next Steps
 

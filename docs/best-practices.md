@@ -23,52 +23,91 @@ chat_models:
     model: openai/gpt-4o-mini
 ```
 
-#### Set Appropriate System Prompts
+#### Set Appropriate Prompts (Prompt + Role)
+Use `prompt` with an explicit `role`:
+
 ```yaml
 # Good: Specific and clear instructions
 chat_models:
   - model_id: customer-service
     model: openai/gpt-3.5-turbo
-    system_prompt: "You are a helpful customer service assistant. Be polite, professional, and focus on resolving customer issues efficiently."
+    prompt: "You are a helpful customer service assistant. Be polite, professional, and focus on resolving customer issues efficiently."
+    role: system
 
 # Avoid: Generic or unclear prompts
 chat_models:
   - model_id: assistant
     model: openai/gpt-3.5-turbo
-    system_prompt: "You are helpful."
+    prompt: "You are helpful."
+    role: system
 ```
 
+#### Keep Routes Thin (Reference Models by ID)
+Define models once, reuse them across routes:
 
+```yaml
+chat_models:
+  - model_id: customer-service
+    model: openai/gpt-4o-mini
+    credentials:
+      api_key: !secret OPENAI_API_KEY
+    params:
+      temperature: 0.7
+    prompt: "You are a helpful customer service assistant."
+    role: system
+
+routes:
+  customer-service-route:
+    chat_models:
+      - customer-service
+```
+
+---
 
 ### 2. Fallback Configuration
 
 #### Comprehensive Fallback Chains
 ```yaml
-# Good: Multiple fallback options
-fallback:
-  - target: gpt-4o-mini
-    fallbacks:
-      - gpt-3.5-turbo
-      - claude-3-sonnet
-  - target: gpt-3.5-turbo
-    fallbacks:
-      - claude-3-sonnet
+routes:
+  production:
+    chat_models:
       - gpt-4o-mini
-
-# Avoid: Single point of failure
-fallback:
-  - target: gpt-4o-mini
-    fallbacks:
       - gpt-3.5-turbo
+      - claude-3-sonnet
+    fallback:
+      # Good: Multiple fallback options
+      - target: gpt-4o-mini
+        fallbacks:
+          - gpt-3.5-turbo
+          - claude-3-sonnet
+      - target: gpt-3.5-turbo
+        fallbacks:
+          - claude-3-sonnet
+          - gpt-4o-mini
 ```
+
+```yaml
+routes:
+  production:
+    chat_models:
+      - gpt-4o-mini
+      - gpt-3.5-turbo
+    fallback:
+      # Avoid: Single point of failure
+      - target: gpt-4o-mini
+        fallbacks:
+          - gpt-3.5-turbo
+```
+
+---
 
 ### 3. Guardrails Configuration
 
 #### Layer Defense Strategy
 ```yaml
-# Good: Multiple layers of protection
+# Good: Multiple layers of protection (fast checks first)
 guardrails:
-  - basic_content_filter    # Fast, simple filtering
+  - basic_content_filter  # Fast, simple filtering
   - pii_analyzer          # Privacy protection
   - toxicity_judge        # AI-powered analysis
 
@@ -87,7 +126,7 @@ guardrails:
     behavior: block
     parameters:
       values: ["spam", "scam"]
-  
+
   - name: toxicity_judge
     type: judge
     where: input
@@ -99,6 +138,8 @@ guardrails:
       max_tokens: 50
 ```
 
+---
+
 ### 4. Rate Limiting Strategy
 
 #### Appropriate Limits
@@ -108,12 +149,14 @@ rate_limiting:
   algorithm: fixed_window
   window_size: 1 minute
   max_requests: 50  # Reasonable for most applications
+```
 
-# Avoid: Too restrictive or too permissive
+```yaml
+# Avoid: Too restrictive
 rate_limiting:
   algorithm: fixed_window
   window_size: 1 minute
-  max_requests: 5  # Too restrictive
+  max_requests: 5
 ```
 
 #### Token Management
@@ -121,30 +164,30 @@ rate_limiting:
 # Good: Separate input/output limits
 token_limiting:
   input:
+    algorithm: fixed_window
     window_size: 1 minute
     max_token: 5000
   output:
+    algorithm: fixed_window
     window_size: 1 minute
     max_token: 10000
-
-# Avoid: Combined limits without distinction
-token_limiting:
-  input:
-    window_size: 1 minute
-    max_token: 15000  # No distinction between input/output
 ```
+
+---
 
 ## Security Best Practices
 
 ### 1. API Key Management
 
-#### Use Environment Variables
+#### Use Secrets / Environment Variables
 ```yaml
-# Good: Environment variables for sensitive data
+# Good: Use secrets or environment variables for sensitive data
 credentials:
-  api_key: "${OPENAI_API_KEY}"
+  api_key: !secret OPENAI_API_KEY
   base_url: "https://api.openai.com/v1"
+```
 
+```yaml
 # Avoid: Hardcoded API keys
 credentials:
   api_key: "sk-1234567890abcdef"
@@ -153,12 +196,10 @@ credentials:
 
 #### Rotate API Keys Regularly
 ```bash
-# Set up automated key rotation
-#!/bin/bash
-# rotate-keys.sh
-NEW_KEY=$(generate_new_api_key)
-update_config_with_new_key $NEW_KEY
-restart_gateway
+# Example: key rotation workflow (conceptual)
+# - issue new provider key
+# - update secrets.yaml / secret manager
+# - restart gateway rollout
 ```
 
 ### 2. Network Security
@@ -171,7 +212,6 @@ server {
     ssl_certificate /path/to/cert.pem;
     ssl_certificate_key /path/to/key.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384;
 }
 ```
 
@@ -185,7 +225,6 @@ ufw deny 8000/tcp  # Block direct gateway access
 
 ### 3. Access Control
 
-#### API Key Management
 Use the Gateway UI to create groups and API keys, then associate them with specific routes:
 
 - **Groups**: Organize API keys by team or application
@@ -194,39 +233,34 @@ Use the Gateway UI to create groups and API keys, then associate them with speci
 
 This allows you to track which groups and keys are using specific applications and control access at the route level.
 
+---
+
 ## Performance Best Practices
 
 ### 1. Caching Strategy
 
-#### Appropriate TTL Values
+#### Appropriate TTL Values (Exact Cache)
 ```yaml
-# Good: TTL based on content type
 routes:
   static-content:
     caching:
-      enabled: true
+      type: exact
       ttl: 3600  # 1 hour for static content
-  
+
   dynamic-content:
     caching:
-      enabled: true
+      type: exact
       ttl: 300   # 5 minutes for dynamic content
 ```
 
+> If you need similarity-based caching, use `type: semantic` with an embedding model and `embedding_model_id`.
+
 #### Cache Invalidation
-```yaml
-# Good: Cache invalidation strategy
-caching:
-  enabled: true
-  ttl: 300
-  invalidation:
-    on_config_change: true
-    on_model_update: true
-```
+Cache invalidation is typically handled through TTL and (optionally) redeploy/config changes depending on your environment. Prefer short TTLs for volatile data.
 
 ### 2. Resource Management
 
-#### Set Resource Limits
+#### Set Resource Limits (Kubernetes example)
 ```yaml
 # Good: Appropriate resource limits
 resources:
@@ -241,125 +275,93 @@ resources:
 #### Monitor Resource Usage
 ```bash
 # Good: Regular resource monitoring
-#!/bin/bash
-# monitor-resources.sh
-while true; do
-  docker stats --no-stream gateway
-  sleep 60
-done
+docker stats --no-stream gateway
 ```
 
 ### 3. Connection Pooling
+If your deployment exposes connection pool settings, tune them for your traffic profile:
 
-#### Optimize Connection Settings
 ```yaml
-# Good: Optimized connection settings
 connection_pool:
   max_connections: 100
   max_keepalive: 30
   timeout: 30
 ```
 
+---
+
 ## Monitoring Best Practices
 
 ### 1. Comprehensive Metrics
 
 #### Key Metrics to Monitor
-```yaml
-# Good: Comprehensive monitoring
-monitoring:
-  metrics:
-    - request_rate
-    - response_time
-    - error_rate
-    - token_usage
-    - cache_hit_rate
-    - guardrail_triggers
-    - fallback_usage
-```
+- request rate, latency, error rate
+- token usage
+- cache hit rate
+- guardrail triggers
+- fallback usage
 
-#### Set Up Alerting
-```yaml
-# Good: Proactive alerting
-alerts:
-  - name: high_error_rate
-    condition: error_rate > 0.05
-    severity: warning
-  - name: high_latency
-    condition: p95_latency > 5000ms
-    severity: critical
-```
+#### Set Up Alerting (conceptual)
+- high error rate
+- high p95 latency
+- frequent fallback usage
+- cache hit-rate drops
 
 ### 2. Logging Strategy
 
-#### Structured Logging
-```yaml
-# Good: Structured logging
-logging:
-  level: INFO
-  format: json
-  fields:
-    - timestamp
-    - level
-    - message
-    - route_name
-    - model_name
-    - request_id
-```
+#### Structured Logging (conceptual)
+- include `route_name`, `model_id`, `request_id`, `group`, `api_key_id` (if applicable)
+- avoid logging sensitive inputs/outputs unless strictly needed and compliant
 
-#### Log Retention
-```yaml
-# Good: Appropriate log retention
-logging:
-  retention:
-    days: 30
-    max_size: 100MB
-    compression: true
-```
+---
 
 ## Deployment Best Practices
 
 ### 1. Environment Separation
 
-#### Use Different Configurations
+Use different configurations or overlays per environment (dev/staging/prod). With the new structure, keep model definitions top-level and reference them in routes:
+
 ```yaml
-# Good: Environment-specific configurations
 # config.dev.yaml
+chat_models:
+  - model_id: gpt-3.5-turbo
+    model: openai/gpt-3.5-turbo
+    credentials:
+      api_key: !secret DEV_OPENAI_API_KEY
+
 routes:
   dev-route:
     chat_models:
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
-        credentials:
-          api_key: "${DEV_OPENAI_API_KEY}"
+      - gpt-3.5-turbo
+```
 
+```yaml
 # config.prod.yaml
+chat_models:
+  - model_id: gpt-3.5-turbo
+    model: openai/gpt-3.5-turbo
+    credentials:
+      api_key: !secret PROD_OPENAI_API_KEY
+
 routes:
   prod-route:
     chat_models:
-      - model_id: gpt-3.5-turbo
-        model: openai/gpt-3.5-turbo
-        credentials:
-          api_key: "${PROD_OPENAI_API_KEY}"
+      - gpt-3.5-turbo
 ```
 
 ### 2. Blue-Green Deployment
 
-#### Zero-Downtime Deployments
 ```bash
-# Good: Blue-green deployment strategy
-#!/bin/bash
-# deploy.sh
+# Example: blue-green deployment strategy (conceptual)
 docker compose -f docker-compose.blue.yml up -d
-wait_for_health_check
+# wait for health check
 docker compose -f docker-compose.green.yml down
 ```
 
 ### 3. Health Checks
 
-#### Comprehensive Health Checks
 ```yaml
-# Good: Multiple health check endpoints
+# Good: Multiple health check endpoints (conceptual)
 health_checks:
   - endpoint: /health
     interval: 30s
@@ -369,104 +371,49 @@ health_checks:
     timeout: 5s
 ```
 
+---
+
 ## Maintenance Best Practices
 
 ### 1. Regular Updates
 
-#### Keep Dependencies Updated
-```bash
-# Good: Regular dependency updates
-#!/bin/bash
-# update-dependencies.sh
-docker pull radicalbit/ai-gateway:latest
-docker compose pull
-docker compose up -d
-```
-
-#### Test Updates in Staging
-```bash
-# Good: Staging environment testing
-#!/bin/bash
-# test-update.sh
-deploy_to_staging
-run_integration_tests
-if tests_pass; then
-  deploy_to_production
-fi
-```
+- Keep gateway and dependencies updated
+- Test updates in staging before production
+- Use version pinning and controlled rollouts
 
 ### 2. Backup Strategy
 
 #### Regular Configuration Backups
 ```bash
-# Good: Automated backups
-#!/bin/bash
-# backup-config.sh
 DATE=$(date +%Y%m%d_%H%M%S)
 cp config.yaml backups/config_$DATE.yaml
 cp secrets.yaml backups/secrets_$DATE.yaml
 ```
 
 #### Test Recovery Procedures
-```bash
-# Good: Regular recovery testing
-#!/bin/bash
-# test-recovery.sh
-restore_from_backup
-verify_configuration
-test_functionality
-```
+- restore from backup
+- verify configuration loads
+- run smoke tests
+
+---
 
 ## Troubleshooting Best Practices
 
 ### 1. Proactive Monitoring
-
-#### Set Up Dashboards
-```yaml
-# Good: Comprehensive dashboards
-dashboards:
-  - name: overview
-    panels:
-      - request_rate
-      - error_rate
-      - response_time
-  - name: detailed
-    panels:
-      - model_usage
-      - guardrail_triggers
-      - cache_performance
-```
+Set up dashboards for:
+- request rate, error rate, latency
+- model usage & fallback usage
+- cache hit rate
+- guardrail triggers
 
 ### 2. Incident Response
+Maintain runbooks for common incidents:
+- high latency
+- high error rate
+- provider outage
+- Redis outage (if used)
 
-#### Document Common Issues
-```markdown
-# Good: Documented troubleshooting procedures
-## Common Issues
-
-### High Latency
-1. Check model response times
-2. Verify network connectivity
-3. Review guardrail performance
-4. Check cache hit rates
-```
-
-#### Runbooks
-```bash
-# Good: Automated runbooks
-#!/bin/bash
-# incident-response.sh
-case $1 in
-  "high_latency")
-    check_model_performance
-    restart_fallback_models
-    ;;
-  "high_error_rate")
-    check_api_keys
-    verify_model_availability
-    ;;
-esac
-```
+---
 
 ## Next Steps
 
