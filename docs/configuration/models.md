@@ -4,30 +4,43 @@ This section provides comprehensive guidance on configuring AI models in the Rad
 
 ## Overview
 
-The Radicalbit AI Gateway supports multiple AI providers and models through a flexible configuration system. Models are defined within routes and can be configured with various parameters including credentials, retry policies, and cost information.
+The Radicalbit AI Gateway supports multiple AI providers and models through a flexible configuration system.
+
+With the **new configuration structure**:
+
+- Models are defined at **top-level** under:
+  - `chat_models` (for chat/completions)
+  - `embedding_models` (for embeddings)
+- Routes **do not contain full model objects** anymore.
+  - Routes reference models by **model ID** (string lists)
+
+---
 
 ## Model Structure
 
-### Basic Model Configuration
+### Basic Model Configuration (Chat)
 
 ```yaml
+chat_models:
+  - model_id: openai-4o
+    model: openai/gpt-4o
+    credentials:
+      api_key: !secret OPENAI_API_KEY
+    params:
+      temperature: 1
+      max_tokens: 20
+
 routes:
   production:
     chat_models:
-      - model_id: openai-4o
-        model: openai/gpt-4o
-        credentials:
-          api_key: !secret OPENAI_API_KEY
-        params:
-          temperature: 1
-          max_tokens: 20
+      - openai-4o
 ```
 
 ### Model Fields
 
 #### Required Fields
 
-- **`model_id`**: Unique identifier for the model within the route
+- **`model_id`**: Unique identifier for the model (used by routes and fallbacks)
 - **`model`**: Model identifier in format `provider/model_name` (e.g., `openai/gpt-4o`)
 
 #### Optional Fields
@@ -35,80 +48,16 @@ routes:
 - **`credentials`**: API credentials for accessing the model
 - **`params`**: Model parameters (temperature, max_tokens, etc.)
 - **`retry_attempts`**: Number of retry attempts (default: 3)
-- **`prompt`**: System prompt for the model
-- **`role`**: Role for the prompt (developer, user, system, assistant)
+- **`prompt`**: Optional prompt/context message for the model
+- **`role`**: Role for the prompt (`developer`, `user`, `system`, `assistant`)
 - **`input_cost_per_million_tokens`**: Cost per million input tokens
 - **`output_cost_per_million_tokens`**: Cost per million output tokens
+
+---
 
 ## Supported Providers
 
 ### OpenAI
-```yaml
-- model_id: gpt-4o
-  model: openai/gpt-4o
-  credentials:
-    api_key: !secret OPENAI_API_KEY
-  params:
-    temperature: 0.7
-    max_tokens: 1000
-```
-
-### Ollama (Local Models)
-```yaml
-- model_id: llama3
-  model: openai/llama3.2:3b
-  credentials:
-    base_url: 'http://host.docker.internal:11434/v1'
-  params:
-    temperature: 0.7
-    top_p: 0.9
-  prompt: 'Do what the user asks without thinking.'
-```
-
-### Google Gemini
-```yaml
-- model_id: gemini-pro
-  model: google-genai/gemini-1.5-pro
-  credentials:
-    api_key: !secret GOOGLE_API_KEY
-  params:
-    temperature: 0.7
-    max_output_tokens: 1024
-```
-
-**Important**: The `api_key` is **required** for Gemini models. Unlike some other providers, Gemini does not support fallback to environment variables.
-
-**Gemini Embedding Models:**
-```yaml
-- model_id: gemini-embedding
-  model: google-genai/models/gemini-embedding-001
-  credentials:
-    api_key: !secret GOOGLE_API_KEY
-  params:
-    task_type: RETRIEVAL_QUERY  # Optional: RETRIEVAL_DOCUMENT, SEMANTIC_SIMILARITY, CLASSIFICATION, CLUSTERING
-```
-
-**Key differences:**
-- **Provider identifier**: Use `google-genai` (consistent with other providers)
-- **API key requirement**: `api_key` is mandatory (no environment variable fallback)
-- **Model format for chat**: Use model names like `gemini-1.5-pro`, `gemini-1.5-flash`, `gemini-pro`
-- **Model format for embeddings**: Use `models/gemini-embedding-001` (with `models/` prefix)
-- **Multimodal support**: Gemini models support multimodal content (text, images, files)
-
-### Mock Models (Testing)
-```yaml
-- model_id: mock-chat
-  model: mock/gateway
-  params:
-    latency_ms: 150
-    response_text: "mocked response"
-```
-
-## Model Types
-
-### Chat Models
-Used for conversational AI and text generation:
-
 ```yaml
 chat_models:
   - model_id: gpt-4o
@@ -120,10 +69,62 @@ chat_models:
       max_tokens: 1000
 ```
 
-### Embedding Models
-Used for text embeddings and vector operations:
-
+### Ollama (Local Models / OpenAI-compatible)
 ```yaml
+chat_models:
+  - model_id: llama3
+    model: openai/llama3.2:3b
+    credentials:
+      base_url: "http://host.docker.internal:11434/v1"
+    params:
+      temperature: 0.7
+      top_p: 0.9
+    prompt: "Do what the user asks without thinking."
+    role: system
+```
+
+### Google Gemini
+```yaml
+chat_models:
+  - model_id: gemini-pro
+    model: google-genai/gemini-2.5-flash
+    credentials:
+      api_key: !secret GOOGLE_API_KEY
+    params:
+      temperature: 0.7
+      max_output_tokens: 1024
+    prompt: "You are a helpful assistant powered by Google Gemini."
+    role: system
+```
+
+**Important**: The `api_key` is **required** for Gemini models.
+
+**Gemini Embedding Models:**
+```yaml
+embedding_models:
+  - model_id: gemini-embedding
+    model: google-genai/models/gemini-embedding-001
+    credentials:
+      api_key: !secret GOOGLE_API_KEY
+    params:
+      task_type: RETRIEVAL_QUERY  # Optional: RETRIEVAL_DOCUMENT, SEMANTIC_SIMILARITY, CLASSIFICATION, CLUSTERING
+```
+
+**Key differences:**
+- **Provider identifier**: Use `google-genai`
+- **API key requirement**: `api_key` is mandatory
+- **Model format for embeddings**: Use `models/gemini-embedding-001` (with `models/` prefix)
+- **Multimodal support**: Gemini chat models support multimodal content (text, images, files)
+
+### Mock Models (Testing)
+```yaml
+chat_models:
+  - model_id: mock-chat
+    model: mock/gateway
+    params:
+      latency_ms: 150
+      response_text: "mocked response"
+
 embedding_models:
   - model_id: mock-embed
     model: mock/embeddings
@@ -131,6 +132,57 @@ embedding_models:
       latency_ms: 100
       vector_size: 8
 ```
+
+---
+
+## Model Types
+
+### Chat Models
+Used for conversational AI and text generation.
+
+Definition:
+```yaml
+chat_models:
+  - model_id: assistant
+    model: openai/gpt-4o
+    credentials:
+      api_key: !secret OPENAI_API_KEY
+    params:
+      temperature: 0.7
+      max_tokens: 1000
+```
+
+Usage in routes:
+```yaml
+routes:
+  customer-service:
+    chat_models:
+      - assistant
+```
+
+### Embedding Models
+Used for embeddings and vector operations.
+
+Definition:
+```yaml
+embedding_models:
+  - model_id: emb-small
+    model: openai/text-embedding-3-small
+    credentials:
+      api_key: !secret OPENAI_API_KEY
+```
+
+Usage in routes:
+```yaml
+routes:
+  semantic-cache-demo:
+    chat_models:
+      - assistant
+    embedding_models:
+      - emb-small
+```
+
+---
 
 ## Credentials Configuration
 
@@ -143,9 +195,11 @@ credentials:
 ### Custom Base URL
 ```yaml
 credentials:
-  base_url: 'http://localhost:11434/v1'
-  api_key: 'dummy-api-key'  # Required for OpenAI-compatible APIs
+  base_url: "http://localhost:11434/v1"
+  api_key: "dummy-api-key"  # May be required by some OpenAI-compatible servers/clients
 ```
+
+---
 
 ## Model Parameters
 
@@ -159,63 +213,77 @@ credentials:
 ### Provider-Specific Parameters
 Each provider may support additional parameters. Refer to the provider's documentation for complete details.
 
+---
+
 ## Cost Configuration
 
 ### Automatic Cost Assignment
-The gateway automatically assigns costs from `model_prices.json` if not explicitly configured:
+The gateway can assign costs from a price list (e.g. `model_prices.json`) if not explicitly configured:
 
 ```yaml
-- model_id: gpt-4o
-  model: openai/gpt-4o
-  # Costs will be automatically assigned from model_prices.json
+chat_models:
+  - model_id: gpt-4o
+    model: openai/gpt-4o
+    # Costs can be automatically assigned if supported
 ```
 
 ### Manual Cost Configuration
 ```yaml
-- model_id: custom-model
-  model: openai/gpt-4o
-  input_cost_per_million_tokens: 5.0
-  output_cost_per_million_tokens: 15.0
+chat_models:
+  - model_id: custom-model
+    model: openai/gpt-4o
+    input_cost_per_million_tokens: 5.0
+    output_cost_per_million_tokens: 15.0
 ```
+
+---
 
 ## Retry Configuration
 
 ### Default Retry Policy
 ```yaml
-- model_id: gpt-4o
-  model: openai/gpt-4o
-  retry_attempts: 3  # Default value
+chat_models:
+  - model_id: gpt-4o
+    model: openai/gpt-4o
+    retry_attempts: 3  # Default value
 ```
 
 ### Custom Retry Policy
 ```yaml
-- model_id: unreliable-model
-  model: openai/gpt-3.5-turbo
-  retry_attempts: 5
+chat_models:
+  - model_id: unreliable-model
+    model: openai/gpt-3.5-turbo
+    retry_attempts: 5
 ```
 
-## System Prompts
+---
 
-### Basic System Prompt
+## Prompts
+
+### Basic Prompt
 ```yaml
-- model_id: assistant
-  model: openai/gpt-4o
-  prompt: "You are a helpful assistant."
-  role: "system"
+chat_models:
+  - model_id: assistant
+    model: openai/gpt-4o
+    prompt: "You are a helpful assistant."
+    role: system
 ```
 
-### Role-Based Prompts
+### Role-Based Prompt
 ```yaml
-- model_id: developer-assistant
-  model: openai/gpt-4o
-  prompt: "You are a senior software developer."
-  role: "developer"
+chat_models:
+  - model_id: developer-assistant
+    model: openai/gpt-4o
+    prompt: "You are a senior software developer."
+    role: developer
 ```
+
+---
 
 ## Model Validation
 
 ### Unique Model IDs
-All models within a route must have unique `model_id` values:
+Model IDs should be unique **within each top-level section**.
 
 ```yaml
 chat_models:
@@ -225,16 +293,22 @@ chat_models:
     model: openai/gpt-3.5-turbo
 ```
 
+### Route References
+- Every ID listed in `routes.<route>.chat_models` must match a `chat_models[].model_id`
+- Every ID listed in `routes.<route>.embedding_models` must match an `embedding_models[].model_id`
+
 ### Credential Validation
-- OpenAI models require API keys when using standard endpoints
-- Custom base URLs can use dummy API keys for OpenAI-compatible services
+- Many hosted providers require API keys
+- OpenAI-compatible servers may require a dummy `api_key` depending on the client/adapter
+
+---
 
 ## Best Practices
 
 ### Model Organization
 - Use descriptive `model_id` names
-- Group related models in the same route
 - Separate production and testing models
+- Keep prompts short and consistent across environments
 
 ### Cost Management
 - Configure cost information for accurate billing
@@ -246,20 +320,30 @@ chat_models:
 - Use fallback models for critical routes
 - Monitor model availability
 
+---
+
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Model Not Found**: Verify `model_id` is unique and correctly referenced
-2. **Authentication Errors**: Check API keys and credentials configuration
-3. **Cost Assignment**: Ensure model names match those in `model_prices.json`
+1. **Model Not Found**: Verify the `model_id` exists in `chat_models` / `embedding_models` and is correctly referenced by routes/fallbacks
+2. **Authentication Errors**: Check API keys and `credentials` configuration
+3. **Cost Assignment**: Ensure model names match those in the price list file (if used)
 
 ### Debug Configuration
 ```yaml
-- model_id: debug-model
-  model: openai/gpt-3.5-turbo
-  retry_attempts: 1  # Reduce retries for faster debugging
+chat_models:
+  - model_id: debug-model
+    model: openai/gpt-3.5-turbo
+    retry_attempts: 1  # Reduce retries for faster debugging
+
+routes:
+  debug:
+    chat_models:
+      - debug-model
 ```
+
+---
 
 ## Next Steps
 
