@@ -25,7 +25,8 @@ chat_models:
       api_key: !secret OPENAI_API_KEY
     params:
       temperature: 0.7
-    prompt: "You are a helpful customer service assistant."
+    # Use either `prompt` OR `prompt_ref` (mutually exclusive)
+    prompt_ref: "customer_service.md"
     role: system
 
 # Definition of reusable embedding models (optional)
@@ -77,6 +78,12 @@ Within each route, you can declare two primary model lists (by ID):
 * *embedding_models*
 
 Both types are fully compliant with the **OpenAI standard**. Their detailed configuration is defined at top-level and explained later in the documentation.
+
+Chat models can optionally define a default prompt either inline (`prompt`) or by referencing a mounted Markdown file (`prompt_ref`).
+
+:::note
+If `prompt` or `prompt_ref` is set for a chat model, the `role` used for prompt injection must be `system` or `developer`.
+:::
 
 At the same level, you can configure the following features:
 * *balancing*
@@ -155,7 +162,7 @@ You configure a Route by defining it in the `config.yaml` file. The configuratio
 * **Fallback logic for error handling or model unavailability**
 * **Routing strategies across models or endpoints**
 
-Model parameters (credentials, retries, prompts, costs, provider settings, etc.) are defined once at top-level in the model definition, and then reused across routes by referencing the model ID.
+Model parameters (credentials, retries, prompts via `prompt` or `prompt_ref`, costs, provider settings, etc.) are defined once at top-level in the model definition, and then reused across routes by referencing the model ID.
 
 Once defined, the Route is visible and traceable from the UI, enabling direct monitoring and managing.
 
