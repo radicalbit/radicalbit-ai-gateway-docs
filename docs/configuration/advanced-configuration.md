@@ -247,10 +247,9 @@ With the new configuration layout, **models are defined once at top-level** and 
 ### File-based prompts (`prompt_ref`)
 
 When using `prompt_ref`, the referenced Markdown file must be available inside the gateway container.
-Mount a host folder containing prompt files and configure the directories via environment variables:
+Mount a host folder containing prompt files and configure the directories via environment variable:
 
 - `PROMPTS_DIR`: directory for chat model prompts (`prompt_ref`)
-- `JUDGE_PROMPTS_DIR` (optional): directory for custom judge prompts
 
 Example (docker compose snippet):
 ```yaml
