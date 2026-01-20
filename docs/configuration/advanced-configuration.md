@@ -184,6 +184,21 @@ With the new configuration layout, **models are defined once at top-level** and 
   </TabItem>
 </Tabs>
 
+### File-based prompts (`prompt_ref`)
+
+When using `prompt_ref`, the referenced Markdown file must be available inside the gateway container.
+Mount a host folder containing prompt files and configure the directories via environment variable:
+
+- `PROMPTS_DIR`: directory for chat model prompts (`prompt_ref`)
+
+Example (docker compose snippet):
+```yaml
+environment:
+  PROMPTS_DIR: "/radicalbit_ai_gateway/radicalbit_ai_gateway/prompts"
+volumes:
+  - ${PROMPTS_HOST_DIR:-./prompts}:/radicalbit_ai_gateway/radicalbit_ai_gateway/prompts:ro
+```
+
 ### Embeddings
 
 <Tabs>
@@ -243,21 +258,6 @@ With the new configuration layout, **models are defined once at top-level** and 
 </Tabs>
 
 ---
-
-### File-based prompts (`prompt_ref`)
-
-When using `prompt_ref`, the referenced Markdown file must be available inside the gateway container.
-Mount a host folder containing prompt files and configure the directories via environment variable:
-
-- `PROMPTS_DIR`: directory for chat model prompts (`prompt_ref`)
-
-Example (docker compose snippet):
-```yaml
-environment:
-  PROMPTS_DIR: "/radicalbit_ai_gateway/radicalbit_ai_gateway/prompts"
-volumes:
-  - ${PROMPTS_HOST_DIR:-./prompts}:/radicalbit_ai_gateway/radicalbit_ai_gateway/prompts:ro
-
 
 ## Guardrails
 
