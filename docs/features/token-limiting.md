@@ -104,7 +104,7 @@ routes:
 
 **Parameters:**
 - `scope`: (`route`, `user`, `group`) – optional, default `route`
-- `algorithm`: limiting algorithm (commonly `fixed_window`)
+- `algorithm`: limiting algorithm (e.g., `fixed_window`, `aligned_fixed_window`).
 - `window_size`: time window for the limit (e.g., `10 seconds`, `1 minute`, `1 hour`)
 - `max_token`: maximum number of tokens allowed within the window
 

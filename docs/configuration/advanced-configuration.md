@@ -360,7 +360,7 @@ cache:
 
 Controls the number of requests allowed over a time window for a given route.
 
-- **`algorithm`**: The limiting algorithm. Currently, only `fixed_window` is supported.
+- **`algorithm`**: The limiting algorithm (e.g., `fixed_window`, `aligned_fixed_window`).
 - **`window_size`**: The duration of the time window (e.g., `1 minute`, `120 seconds`).
 - **`max_requests`**: The maximum number of requests allowed in that window.
 
@@ -384,7 +384,7 @@ Controls the cumulative number of tokens processed for a route's inputs and outp
 
 It has two sections: `input` and `output`.
 
-* **`algorithm`**: The limiting algorithm (e.g., `fixed_window`).
+* **`algorithm`**: The limiting algorithm (e.g., `fixed_window`, `aligned_fixed_window`).
 * **`window_size`**: The duration of the time window.
 * **`max_token`**: The total number of tokens that can be processed in that window.
 
@@ -403,6 +403,28 @@ routes:
         window_size: 10 minutes
         max_token: 500
 ```
+
+### Aligned Fixed Window
+
+Aligned Fixed Window is a special window that will align to the nearest "round" time boundary.
+Given this particular behavior, not all the possible sizes are supported.
+In the following table there are the supported sizes with the aligned time boundaries
+
+| Window Size | Seconds | Aligns To |
+|-------------|---------|-----------|
+| 1 minute | 60 | :00 seconds |
+| 5 minutes | 300 | :00, :05, :10... |
+| 10 minutes | 600 | :00, :10, :20... |
+| 15 minutes | 900 | :00, :15, :30, :45 |
+| 30 minutes | 1800 | :00, :30 |
+| 1 hour | 3600 | :00 minutes |
+| 2 hours | 7200 | 00:00, 02:00, 04:00... |
+| 3 hours | 10800 | 00:00, 03:00, 06:00... |
+| 4 hours | 14400 | 00:00, 04:00, 08:00... |
+| 6 hours | 21600 | 00:00, 06:00, 12:00, 18:00 |
+| 8 hours | 28800 | 00:00, 08:00, 16:00 |
+| 12 hours | 43200 | 00:00, 12:00 |
+| 1 day | 86400 | 00:00 (midnight UTC) |
 
 ---
 
