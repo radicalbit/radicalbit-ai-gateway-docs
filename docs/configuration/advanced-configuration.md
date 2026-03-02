@@ -46,7 +46,8 @@ chat_models:
     params:
       temperature: 0.7
       max_tokens: 300
-    prompt: "You are a helpful assistant."
+    # Use either `prompt` OR `prompt_ref` (mutually exclusive)
+    prompt_ref: "helpful_assistant.md"
     role: system
 
   - model_id: claude-3-sonnet
@@ -117,7 +118,8 @@ With the new configuration layout, **models are defined once at top-level** and 
       params:
         temperature: 1
         max_tokens: 200
-      prompt: "You are a helpful assistant."
+      # Use either `prompt` OR `prompt_ref` (mutually exclusive)
+      prompt_ref: "helpful_assistant.md"
       role: system
 
   routes:
@@ -131,8 +133,9 @@ With the new configuration layout, **models are defined once at top-level** and 
   - **`credentials`**: API credentials for accessing the model
   - **`params`**: Model parameters (temperature, max_tokens, etc.)
   - **`retry_attempts`**: Number of retry attempts (default: 3)
-  - **`prompt`**: Optional message to set the context
-  - **`role`**: Role for the prompt (`developer`, `user`, `system`, `assistant`)
+  - **`prompt`**: Optional inline system/developer prompt (mutually exclusive with `prompt_ref`)
+  - **`prompt_ref`**: Optional reference to a Markdown file containing the prompt
+  - **`role`**: Role used when injecting `prompt`/`prompt_ref` (allowed: system or developer when prompt is set)
   - **`input_cost_per_million_tokens`**: Cost per million input tokens
   - **`output_cost_per_million_tokens`**: Cost per million output tokens
   ---
@@ -148,7 +151,7 @@ With the new configuration layout, **models are defined once at top-level** and 
       params:
         temperature: 0.7
         top_p: 0.9
-      prompt: "You are an assistant!"
+      prompt_ref: "assistant.md"
       role: system
 
   routes:
@@ -180,6 +183,21 @@ With the new configuration layout, **models are defined once at top-level** and 
   ---
   </TabItem>
 </Tabs>
+
+### File-based prompts (`prompt_ref`)
+
+When using `prompt_ref`, the referenced Markdown file must be available inside the gateway container.
+Mount a host folder containing prompt files and configure the directories via environment variable:
+
+- `PROMPTS_DIR`: directory for chat model prompts (`prompt_ref`)
+
+Example (docker compose snippet):
+```yaml
+environment:
+  PROMPTS_DIR: "/radicalbit_ai_gateway/radicalbit_ai_gateway/prompts"
+volumes:
+  - ${PROMPTS_HOST_DIR:-./prompts}:/radicalbit_ai_gateway/radicalbit_ai_gateway/prompts:ro
+```
 
 ### Embeddings
 
@@ -440,7 +458,8 @@ chat_models:
     params:
       temperature: 0.7
       top_p: 0.9
-    prompt: "You are a helpful assistant and you are nice to the customer that you are facing. Do not take initiatives"
+    # Use either `prompt` OR `prompt_ref` (mutually exclusive)
+    prompt_ref: "customer_service.md"
     role: system
 
   - model_id: llama3.2

@@ -48,8 +48,9 @@ routes:
 - **`credentials`**: API credentials for accessing the model
 - **`params`**: Model parameters (temperature, max_tokens, etc.)
 - **`retry_attempts`**: Number of retry attempts (default: 3)
-- **`prompt`**: Optional prompt/context message for the model
-- **`role`**: Role for the prompt (`developer`, `user`, `system`, `assistant`)
+- **`prompt`**: Optional inline system/developer prompt (mutually exclusive with `prompt_ref`)
+- **`prompt_ref`**: Optional reference to a Markdown file containing the prompt
+- **`role`**: Role used when injecting `prompt`/`prompt_ref` (allowed: `system` or `developer` when `prompt` is set)
 - **`input_cost_per_million_tokens`**: Cost per million input tokens
 - **`output_cost_per_million_tokens`**: Cost per million output tokens
 
@@ -79,7 +80,8 @@ chat_models:
     params:
       temperature: 0.7
       top_p: 0.9
-    prompt: "Do what the user asks without thinking."
+    # Use either `prompt` OR `prompt_ref` (mutually exclusive)
+    prompt_ref: "ollama_system.md"
     role: system
 ```
 
@@ -269,6 +271,17 @@ chat_models:
     role: system
 ```
 
+### File-based Prompt (`prompt_ref`)
+You can load the default prompt from a Markdown file mounted at runtime.
+
+```yaml
+chat_models:
+  - model_id: assistant
+    model: openai/gpt-4o
+    # Use either `prompt` OR `prompt_ref` (mutually exclusive)
+    prompt_ref: "assistant.md"
+    role: system
+
 ### Role-Based Prompt
 ```yaml
 chat_models:
@@ -309,6 +322,7 @@ chat_models:
 - Use descriptive `model_id` names
 - Separate production and testing models
 - Keep prompts short and consistent across environments
+- Prefer `prompt_ref` for environment-specific prompts (mount different prompt folders per environment without changing `config.yaml`).
 
 ### Cost Management
 - Configure cost information for accurate billing
@@ -328,7 +342,8 @@ chat_models:
 
 1. **Model Not Found**: Verify the `model_id` exists in `chat_models` / `embedding_models` and is correctly referenced by routes/fallbacks
 2. **Authentication Errors**: Check API keys and `credentials` configuration
-3. **Cost Assignment**: Ensure model names match those in the price list file (if used)
+3. **Prompt File Not Found**: If using `prompt_ref`, ensure the Markdown file exists in the mounted `PROMPTS_DIR` inside the container and the filename matches the configured value.
+4. **Cost Assignment**: Ensure model names match those in the price list file (if used)
 
 ### Debug Configuration
 ```yaml
