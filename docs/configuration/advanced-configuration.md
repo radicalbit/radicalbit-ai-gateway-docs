@@ -16,6 +16,7 @@ In this page we are going to explain how to configure the Gateway routes in all 
 - **[Caching](#caching)**
 - **[Rate Limiting](#rate-limiting)**
 - **[Token Limiting](#token-limiting)**
+- **[Routing](#routing)**
 
 The gateway's entire behavior is controlled by a single YAML configuration file. This file defines:
 
@@ -406,6 +407,77 @@ routes:
 
 ---
 
+## Routing
+
+Intelligent routing allows the gateway to dynamically select which model handles a request based on configurable rules. Routing configs are defined at top-level under `routing` and referenced by name from routes.
+
+- **`name`**: Unique identifier for the routing config.
+- **`type`** *(optional)*: The routing strategy. Defaults to `deterministic`.
+- **`default_model_id`**: Model ID to use when no rule condition matches.
+- **`rule`**: The rule type to apply. One of: `keyword`, `token_length`, `time`, `budget`.
+- **`output_mapping`**: List of entries mapping conditions to model IDs.
+
+**Example (keyword routing):**
+```yaml
+routing:
+  - name: keyword-routing
+    type: deterministic
+    default_model_id: gpt-4o-mini
+    rule: keyword
+    output_mapping:
+      - model_id: gpt-4o
+        conditions:
+          - "urgent"
+          - "complex"
+      - model_id: gpt-4o-mini
+        conditions:
+          - "simple"
+
+routes:
+  customer-service:
+    chat_models:
+      - gpt-4o
+      - gpt-4o-mini
+    routing: keyword-routing
+```
+
+If a user message contains "urgent" or "complex", the request is routed to `gpt-4o`. If it contains "simple", it goes to `gpt-4o-mini`. Otherwise, the `default_model_id` (`gpt-4o-mini`) is used.
+
+**Example (budget routing):**
+```yaml
+routing:
+  - name: budget-routing
+    type: deterministic
+    default_model_id: gpt-4o
+    rule: budget
+    output_mapping:
+      - model_id: gpt-4o-mini
+        conditions:
+          threshold: 0.8
+
+routes:
+  production:
+    chat_models:
+      - gpt-4o
+      - gpt-4o-mini
+    routing: budget-routing
+    budget_limiting:
+      input:
+        algorithm: fixed_window
+        window_size: 1 hour
+        max_budget: 50.0
+      output:
+        algorithm: fixed_window
+        window_size: 1 hour
+        max_budget: 100.0
+```
+
+The threshold is evaluated against the **combined input + output budget**. In this example, `max_budget` = $50 (input) + $100 (output) = $150 total. When more than 80% of that combined budget ($120+) has been consumed, requests are automatically routed to the cheaper `gpt-4o-mini` model.
+
+For full details on all rule types (keyword, token length, time, budget), see the **[Intelligent Routing](../features/advanced-routing.md)** page.
+
+---
+
 ## Complete Configuration Example
 
 This example showcases multiple routes and features using the **new top-level model definitions**:
@@ -464,6 +536,21 @@ embedding_models:
     credentials:
       api_key: "your-api-key"
 
+routing:
+  - name: keyword-routing
+    type: deterministic
+    default_model_id: qwen
+    rule: keyword
+    output_mapping:
+      - model_id: llama3.2
+        conditions:
+          - "finance"
+          - "budget"
+      - model_id: qwen
+        conditions:
+          - "support"
+          - "help"
+
 routes:
   customer-service:
     chat_models:
@@ -491,6 +578,8 @@ routes:
   business-development:
     chat_models:
       - qwen
+      - llama3.2
+    routing: keyword-routing
     rate_limiting:
       algorithm: fixed_window
       window_size: 20 seconds
