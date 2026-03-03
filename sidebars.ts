@@ -45,7 +45,7 @@ const sidebars: SidebarsConfig = {
         'features/rate-limiting',
         'features/budget-limiting',
         'features/semantic-caching',
-        'configuration/load-balancing',
+        'features/advanced-routing',
         'configuration/fallback',
       ],
     },
