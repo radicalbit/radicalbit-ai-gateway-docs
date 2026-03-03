@@ -48,22 +48,22 @@ Before using your application, remember to configure  the Gateway pointing it to
 
 The Radicalbit AI Gateway enables you to:
 
-### **Guardrails**
+### **Apply Guardrails**
 - **Text Control**: Contains, starts with, ends with, regex patterns
 - **PII Detection and Masking**: Automatic detection and anonymization of sensitive data
 - **LLM-as-a-Judge**: Custom logic evaluation using AI models
 
-### **Caching**
+### **Cache Responses**
 - **Semantic Cache**: Intelligent caching based on content similarity
 - **Exact Cache**: Precise response caching to avoid redundancy
 
-### **Traffic Management**
+### **Manage Traffic**
 - **Rate Limits**: Control requests per time interval
 - **Token Limits**: Cap tokens processed by models
 - **Model Fallbacks**: Automatic failover for error handling
 - **Intelligent Routing**: Traffic distribution across models
 
-### **Monitoring & Observability**
+### **Monitor and Observe**
 - **Authenticated UI**: Monitor and manage your applications
 - **Groups and Keys**: Create and manage API keys and groups
 - **Cost Control**: Track costs by groups and keys
