@@ -12,6 +12,13 @@ With the **new configuration structure**:
 - **Routes reference routing configs by name** (strings)
 - Models are defined at top-level (`chat_models`, `embedding_models`) and referenced by ID
 
+There are two routing categories:
+
+| Category | `type` value | Decision basis | Added latency |
+|---|---|---|---|
+| [Deterministic](#deterministic-routing) | `deterministic` | Rule evaluated locally | Negligible |
+| [Text Classification](#text-classification-routing) | `text_classification` | External ML classifier over HTTP | HTTP call latency |
+
 ---
 
 ## Deterministic Routing
@@ -281,6 +288,139 @@ routes:
 
 ---
 
+## Text Classification Routing
+
+Text classification routing delegates the routing decision to an **external ML model** (e.g., a classifier deployed via MLflow). The gateway sends the last user message to a configurable HTTP endpoint and maps the returned class label to a model.
+
+**How it works**: For each incoming request, the gateway extracts the last human message and POSTs it to the configured `url`. The classifier responds with a predicted class. The gateway looks up the class in `output_mapping.conditions` and routes to the matching model. If the class is not found, or if the HTTP call fails (timeout or error response), the gateway falls back silently to `default_model_id`.
+
+### Configuration Structure
+
+```yaml
+routing:
+  - name: semantic-routing
+    type: text_classification
+    url: http://text-classifier:8888    # HTTP endpoint of the classifier
+    timeout: 5.0                        # Request timeout in seconds (default: 5.0)
+    default_model_id: fallback-model
+    output_mapping:
+      - model_id: model-a
+        conditions:
+          - CLASS_A
+      - model_id: model-b
+        conditions:
+          - CLASS_B
+          - CLASS_C
+
+routes:
+  my-route:
+    chat_models:
+      - model-a
+      - model-b
+      - fallback-model
+    routing: semantic-routing
+```
+
+### HTTP Contract
+
+The gateway sends a `POST` request to the configured `url` using MLflow's `dataframe_records` format:
+
+**Request body:**
+
+```json
+{
+  "dataframe_records": [{ "inputs": "<last user message>" }]
+}
+```
+
+**Expected response body:**
+
+```json
+{
+  "predictions": [
+    {
+      "class": "CLASS_A",
+      "score": 0.95
+    }
+  ]
+}
+```
+
+The gateway extracts the `class` field from the first element of `predictions` and looks it up in the `output_mapping` conditions.
+
+:::warning
+If the classifier times out, returns an HTTP error, or returns a class not present in any `output_mapping` entry, the gateway **falls back silently** to `default_model_id`. No error is returned to the client.
+:::
+
+### Routing Config Fields
+
+#### Required Fields
+
+- **`name`**: Unique identifier for the routing config
+- **`type`**: Must be `text_classification`
+- **`url`**: Full HTTP URL of the classifier endpoint
+- **`default_model_id`**: Model ID to use when no class matches or on error
+- **`output_mapping`**: List of entries mapping class labels to model IDs
+
+#### Optional Fields
+
+- **`timeout`**: HTTP request timeout in seconds (default: `5.0`)
+
+### Full Example
+
+```yaml
+chat_models:
+  - model_id: sentiment-positive-model
+    model: openai/gpt-4o
+    credentials:
+      api_key: !secret OPENAI_API_KEY
+
+  - model_id: sentiment-negative-model
+    model: openai/gpt-4o-mini
+    credentials:
+      api_key: !secret OPENAI_API_KEY
+
+  - model_id: fallback-model
+    model: openai/gpt-4o-mini
+    credentials:
+      api_key: !secret OPENAI_API_KEY
+
+routing:
+  - name: sentiment-routing
+    type: text_classification
+    url: http://sentiment-classifier:8888
+    timeout: 3.0
+    default_model_id: fallback-model
+    output_mapping:
+      - model_id: sentiment-positive-model
+        conditions:
+          - SAT
+      - model_id: sentiment-negative-model
+        conditions:
+          - WRONG_ANSWER
+          - NEED_CLARIFICATION
+
+routes:
+  feedback:
+    chat_models:
+      - sentiment-positive-model
+      - sentiment-negative-model
+      - fallback-model
+    routing: sentiment-routing
+```
+
+:::tip
+Text classification routing is ideal for intent detection or sentiment-based routing using a custom ML model trained on your domain data (e.g., classifying user feedback as `SAT`, `NEED_CLARIFICATION`, or `WRONG_ANSWER`).
+:::
+
+**Behavior**:
+- The gateway evaluates the **last user message** only
+- The `conditions` list for each `output_mapping` entry contains the class labels that should map to that model — multiple labels can share a model
+- Entry order does not matter for class lookup (unlike keyword/time rules)
+- On any failure (timeout, HTTP error, unknown class), `default_model_id` is used
+
+---
+
 ## Configuration Reference
 
 ### Routing Config
@@ -288,9 +428,11 @@ routes:
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `name` | `string` | Yes | Unique name for the routing config |
-| `type` | `string` | No | Routing strategy (default: `deterministic`) |
-| `default_model_id` | `string` | Yes | Fallback model ID when no rule matches |
-| `rule` | `string` | Yes | Rule type: `keyword`, `token_length`, `time`, or `budget` |
+| `type` | `string` | Yes | Routing strategy: `deterministic` or `text_classification` |
+| `default_model_id` | `string` | Yes | Fallback model ID when no rule matches or on error |
+| `rule` | `string` | Deterministic only | Rule type: `keyword`, `token_length`, `time`, or `budget` |
+| `url` | `string` | Text classification only | HTTP endpoint of the external classifier |
+| `timeout` | `float` | No | Classifier request timeout in seconds (default: `5.0`) |
 | `output_mapping` | `list` | Yes | List of condition-to-model mappings |
 
 ### Output Mapping Entry
@@ -300,14 +442,15 @@ routes:
 | `model_id` | `string` | Yes | Model ID to select when conditions match |
 | `conditions` | varies | Yes | Rule-specific conditions (see below) |
 
-### Conditions by Rule Type
+### Conditions by Rule / Type
 
-| Rule | Conditions Type | Format |
-|------|----------------|--------|
-| `keyword` | `list[str]` | List of keyword strings |
-| `token_length` | `TokenLengthConditions` | Object with `threshold: int` |
-| `time` | `list[str]` | List of cron expressions |
-| `budget` | `BudgetConditions` | Object with `threshold: float` (0.0–1.0) |
+| Routing type / Rule | Conditions Type | Format |
+|---------------------|----------------|--------|
+| `deterministic` / `keyword` | `list[str]` | List of keyword strings |
+| `deterministic` / `token_length` | `TokenLengthConditions` | Object with `threshold: int` |
+| `deterministic` / `time` | `list[str]` | List of cron expressions |
+| `deterministic` / `budget` | `BudgetConditions` | Object with `threshold: float` (0.0–1.0) |
+| `text_classification` | `list[str]` | List of class label strings returned by the classifier |
 
 ---
 
@@ -318,6 +461,7 @@ routes:
 - Use **token length** routing to send complex, long prompts to more capable models
 - Use **time** routing to optimize costs during off-peak hours
 - Use **budget** routing to gracefully degrade to cheaper models as spending increases
+- Use **text classification** routing when intent detection requires an ML model — e.g., sentiment analysis, topic classification, or domain-specific labelling
 
 ### Model Configuration
 - Ensure all models referenced in `output_mapping` and `default_model_id` are defined in `chat_models`
@@ -339,6 +483,7 @@ routes:
 2. **Budget Rule Not Working**: Verify that `budget_limiting` is configured on the route. Without it, the budget rule always falls back to `default_model_id`
 3. **Time Rule Not Matching**: Cron expressions are evaluated in UTC. Double-check your expressions account for the correct time zone offset
 4. **Unexpected Model Selection**: For keyword and time rules, the first match wins. Review the order of your `output_mapping` entries
+5. **Text Classification Always Using Fallback**: Check that the classifier is reachable from the gateway (correct `url`, network connectivity). Verify the response contains a `predictions[0].class` field and that its value matches a label defined in `output_mapping.conditions`. Increase `timeout` if the classifier is slow to respond
 
 ---
 
