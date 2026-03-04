@@ -323,16 +323,13 @@ routes:
 
 ### HTTP Contract
 
-The gateway sends a `POST` request to the configured `url` using MLflow's `dataframe_split` format:
+The gateway sends a `POST` request to the configured `url` using MLflow's `dataframe_records` format:
 
 **Request body:**
 
 ```json
 {
-  "dataframe_split": {
-    "columns": ["inputs"],
-    "data": [["<last user message>"]]
-  }
+  "dataframe_records": [{ "inputs": "<last user message>" }]
 }
 ```
 
