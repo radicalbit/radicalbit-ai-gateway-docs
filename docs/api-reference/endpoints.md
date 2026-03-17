@@ -1,6 +1,6 @@
 # API Reference
 
-The Radicalbit AI Gateway implements the OpenAI Chat Completions API specification, making it compatible with existing OpenAI libraries and tools.
+The Radicalbit AI Gateway implements the OpenAI API specification — including Chat Completions, Embeddings, and the Responses API — making it compatible with existing OpenAI libraries and tools.
 
 ## Base URL
 
@@ -125,6 +125,88 @@ curl -H "Authorization: Bearer your-api-key" \
   }
 }
 ```
+
+### Responses API
+
+**Endpoint:** `POST /v1/responses`
+
+**Description:** Creates a response using the [OpenAI Responses API](https://platform.openai.com/docs/api-reference/responses) format (stateless Phase 1). The gateway translates the request to Chat Completions internally, so all gateway features (guardrails, caching, rate limiting) apply as usual.
+
+:::tip
+The `model` field works exactly like in Chat Completions — it maps to a **route name** from your `config.yaml`, not directly to an upstream model name.
+:::
+
+:::warning
+The gateway operates in **stateless mode** only. Setting `previous_response_id` will return an error. Multi-turn conversations must be managed client-side.
+:::
+
+**Request Body:**
+```json
+{
+  "model": "route-name",
+  "input": "What is the capital of France?",
+  "instructions": "You are a helpful assistant.",
+  "stream": false,
+  "temperature": 0.7,
+  "max_output_tokens": 200
+}
+```
+
+The `input` field also accepts a list of message objects:
+```json
+{
+  "model": "route-name",
+  "input": [
+    {"role": "user", "content": "What is the capital of France?"}
+  ]
+}
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `model` | string | Yes | Gateway route name |
+| `input` | string or array | Yes | User prompt or list of message objects |
+| `instructions` | string | No | System-level instructions (equivalent to a system message) |
+| `stream` | boolean | No | Whether to stream the response |
+| `temperature` | number | No | Sampling temperature |
+| `top_p` | number | No | Nucleus sampling parameter |
+| `max_output_tokens` | integer | No | Maximum output tokens (mapped to `max_completion_tokens`) |
+| `tools` | array | No | Function tools to make available |
+| `tool_choice` | string or object | No | Tool selection strategy |
+| `parallel_tool_calls` | boolean | No | Allow parallel tool calls |
+| `user` | string | No | End-user identifier forwarded to the upstream provider |
+| `previous_response_id` | string | No | **Not supported** — raises an error |
+
+**Response:**
+```json
+{
+  "id": "resp_123",
+  "object": "response",
+  "created_at": 1677652288,
+  "model": "route-name",
+  "output": [
+    {
+      "type": "message",
+      "role": "assistant",
+      "content": [
+        {
+          "type": "output_text",
+          "text": "The capital of France is Paris."
+        }
+      ]
+    }
+  ],
+  "usage": {
+    "input_tokens": 10,
+    "output_tokens": 8,
+    "total_tokens": 18
+  }
+}
+```
+
+---
 
 ## Error Responses
 
