@@ -4,85 +4,79 @@ slug: /
 
 # Radicalbit AI Gateway
 
-The **Radicalbit AI Gateway** connects to the LLMs used in your Generative AI application, providing the ability to apply guardrails, routing, and management of inbound and outbound traffic.
+The **Radicalbit AI Gateway** is a centralized access point to the generative AI models used across your organization.
 
-Thanks to the Radicalbit AI Gateway, you will be able to:
-* **Configure Inbound and Outbound Guardrails** based on:
-  * Text control (e.g.,‘contains’, ‘starts with’, ‘ends with’, ‘regex’).
-  * Detection and/or masking of PII.
-  * LLM-as-a-Judge to manage custom logic.
-* **Configure Semantic or Exact Cache to prevent redundant responses.**
-* **Configure rate limits and token limits.**
-* **Manage model fallbacks and traffic routing.**
-* **Monitor applications via an authenticated UI** that allows you to: to:
-  * Create groups and keys.
-  * Control costs by group and key.
-  * Investigate detailed metrics.
-  * Benefit from total observability through the Gateway tracing.
+It sits between your AI applications and the underlying models — analyzing traffic, filtering information based on configurable conditions, and recording metrics and events to give you full visibility into every operation. The result is a single, controlled layer that makes your AI applications observable, governed, and cost-efficient.
 
-**The Radicalbit AI Gateway is application-agnostic and supports any model that adheres to the OpenAI standard.** This makes the tool usable in the vast majority of applications.
+**The Gateway is application-agnostic and supports any model that adheres to the OpenAI standard**, making it compatible with the vast majority of AI applications and frameworks.
 
+---
 
+## Three Pillars
 
+The Radicalbit AI Gateway is built on three core pillars that define its long-term vision:
 
-# How to use it
+### 1. Governance & Security
+The Gateway lets you govern and secure your AI applications through authenticated access, configurable guardrails, and mechanisms to limit calls to the underlying models:
 
-**The Radicalbit AI Gateway is designed  to be agnostic to any GenAI framework and application.** For this reason, the application development and the Gateway are two independent processes.
+- **Inbound and Outbound Guardrails**: text control (contains, starts with, ends with, regex), PII detection and masking, and LLM-as-a-Judge for custom logic evaluation.
+- **Rate and Token Limits**: control the volume and cost of requests at the route level.
+- **Model Fallbacks and Routing**: automatic failover and intelligent traffic distribution across models.
 
-The first step is to develop your application, regardless of the Gateway. It can be a chat assistant, a RAG application or anything else. Focus on the main logic of your application without struggling with guardrails, caching or metrics to expose. These complexities can be delegated to the Gateway.
+### 2. Cost Control
+The Gateway provides a dedicated UI with a detailed cost dashboard, as well as a set of features designed to actively reduce application costs:
 
-Once the application has been built, we can move on to the **Gateway [configuration](docs/configuration/advanced-configuration.md)**. At this stage, we need to write the `config.yaml` file by choosing the route name, the model to use as well as any logic required to control, limit and monitor your application.
+- **Cost Dashboard**: monitor spending by group and API key.
+- **Token and Rate Limiting**: cap the resources consumed by each application or team.
+- **Semantic and Exact Caching**: avoid redundant model calls by reusing previous responses.
 
-The hard part is over. To integrate your application with the Gateway, we have to specify the following information in the LLM Client:
-* the Route name instead of the model name (the same as in the config.yaml).
-* the Gateway base URL.
-* the Gateway API Key (generated in the UI).
+### 3. Observability
+The Gateway gives you all the tools needed to make your AI applications — and the Gateway itself — fully inspectable:
 
-This ensures that all the traffic is sent to and processed by the Gateway.
-Before using your application, remember to configure  the Gateway pointing it to the `config.yaml` file.
+- **Detailed Metrics**: investigate performance and usage across routes and models.
+- **Gateway Tracing**: end-to-end traces of every request processed by the Gateway.
+- **Event Notifications**: receive alerts based on configured conditions.
 
+---
 
+## Who Is It For
 
+The Radicalbit AI Gateway serves different roles within an organization:
 
-## Key Capabilities
+| Role | Responsibilities |
+|------|-----------------|
+| **DevOps** | Configure the Gateway, manage infrastructure, set up observability |
+| **AI Engineers** | Build AI applications and integrate them with the Gateway |
+| **System Administrators** | Create users and API keys, manage groups, maintain an administrative view of AI usage |
+| **Project Managers** | Monitor application costs, detect unwanted events, and request technical investigations |
 
-The Radicalbit AI Gateway enables you to:
+---
 
-### **Apply Guardrails**
-- **Text Control**: Contains, starts with, ends with, regex patterns
-- **PII Detection and Masking**: Automatic detection and anonymization of sensitive data
-- **LLM-as-a-Judge**: Custom logic evaluation using AI models
+## How It Works
 
-### **Cache Responses**
-- **Semantic Cache**: Intelligent caching based on content similarity
-- **Exact Cache**: Precise response caching to avoid redundancy
+The Gateway is designed to be decoupled from your application development. The two are independent processes:
 
-### **Manage Traffic**
-- **Rate Limits**: Control requests per time interval
-- **Token Limits**: Cap tokens processed by models
-- **Model Fallbacks**: Automatic failover for error handling
-- **Intelligent Routing**: Traffic distribution across models
+1. **Build your application** — a chat assistant, a RAG pipeline, or any GenAI app. Focus on your core logic without worrying about guardrails, caching, or metrics.
+2. **Configure the Gateway** — write a `config.yaml` file that defines routes, models, and any control or monitoring logic. See the [configuration guide](./configuration/advanced-configuration.md).
+3. **Integrate** — point your LLM client to the Gateway by setting:
+   - the **route name** (in place of the model name, matching your `config.yaml`)
+   - the **Gateway base URL**
+   - the **Gateway API Key** (generated from the UI)
 
-### **Monitor and Observe**
-- **Authenticated UI**: Monitor and manage your applications
-- **Groups and Keys**: Create and manage API keys and groups
-- **Cost Control**: Track costs by groups and keys
-- **Event Notifications**: Receive alerts based on configured logic
-- **Detailed Metrics**: Investigate performance and usage
+All traffic flows through the Gateway from that point on.
 
+---
 
 ## Get Started
 
-### **For Developers**
-- **[Installation](./getting-started/installation.md)** - Set up your gateway
-- **[Basic Configuration](./configuration/basic-setup.md)** - Essential configuration
-- **[Advanced Configuration](./configuration/advanced-configuration.md)** - Practical configurations
+### For Developers
+- **[Installation](./getting-started/installation.md)** — Set up your Gateway
+- **[Basic Configuration](./configuration/basic-setup.md)** — Essential configuration
+- **[Advanced Configuration](./configuration/advanced-configuration.md)** — Practical configurations
 
-### **For Operations**
-- **[Monitoring](./operations//monitoring.md)** - Observability and exposed metrics
-- **[Telemetry](./operations//telemetry.md)** - Gateway Traces
-- **[Troubleshooting](./troubleshooting/common-issues.md)** - Common issues and solutions
+### For Operations
+- **[Monitoring](./operations/monitoring.md)** — Observability and exposed metrics
+- **[Telemetry](./operations/telemetry.md)** — Gateway traces
+- **[Troubleshooting](./troubleshooting/common-issues.md)** — Common issues and solutions
 
-
-
-**Ready to get started?** Begin with the [installation guide](./getting-started/installation.md)!
+**Ready to get started?** Begin with the [installation guide](./getting-started/installation.md).
