@@ -262,11 +262,157 @@ volumes:
 
 ## Guardrails
 
+Guardrails are defined at the **top level** of `config.yaml` and then **referenced by name** inside a route. This allows the same guardrail to be reused across multiple routes.
+
+```yaml
+guardrails:
+  - name: my_guardrail       # unique identifier
+    type: ...                # guardrail type
+    where: input             # input | output | io
+    behavior: block          # block | soft_block | warn (not needed for redact types)
+    response_message: "..."  # optional message returned to the user when triggered
+    parameters: ...          # type-specific settings
+
+routes:
+  your-route:
+    chat_models:
+      - your-model
+    guardrails:
+      - my_guardrail         # reference by name
+```
+
+- **`name`**: Unique identifier, used to reference the guardrail from a route.
+- **`type`**: The guardrail type (see subsections below).
+- **`where`**: Where to apply it — `input` (user message), `output` (model response), or `io` (both).
+- **`behavior`**: Action when triggered — `block` (reject), `soft_block` (reject with friendly message), `warn` (log and continue). Not required for redact types.
+- **`response_message`**: Optional message returned to the user when the guardrail fires.
+- **`parameters`**: Type-specific configuration.
+
 ### Text Control
 
-### PII detection and masking
+Fast, rule-based filters using pattern matching. These run with minimal latency and should be your first line of defence.
+
+| Type | Description |
+|------|-------------|
+| `starts_with` | Triggers if the text starts with any of the specified strings |
+| `ends_with` | Triggers if the text ends with any of the specified strings |
+| `contains` | Triggers if the text contains any of the specified substrings |
+| `regex` | Triggers if the text matches any of the specified regular expressions |
+
+All four types use the same `parameters` key: **`values`** — a list of strings or patterns to match against.
+
+**Example:**
+```yaml
+guardrails:
+  - name: profanity_filter
+    type: contains
+    where: input
+    behavior: block
+    parameters:
+      values: ["inappropriate", "offensive", "spam"]
+    response_message: "Content blocked due to inappropriate language"
+
+  - name: email_detector
+    type: regex
+    where: io
+    behavior: block
+    parameters:
+      values: ['\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b']
+    response_message: "Email addresses are not allowed"
+
+routes:
+  your-route:
+    chat_models:
+      - your-model
+    guardrails:
+      - profanity_filter
+      - email_detector
+```
+
+### PII Detection and Masking
+
+PII guardrails are powered by [Microsoft Presidio](https://microsoft.github.io/presidio/) and support two types:
+
+- **`presidio_analyzer`** — a *Check* guardrail that detects PII and blocks or warns depending on `behavior`.
+- **`presidio_anonymizer`** — a *Redact* guardrail that masks detected PII with placeholders (e.g., `<EMAIL_ADDRESS>`). Always redacts; no `behavior` required.
+
+Both types accept the same `parameters`:
+
+- **`language`**: Language of the text (e.g., `en`, `it`).
+- **`entities`**: List of PII entity types to detect (e.g., `EMAIL_ADDRESS`, `PHONE_NUMBER`, `IBAN_CODE`, `IT_IDENTITY_CARD`).
+
+**Example:**
+```yaml
+guardrails:
+  - name: pii_block
+    type: presidio_analyzer
+    where: input
+    behavior: block
+    parameters:
+      language: en
+      entities: ["EMAIL_ADDRESS", "PHONE_NUMBER", "CREDIT_CARD"]
+    response_message: "Personal information detected and blocked"
+
+  - name: pii_mask
+    type: presidio_anonymizer
+    where: io
+    parameters:
+      language: it
+      entities: ["EMAIL_ADDRESS", "IBAN_CODE", "IT_IDENTITY_CARD"]
+
+routes:
+  your-route:
+    chat_models:
+      - your-model
+    guardrails:
+      - pii_block
+      - pii_mask
+```
 
 ### LLM-as-a-Judge
+
+The `judge` type uses a language model to semantically evaluate content against a policy defined in a prompt template. It is slower than rule-based filters but can handle complex, context-dependent decisions.
+
+- **`prompt_ref`**: Filename of the prompt template to use (built-in or custom).
+- **`model_id`**: The model used as the judge.
+- **`temperature`**: Sampling temperature for the judge model.
+- **`max_tokens`**: Maximum tokens for the judge's response.
+- **`fallback_model_id`** *(optional)*: A backup model to use if the primary judge fails.
+
+**Built-in prompt templates:**
+
+| Prompt | Purpose |
+|--------|---------|
+| `toxicity_check.md` | Detects offensive, abusive, or harmful content |
+| `business_context_check.md` | Validates if the request aligns with your business domain |
+| `prompt_injection_check.md` | Identifies prompt injection or jailbreak attempts |
+
+Custom prompts can be added by mounting a directory and setting `JUDGE_PROMPTS_DIR`. See the [Guardrails](../features/guardrails.md#custom-prompt-templates) page for details.
+
+**Example:**
+```yaml
+guardrails:
+  - name: toxicity_judge
+    type: judge
+    where: input
+    behavior: block
+    response_message: "🚨 Toxic content detected and blocked"
+    parameters:
+      prompt_ref: "toxicity_check.md"
+      model_id: "gpt-4o-mini"
+      temperature: 0.0
+      max_tokens: 100
+      fallback_model_id: "gpt-3.5-turbo"
+
+routes:
+  your-route:
+    chat_models:
+      - your-model
+    guardrails:
+      - toxicity_judge
+```
+
+For the full guardrails reference including all parameters and behaviors, see the **[Guardrails](../features/guardrails.md)** page.
 
 ---
 

@@ -25,6 +25,7 @@ const sidebars: SidebarsConfig = {
       label: 'Getting Started',
       items: [
         'getting-started/installation',
+        'getting-started/examples',
       ],
     },
     {
@@ -40,7 +41,6 @@ const sidebars: SidebarsConfig = {
       label: 'Features',
       items: [
         'features/guardrails',
-        'features/guardrails-reference',
         'features/caching',
         'features/rate-limiting',
         'features/budget-limiting',
