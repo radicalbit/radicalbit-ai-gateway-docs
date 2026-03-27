@@ -4,9 +4,11 @@ This page covers budget limiting configuration and features in the Radicalbit AI
 
 ## Overview
 
-Budget limiting in the Radicalbit AI Gateway controls costs by setting limits on **input and output budget** consumed across all models in a route, helping to manage AI usage expenses.
+Budget limiting in the Radicalbit AI Gateway controls costs by setting a limit on the **combined budget** (input + output) consumed across all models in a route, helping to manage AI usage expenses.
 
-With the **new configuration structure**:
+A single time window tracks total spending — when the combined cost of input and output tokens crosses the configured threshold within the window, further requests are rejected until the window resets.
+
+With the **configuration structure**:
 
 - Models are defined at top-level (`chat_models`, `embedding_models`)
 - Routes reference models by **model ID** (strings)
@@ -16,7 +18,7 @@ With the **new configuration structure**:
 ## Budget Limiting Configuration
 
 ### Basic Budget Limiting
-Set cost limits on input and output tokens:
+Set a combined cost limit for input and output tokens:
 
 ```yaml
 chat_models:
@@ -30,14 +32,9 @@ routes:
     chat_models:
       - gpt-4o
     budget_limiting:
-      input:
-        algorithm: fixed_window
-        window_size: 1 hour
-        max_budget: 50.0   # $50 per hour maximum cost (input)
-      output:
-        algorithm: fixed_window
-        window_size: 1 hour
-        max_budget: 100.0  # $100 per hour maximum cost (output)
+      algorithm: fixed_window
+      window_size: 1 hour
+      max_budget: 50.0   # $50 per hour maximum combined cost
 ```
 
 ### Advanced Budget Configuration
@@ -54,14 +51,9 @@ routes:
       - gpt-4o
       - gpt-3.5-turbo
     budget_limiting:
-      input:
-        algorithm: fixed_window
-        window_size: 1 minute
-        max_budget: 100
-      output:
-        algorithm: fixed_window
-        window_size: 1 minute
-        max_budget: 100
+      algorithm: fixed_window
+      window_size: 1 minute
+      max_budget: 100
 ```
 
 ---
@@ -69,18 +61,13 @@ routes:
 ## Budget Limiting Types
 
 ### Cost-Based Budget Limiting
-Control costs by setting maximum budget (in dollars) per time window:
+Control costs by setting a maximum budget (in dollars) per time window:
 
 ```yaml
 budget_limiting:
-  input:
-    algorithm: fixed_window
-    window_size: 1 hour
-    max_budget: 50.0   # $50 per hour for input tokens
-  output:
-    algorithm: fixed_window
-    window_size: 1 hour
-    max_budget: 100.0  # $100 per hour for output tokens
+  algorithm: fixed_window
+  window_size: 1 hour
+  max_budget: 50.0   # $50 per hour for combined input + output tokens
 ```
 
 **Note:** Budget limiting uses cost calculations based on model pricing. You can set either `max_token` (token-based limits) or `max_budget` (cost-based limits), but not both in the same configuration.
@@ -97,10 +84,8 @@ budget_limiting:
 ### Response Headers (if exposed by the gateway)
 ```
 HTTP/1.1 429 Too Many Requests
-X-Budget-Limit-Input: 100
-X-Budget-Remaining-Input: 0
-X-Budget-Limit-Output: 100
-X-Budget-Remaining-Output: 25
+X-Budget-Limit: 100
+X-Budget-Remaining: 0
 X-Budget-Reset: 1640995200
 ```
 
