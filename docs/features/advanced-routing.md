@@ -278,7 +278,7 @@ routes:
 
 **Behavior**:
 - Entries are sorted by `threshold` **descending** (highest first) — the highest threshold that the usage ratio meets or exceeds wins
-- The usage ratio is computed over the **combined input + output budget**. In the example above, `max_budget` = $50 (input) + $100 (output) = $150 total. A `threshold` of `0.8` triggers when $120 or more has been consumed across both
+- The usage ratio is computed over the **combined input + output budget**, in the example above $150 total. A `threshold` of `0.8` triggers when $120 or more has been consumed across both
 - If no threshold is met, or if no budget limiter is configured, `default_model_id` is used
 
 ---
