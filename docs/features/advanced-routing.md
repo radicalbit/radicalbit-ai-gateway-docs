@@ -4,7 +4,7 @@ This page covers intelligent routing configuration for the Radicalbit AI Gateway
 
 ## Overview
 
-Intelligent routing in the Radicalbit AI Gateway allows you to automatically select which model handles a request based on rule-based logic. Instead of always routing to a fixed model, routing evaluates incoming requests against configurable rules — such as keywords in the user message, input token count, time of day, or budget consumption — and directs each request to the most appropriate model.
+Intelligent routing in the Radicalbit AI Gateway allows you to automatically select which model handles a request based on rule-based logic. Instead of always routing to a fixed model, routing evaluates incoming requests against configurable rules — such as keywords in the user message, token count (per-message or full conversation), time of day, or budget consumption — and directs each request to the most appropriate model.
 
 With the **new configuration structure**:
 
@@ -59,7 +59,7 @@ routes:
 
 - **`name`**: Unique identifier for the routing config (used by routes to reference it)
 - **`default_model_id`**: Model ID to use when no rule condition matches
-- **`rule`**: The rule type to apply. One of: `keyword`, `token_length`, `time`, `budget`
+- **`rule`**: The rule type to apply. One of: `keyword`, `token_length`, `context_length`, `time`, `budget`
 - **`output_mapping`**: List of entries mapping conditions to model IDs
 
 #### Optional Fields
@@ -79,7 +79,7 @@ Each entry in `output_mapping` defines a model and the conditions under which it
 
 The **keyword** rule matches keywords against user messages and selects a model based on the first match.
 
-**How it works**: The gateway concatenates the content of all user messages (lowercased), then checks each `output_mapping` entry in order. If any keyword from an entry's `conditions` is found as a substring in the combined text, that entry's `model_id` is selected. First match wins.
+**How it works**: The gateway extracts the **last user message** (lowercased), then checks each `output_mapping` entry in order. If any keyword from an entry's `conditions` is found as a substring in that message, that entry's `model_id` is selected. First match wins.
 
 **Conditions type**: `list[str]` — a list of keyword strings
 
@@ -122,18 +122,32 @@ Keyword matching is **case-insensitive** and uses **substring matching**. A keyw
 :::
 
 **Behavior**:
+- Only the **last user message** is evaluated — keywords in earlier messages do not affect routing
 - Entries are evaluated **in order** — first keyword match across all entries wins
 - If no keyword matches any entry, `default_model_id` is used
+- Supports both plain string and **multipart content** message formats
 
 ---
 
 ## Token Length Rule
 
-The **token length** rule routes requests based on the number of input tokens, allowing you to send longer or more complex prompts to more capable models.
+The **token length** rule routes requests based on the number of tokens in the **last user message**, allowing you to send longer or more complex prompts to more capable models.
 
-**How it works**: The gateway counts the tokens in the user's input using the default model's tokenizer. It then sorts the `output_mapping` entries by `threshold` in descending order and selects the first entry whose threshold is less than or equal to the token count.
+**How it works**: The gateway extracts the last user message and counts its tokens using the default model's tokenizer. Each `output_mapping` entry specifies a condition — **`gte`** (greater than or equal), **`lte`** (less than or equal), or **`between`** (inclusive range) — and the first matching entry determines the model.
 
-**Conditions type**: `TokenLengthConditions` — an object with a `threshold` field (integer)
+**Conditions type**: `TokenLengthConditions` — an object with exactly **one** of the following fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `gte` | `int` | Matches when token count **≥** the value |
+| `lte` | `int` | Matches when token count **≤** the value |
+| `between` | `[int, int]` | Matches when token count is within the inclusive range `[min, max]` |
+
+:::warning
+Each entry must set **exactly one** condition (`gte`, `lte`, or `between`). Setting none or more than one will cause a validation error. For `between`, the first value must be ≤ the second value.
+:::
+
+### Example: Tiered routing with all condition types
 
 ```yaml
 chat_models:
@@ -147,31 +161,114 @@ chat_models:
     credentials:
       api_key: !secret OPENAI_API_KEY
 
+  - model_id: gpt-4.1
+    model: openai/gpt-4.1
+    credentials:
+      api_key: !secret OPENAI_API_KEY
+
 routing:
   - name: token-length-routing
     type: deterministic
-    default_model_id: gpt-4o-mini
+    default_model_id: gpt-4o
     rule: token_length
     output_mapping:
-      - model_id: gpt-4o
-        conditions:
-          threshold: 1000
       - model_id: gpt-4o-mini
         conditions:
-          threshold: 100
+          lte: 999              # Short messages → lightweight model
+      - model_id: gpt-4.1
+        conditions:
+          between: [1000, 4999] # Medium messages → mid-tier model
+      - model_id: gpt-4o
+        conditions:
+          gte: 5000             # Long messages → most capable model
 
 routes:
   production:
     chat_models:
       - gpt-4o
       - gpt-4o-mini
+      - gpt-4.1
     routing: token-length-routing
 ```
 
 **Behavior**:
-- Entries are sorted by `threshold` **descending** (highest first) — the highest threshold that the token count meets or exceeds wins
-- For the example above: a message with 1500 tokens routes to `gpt-4o`, a message with 200 tokens routes to `gpt-4o-mini`
-- If the token count is below all thresholds, `default_model_id` is used
+- Only the **last user message** is evaluated — earlier messages and system messages do not affect the token count
+- Each entry is checked against the token count using its condition type (`gte`, `lte`, or `between`)
+- For the example above: a message with 500 tokens routes to `gpt-4o-mini`, 2500 tokens routes to `gpt-4.1`, and 6000 tokens routes to `gpt-4o`
+- If no condition matches, `default_model_id` is used
+
+### Validation rules
+
+The gateway validates your configuration at startup and rejects invalid setups:
+
+- Each entry must have **exactly one** of `gte`, `lte`, or `between` set
+- `between` ranges must have `between[0] ≤ between[1]`
+- `between` ranges must **not overlap** with other `between` ranges or with `gte`/`lte` conditions
+- Multiple `gte` or multiple `lte` entries are allowed (the router sorts them deterministically)
+
+:::tip
+If you need to route based on the total token count of the **entire conversation** (including system and assistant messages), use the [`context_length`](#context-length-rule) rule instead.
+:::
+
+---
+
+## Context Length Rule
+
+The **context length** rule routes requests based on the total token count of the **entire conversation** — including system messages, assistant messages, and all user messages. This is useful when you want routing decisions to reflect the full context window usage, not just the latest message.
+
+**How it works**: The gateway concatenates the content of all messages in the conversation and counts the total tokens using the default model's tokenizer. Each `output_mapping` entry specifies a condition — **`gte`**, **`lte`**, or **`between`** — and the first matching entry determines the model. The conditions work identically to the [token length rule](#token-length-rule).
+
+**Conditions type**: `TokenLengthConditions` — an object with exactly **one** of `gte`, `lte`, or `between` (same as `token_length`)
+
+```yaml
+chat_models:
+  - model_id: deepseek-chat
+    model: deepseek/deepseek-chat
+    credentials:
+      api_key: !secret DEEPSEEK_API_KEY
+
+  - model_id: gpt-4o
+    model: openai/gpt-4o
+    credentials:
+      api_key: !secret OPENAI_API_KEY
+
+  - model_id: claude-long-context
+    model: anthropic/claude-3-5-sonnet-latest
+    credentials:
+      api_key: !secret ANTHROPIC_API_KEY
+
+routing:
+  - name: context-length-routing
+    type: deterministic
+    default_model_id: deepseek-chat
+    rule: context_length
+    output_mapping:
+      - model_id: gpt-4o
+        conditions:
+          between: [2000, 7999]    # Medium conversations → standard model
+      - model_id: claude-long-context
+        conditions:
+          gte: 8000                # Long conversations → large context model
+
+routes:
+  production:
+    chat_models:
+      - deepseek-chat
+      - gpt-4o
+      - claude-long-context
+    routing: context-length-routing
+```
+
+**Behavior**:
+- **All messages** are included in the token count — system messages, assistant messages, and all user messages (not just the last one)
+- Each entry is checked against the total token count using its condition type (`gte`, `lte`, or `between`)
+- For the example above: a conversation with 10,000 total tokens routes to `claude-long-context`, one with 3,000 tokens routes to `gpt-4o`, and one with 500 tokens uses the default `deepseek-chat`
+- If no condition matches, `default_model_id` is used
+- The same [validation rules](#validation-rules) apply as for token length (exactly one condition per entry, no overlapping between ranges)
+
+:::tip
+Use `context_length` when conversations grow over time and you want to automatically escalate to models with larger context windows. Use `token_length` when you want routing based solely on the complexity of the current user message.
+:::
 
 ---
 
@@ -430,7 +527,7 @@ Text classification routing is ideal for intent detection or sentiment-based rou
 | `name` | `string` | Yes | Unique name for the routing config |
 | `type` | `string` | Yes | Routing strategy: `deterministic` or `text_classification` |
 | `default_model_id` | `string` | Yes | Fallback model ID when no rule matches or on error |
-| `rule` | `string` | Deterministic only | Rule type: `keyword`, `token_length`, `time`, or `budget` |
+| `rule` | `string` | Deterministic only | Rule type: `keyword`, `token_length`, `context_length`, `time`, or `budget` |
 | `url` | `string` | Text classification only | HTTP endpoint of the external classifier |
 | `timeout` | `float` | No | Classifier request timeout in seconds (default: `5.0`) |
 | `output_mapping` | `list` | Yes | List of condition-to-model mappings |
@@ -447,7 +544,8 @@ Text classification routing is ideal for intent detection or sentiment-based rou
 | Routing type / Rule | Conditions Type | Format |
 |---------------------|----------------|--------|
 | `deterministic` / `keyword` | `list[str]` | List of keyword strings |
-| `deterministic` / `token_length` | `TokenLengthConditions` | Object with `threshold: int` |
+| `deterministic` / `token_length` | `TokenLengthConditions` | Object with exactly one of: `gte: int`, `lte: int`, or `between: [int, int]` |
+| `deterministic` / `context_length` | `TokenLengthConditions` | Object with exactly one of: `gte: int`, `lte: int`, or `between: [int, int]` |
 | `deterministic` / `time` | `list[str]` | List of cron expressions |
 | `deterministic` / `budget` | `BudgetConditions` | Object with `threshold: float` (0.0–1.0) |
 | `text_classification` | `list[str]` | List of class label strings returned by the classifier |
@@ -458,7 +556,8 @@ Text classification routing is ideal for intent detection or sentiment-based rou
 
 ### Rule Selection
 - Use **keyword** routing when request intent is clearly expressed in the message content
-- Use **token length** routing to send complex, long prompts to more capable models
+- Use **token length** routing to send complex, long prompts to more capable models based on the current message
+- Use **context length** routing to escalate to larger context window models as conversations grow over time
 - Use **time** routing to optimize costs during off-peak hours
 - Use **budget** routing to gracefully degrade to cheaper models as spending increases
 - Use **text classification** routing when intent detection requires an ML model — e.g., sentiment analysis, topic classification, or domain-specific labelling
