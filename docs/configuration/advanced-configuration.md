@@ -626,17 +626,12 @@ routes:
       - gpt-4o-mini
     routing: budget-routing
     budget_limiting:
-      input:
-        algorithm: fixed_window
-        window_size: 1 hour
-        max_budget: 50.0
-      output:
-        algorithm: fixed_window
-        window_size: 1 hour
-        max_budget: 100.0
+      algorithm: fixed_window
+      window_size: 1 hour
+      max_budget: 150.0
 ```
 
-The threshold is evaluated against the **combined input + output budget**. In this example, `max_budget` = $50 (input) + $100 (output) = $150 total. When more than 80% of that combined budget ($120+) has been consumed, requests are automatically routed to the cheaper `gpt-4o-mini` model.
+The threshold is evaluated against the **combined input + output budget**, in this example $150 total. When more than 80% of that combined budget ($120+) has been consumed, requests are automatically routed to the cheaper `gpt-4o-mini` model.
 
 For full details on all rule types (keyword, token length, time, budget), see the **[Intelligent Routing](../features/advanced-routing.md)** page.
 
