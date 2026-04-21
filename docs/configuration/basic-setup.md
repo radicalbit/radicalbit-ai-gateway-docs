@@ -25,7 +25,7 @@ This creates:
 - a **route** named `gpt-pirate-route` that references `gpt-pirate` by **model ID**
 
 :::tip
-Save your model API Key into a `secrets.yaml` file.
+Save your model API Key into a `secrets.yaml` file. See [Secrets Management](../deployment/secrets-management/index.md) for full details, including support for AWS Secrets Manager, HashiCorp Vault, GCP Secret Manager, and Azure Key Vault.
 :::
 
 Once the gateway is started, you will need to access the UI (http://localhost:9000) to view route information, create a group and a key, and finally, associate the group with the route.

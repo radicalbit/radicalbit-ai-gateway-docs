@@ -202,6 +202,8 @@ credentials:
 # - restart gateway rollout
 ```
 
+For detailed instructions on configuring external secret providers, see [Secrets Management](./deployment/secrets-management/index.md).
+
 ### 2. Network Security
 
 #### Use TLS/SSL
