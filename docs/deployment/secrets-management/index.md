@@ -1,4 +1,4 @@
-# Secrets Management
+# Getting Started
 
 The Radicalbit AI Gateway uses `!secret KEY` references in `config.yaml` to keep API keys and other sensitive values out of your configuration files. When the gateway loads a configuration that contains `!secret OPENAI_API_KEY`, it resolves the value from a configured secrets backend.
 
