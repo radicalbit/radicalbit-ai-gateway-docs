@@ -12,12 +12,13 @@ With the **new configuration structure**:
 - **Routes reference routing configs by name** (strings)
 - Models are defined at top-level (`chat_models`, `embedding_models`) and referenced by ID
 
-There are two routing categories:
+There are three routing categories:
 
 | Category | `type` value | Decision basis | Added latency |
 |---|---|---|---|
 | [Deterministic](#deterministic-routing) | `deterministic` | Rule evaluated locally | Negligible |
 | [Text Classification](#text-classification-routing) | `text_classification` | External ML classifier over HTTP | HTTP call latency |
+| [Semantic](#semantic-routing) | `semantic` | Embedding similarity against example utterances | Embedding call latency (startup + per query) |
 
 ---
 
@@ -513,6 +514,121 @@ Text classification routing is ideal for intent detection or sentiment-based rou
 
 ---
 
+## Semantic Routing
+
+Semantic routing uses **embedding similarity** to route requests to the most appropriate model. Instead of matching keywords or calling an external classifier, it compares the user's message against pre-computed example utterances using vector similarity.
+
+This is ideal when you want intent-based routing without deploying a separate ML classifier — you simply provide example utterances for each model, and the gateway handles the rest.
+
+### How It Works
+
+Semantic routing operates in two phases:
+
+**Initialization phase** (runs once at startup):
+
+1. For each model in `output_mapping`, the gateway takes the list of example utterances from `conditions`
+2. Embeds every utterance using the model referenced by `embedding_model_id`
+3. Computes a **normalized centroid vector** (average of embeddings) per model
+
+**Query phase** (runs per request):
+
+1. Extracts the **last human message** from the conversation
+2. Embeds it using the same embedding model
+3. Computes **cosine similarity** between the message embedding and every stored centroid
+4. If the highest similarity score exceeds `similarity_threshold`, routes to that model
+5. Otherwise, routes to `default_model_id`
+
+### Configuration Structure
+
+```yaml
+embedding_models:
+  - model_id: text-embedding-3-small
+    model: openai/text-embedding-3-small
+    credentials:
+      api_key: !secret OPENAI_API_KEY
+
+chat_models:
+  - model_id: code-model
+    model: openai/gpt-4o
+    credentials:
+      api_key: !secret OPENAI_API_KEY
+
+  - model_id: general-model
+    model: openai/gpt-4o-mini
+    credentials:
+      api_key: !secret OPENAI_API_KEY
+
+  - model_id: default-model
+    model: openai/gpt-4o-mini
+    credentials:
+      api_key: !secret OPENAI_API_KEY
+
+routing:
+  - name: intent-routing
+    type: semantic
+    default_model_id: default-model
+    embedding_model_id: text-embedding-3-small
+    similarity_threshold: 0.35
+    output_mapping:
+      - model_id: code-model
+        conditions:
+          - "write a python function"
+          - "debug this code"
+          - "explain this algorithm"
+          - "refactor this class"
+      - model_id: general-model
+        conditions:
+          - "what is the weather"
+          - "tell me a joke"
+          - "summarize this article"
+
+routes:
+  production:
+    chat_models:
+      - code-model
+      - general-model
+      - default-model
+    routing: intent-routing
+```
+
+### Routing Config Fields
+
+#### Required Fields
+
+- **`name`**: Unique identifier for the routing config
+- **`type`**: Must be `semantic`
+- **`default_model_id`**: Model ID used when no centroid exceeds the similarity threshold, or if initialization fails
+- **`embedding_model_id`**: References a top-level `embedding_models` entry used for embedding both utterances and queries
+- **`output_mapping`**: List of entries mapping example utterances to model IDs
+
+#### Optional Fields
+
+- **`similarity_threshold`**: Cosine similarity threshold (default: `0.35`, range: `0.0`–`1.0`). A message must exceed this score against a centroid to be routed to that model
+
+### Output Mapping Fields
+
+Each entry in `output_mapping`:
+
+- **`model_id`**: The model to route to (must reference a top-level `chat_models` entry)
+- **`conditions`**: `list[str]` — example utterances that represent the kind of messages this model should handle. These are embedded at startup to form the centroid
+
+:::warning
+The embedding model referenced by `embedding_model_id` must be defined in the top-level `embedding_models` section. If the embedding model is unreachable or initialization fails, the gateway logs a warning and falls back to `default_model_id` for all requests.
+:::
+
+:::tip
+Write conditions that are representative of real user messages. More diverse examples produce a better centroid and more accurate routing. Aim for **5–10 examples per model** covering the range of expected intents.
+:::
+
+**Behavior**:
+- Only the **last human message** is evaluated
+- Initialization is **asynchronous** at startup — if it fails, the gateway falls back to `default_model_id` with a warning (no error returned to clients)
+- At query time, cosine similarity is computed against all centroids; the highest-scoring centroid wins if it exceeds the threshold
+- Entry order in `output_mapping` does not matter — selection is purely by similarity score
+- If two centroids have the same score, the first one in `output_mapping` order wins
+
+---
+
 ## Configuration Reference
 
 ### Routing Config
@@ -520,11 +636,13 @@ Text classification routing is ideal for intent detection or sentiment-based rou
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `name` | `string` | Yes | Unique name for the routing config |
-| `type` | `string` | Yes | Routing strategy: `deterministic` or `text_classification` |
+| `type` | `string` | Yes | Routing strategy: `deterministic`, `text_classification`, or `semantic` |
 | `default_model_id` | `string` | Yes | Fallback model ID when no rule matches or on error |
 | `rule` | `string` | Deterministic only | Rule type: `keyword`, `token_length`, `context_length`, `time`, or `budget` |
 | `url` | `string` | Text classification only | HTTP endpoint of the external classifier |
 | `timeout` | `float` | No | Classifier request timeout in seconds (default: `5.0`) |
+| `embedding_model_id` | `string` | Semantic only | References a top-level `embedding_models` entry for embedding utterances and queries |
+| `similarity_threshold` | `float` | No | Cosine similarity threshold (default: `0.35`, range: `0.0`–`1.0`). Semantic only |
 | `output_mapping` | `list` | Yes | List of condition-to-model mappings |
 
 ### Output Mapping Entry
@@ -544,6 +662,7 @@ Text classification routing is ideal for intent detection or sentiment-based rou
 | `deterministic` / `time` | `list[str]` | List of cron expressions |
 | `deterministic` / `budget` | `BudgetConditions` | Object with `threshold: float` (0.0–1.0) |
 | `text_classification` | `list[str]` | List of class label strings returned by the classifier |
+| `semantic` | `list[str]` | List of example utterances used to compute the centroid for the model |
 
 ---
 
@@ -556,16 +675,20 @@ Text classification routing is ideal for intent detection or sentiment-based rou
 - Use **time** routing to optimize costs during off-peak hours
 - Use **budget** routing to gracefully degrade to cheaper models as spending increases
 - Use **text classification** routing when intent detection requires an ML model — e.g., sentiment analysis, topic classification, or domain-specific labelling
+- Use **semantic** routing when you want intent-based model selection without deploying an external classifier — just provide example utterances per model
 
 ### Model Configuration
 - Ensure all models referenced in `output_mapping` and `default_model_id` are defined in `chat_models`
 - All models used in routing must also be listed in the route's `chat_models`
 - Configure cost information on models when using budget routing
+- For semantic routing, ensure the embedding model referenced by `embedding_model_id` is defined in top-level `embedding_models`
 
 ### General Tips
 - Keep `output_mapping` entries ordered intentionally — entry order matters for keyword and time rules
 - Test routing rules in non-production environments before deploying
 - Use descriptive `name` values for routing configs (e.g., `keyword-routing`, `budget-aware-routing`)
+- For semantic routing, write **diverse, representative** example utterances (5–10 per model) — the quality of routing depends on how well the centroids represent each intent cluster
+- Set `similarity_threshold` conservatively (0.3–0.5) to start, then adjust based on how many requests fall through to the default model
 
 ---
 
@@ -578,6 +701,8 @@ Text classification routing is ideal for intent detection or sentiment-based rou
 3. **Time Rule Not Matching**: Cron expressions are evaluated in UTC. Double-check your expressions account for the correct time zone offset
 4. **Unexpected Model Selection**: For keyword and time rules, the first match wins. Review the order of your `output_mapping` entries
 5. **Text Classification Always Using Fallback**: Check that the classifier is reachable from the gateway (correct `url`, network connectivity). Verify the response contains a `predictions[0].class` field and that its value matches a label defined in `output_mapping.conditions`. Increase `timeout` if the classifier is slow to respond
+6. **Semantic Routing Always Using Default Model**: Check that the embedding model referenced by `embedding_model_id` is defined in top-level `embedding_models` and is reachable. Review gateway startup logs for initialization warnings. Verify that `similarity_threshold` is not set too high — try lowering it (e.g., from `0.8` to `0.6`) and inspect whether any centroid scores appear in debug logs
+7. **Semantic Routing Selecting the Wrong Model**: Improve `conditions` in `output_mapping` — add more diverse example utterances that better represent the target intent. Ensure conditions across different models are sufficiently distinct (overlapping utterance themes produce overlapping centroids)
 
 ---
 
@@ -585,4 +710,5 @@ Text classification routing is ideal for intent detection or sentiment-based rou
 
 - **[Fallback Configuration](../configuration/fallback.md)** - Set up automatic failover when models fail
 - **[Budget Limiting](./budget-limiting.md)** - Configure budget limits (required for budget routing)
+- **[Semantic Caching](./semantic-caching.md)** - Another embedding-based feature for caching similar requests
 - **[Advanced Configuration](../configuration/advanced-configuration.md)** - Enterprise configuration options
