@@ -62,6 +62,18 @@ const sidebars: SidebarsConfig = {
       label: 'Deployment',
       items: [
         'deployment/production',
+        {
+          type: 'category',
+          label: 'Secrets Management',
+          items: [
+            'deployment/secrets-management/index',
+            'deployment/secrets-management/aws-secrets-manager',
+            'deployment/secrets-management/hashicorp-vault',
+            'deployment/secrets-management/gcp-secret-manager',
+            'deployment/secrets-management/azure-key-vault',
+            'deployment/secrets-management/custom-plugin',
+          ],
+        },
       ],
     },
     {
