@@ -85,3 +85,24 @@ h1, h2, h3 {
   margin-top: 2rem;
   font-size: .8em;
 }
+
+/* Enterprise badge */
+.enterprise-badge {
+  --ifm-color-info: #b8860b;
+  border-left: 5px solid #b8860b !important;
+  background-color: rgba(184, 134, 11, 0.08) !important;
+}
+
+[data-theme='dark'] .enterprise-badge {
+  --ifm-color-info: #ffd700;
+  border-left: 5px solid #ffd700 !important;
+  background-color: rgba(255, 215, 0, 0.1) !important;
+}
+
+.enterprise-badge .admonition-heading {
+  color: #b8860b;
+}
+
+[data-theme='dark'] .enterprise-badge .admonition-heading {
+  color: #ffd700;
+}

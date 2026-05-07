@@ -1,5 +1,9 @@
 # AWS Secrets Manager
 
+:::info[Enterprise Feature]{className="enterprise-badge"}
+This feature is available exclusively in the **Enterprise edition** of the Radicalbit AI Gateway. [Contact sales](mailto:sales@radicalbit.ai) for licensing information.
+:::
+
 This plugin enables the gateway to resolve `!secret` references from AWS Secrets Manager instead of a static `secrets.yaml` file.
 
 All gateway secrets are stored in **one AWS Secrets Manager secret** as a JSON object of key-value pairs. Each `!secret KEY` reference fetches the corresponding key from that single secret.

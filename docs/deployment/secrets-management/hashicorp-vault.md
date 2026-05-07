@@ -1,5 +1,9 @@
 # HashiCorp Vault
 
+:::info[Enterprise Feature]{className="enterprise-badge"}
+This feature is available exclusively in the **Enterprise edition** of the Radicalbit AI Gateway. [Contact sales](mailto:sales@radicalbit.ai) for licensing information.
+:::
+
 This plugin enables the gateway to resolve `!secret` references from HashiCorp Vault instead of a static `secrets.yaml` file.
 
 Secrets are stored in Vault's KV engine (v1 or v2). The provider reads a single secret at `VAULT_MOUNT_PATH/VAULT_SECRET_PATH` and resolves individual keys from it.

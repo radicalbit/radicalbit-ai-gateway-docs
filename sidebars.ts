@@ -59,6 +59,15 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
+      label: 'Access Control',
+      items: [
+        'access-control/index',
+        'access-control/keycloak-idp',
+        'access-control/oidc',
+      ],
+    },
+    {
+      type: 'category',
       label: 'Deployment',
       items: [
         'deployment/production',

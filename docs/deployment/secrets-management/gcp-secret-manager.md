@@ -1,5 +1,9 @@
 # GCP Secret Manager
 
+:::info[Enterprise Feature]{className="enterprise-badge"}
+This feature is available exclusively in the **Enterprise edition** of the Radicalbit AI Gateway. [Contact sales](mailto:sales@radicalbit.ai) for licensing information.
+:::
+
 This plugin enables the gateway to resolve `!secret` references from Google Cloud Secret Manager instead of a static `secrets.yaml` file.
 
 Unlike other providers that store all secrets under one path, GCP Secret Manager treats **each secret as an individual resource**. So `!secret OPENAI_API_KEY` fetches the secret named `OPENAI_API_KEY` from the configured project.

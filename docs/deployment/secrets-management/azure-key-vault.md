@@ -1,5 +1,9 @@
 # Azure Key Vault
 
+:::info[Enterprise Feature]{className="enterprise-badge"}
+This feature is available exclusively in the **Enterprise edition** of the Radicalbit AI Gateway. [Contact sales](mailto:sales@radicalbit.ai) for licensing information.
+:::
+
 This plugin enables the gateway to resolve `!secret` references from Azure Key Vault instead of a static `secrets.yaml` file.
 
 The plugin bulk-loads all secrets from the configured vault at startup, caches them in memory, and resolves every `!secret KEY` reference from that cache.
