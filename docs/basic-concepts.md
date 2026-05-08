@@ -4,17 +4,28 @@ The Radicalbit AI Gateway combines **several integrated components that work tog
 
 ---
 
+### Projects
+
+A **Project** is the organizational unit that holds a gateway configuration. Every configuration you write lives inside a project, and the gateway can serve multiple projects simultaneously — each as an isolated set of routes, models, and features.
+
+Projects follow a simple lifecycle: **Create → Load Config → Approve → Serve**. Once a project is served, its routes become live and start handling traffic. Routes from different projects are kept separate using the format `project-name/route-name`, which is what you pass as the `model` parameter in your application:
+
+```python
+response = client.chat.completions.create(
+    model="my-project/customer-service",  # project-name/route-name
+    messages=[...]
+)
+```
+
+See [Projects](./configuration/projects.md) for the full lifecycle reference.
+
+---
+
 ### The config.yaml file
 
-To configure the Gateway, you need to create a single YAML configuration file. While you can choose any name, we refer to it as `config.yaml` throughout this documentation.
-This file controls the entire behavior of the Gateway, defining all routes, models, and the features applied to them.
+Each project holds a single YAML configuration file. While you can choose any name, we refer to it as `config.yaml` throughout this documentation. This file controls the entire behavior of the project, defining all routes, models, and the features applied to them.
 
-With the **new configuration structure**:
-
-- Models are defined at top-level:
-  - `chat_models`
-  - `embedding_models`
-- Routes reference models by **model ID** (strings), and define which features apply to that route.
+Models are defined once at the top level and referenced by ID inside routes:
 
 ```yaml
 # Definition of reusable chat models
@@ -65,7 +76,7 @@ cache:
 ```
 
 At the route level, you must define the route name (e.g., `customer-service` in the above example).
-**This name is important because you will refer to it in your model client during application development and it also appears in the UI**.
+**This name is important because it also appears in the UI, and you will refer to it in your model client combined with the project name** — as `project-name/route-name` (e.g., `my-project/customer-service`).
 
 :::tip
 Always choose a clear and descriptive name.
@@ -86,12 +97,13 @@ If `prompt` or `prompt_ref` is set for a chat model, the `role` used for prompt 
 :::
 
 At the same level, you can configure the following features:
-* *balancing*
 * *fallback*
 * *guardrails*
 * *rate_limiting*
 * *token_limiting*
+* *budget_limiting*
 * *caching*
+* *routing*
 
 Since *guardrails* and **caching backend settings** are used across multiple routes, they can be defined globally at the root level and subsequently referenced within specific routes.
 

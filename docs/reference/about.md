@@ -1,99 +1,58 @@
 # About
 
-This page provides information about the Radicalbit AI Gateway project and the team behind it.
+## What Is the Radicalbit AI Gateway
 
-## Project Overview
+The Radicalbit AI Gateway is a centralized access point to the generative AI models used across your organization. It sits between your AI applications and the underlying models — analyzing traffic, filtering information based on configurable conditions, and recording metrics and events to give you full visibility into every operation.
 
-The Radicalbit AI Gateway is a simple and streamlined tool that connects to the models used in your Generative AI application, offering the ability to apply guardrails, routing, and management of inbound and outbound traffic.
+The result is a single, controlled layer that makes your AI applications observable, governed, and cost-efficient. The Gateway is application-agnostic and fully compatible with the OpenAI standard, which means it integrates with the vast majority of AI applications and frameworks without requiring any code changes.
 
 ### Mission
 
-Our mission is to simplify and secure AI model access while providing essential features for managing and monitoring AI applications.
+Our mission is to give organizations full control over their AI usage — making it secure, observable, and cost-efficient — without adding friction to the teams building AI applications.
 
-## Key Features
+---
 
-### Core Capabilities
+## Capabilities
 
-- **OpenAI Compatibility**: Full OpenAI Chat Completions, Embeddings, and Responses API compatibility
-- **Multi-Model Support**: Support for OpenAI, Anthropic, Google Gemini, Ollama, and OpenAI-compatible models
-- **Comprehensive Guardrails**: Content filtering, PII detection, LLM-as-a-Judge
-- **Robust Fallback Mechanisms**: Automatic failover and recovery
-- **API Key Management**: Groups and keys management through UI
-- **Monitoring UI**: Web interface for managing routes, groups, keys, and monitoring costs
-- **Caching**: Semantic and exact caching for improved performance and reduced costs
-- **Advanced Routing**: Keyword, token length, semantic, time-based, and budget-aware routing
+### Governance & Security
 
-### Security Features
+- **Guardrails** — rule-based filters (contains, starts with, ends with, regex), PII detection and masking via Microsoft Presidio, and LLM-as-a-Judge for semantic content evaluation
+- **Fallback** — automatic failover across models when a provider fails or is unavailable
+- **Rate Limiting** — cap the number of requests per time window at the route level
+- **Token Limiting** — cap input and output token consumption per time window
+- **Budget Limiting** — cap spending based on combined token costs per time window
+- **API Key Authentication** — every route requires a gateway-issued API key; no direct model access
 
-- **Content Safety**: Built-in content filtering and safety measures
-- **PII Protection**: Automatic detection and anonymization of sensitive data via Presidio
-- **Rate Limiting**: Control costs and prevent abuse
-- **Token Management**: Comprehensive token counting and limiting
-- **Budget Limiting**: Cost-based request limiting
-- **Audit Logging**: Request and response logging
+### Cost Control
+
+- **Exact Caching** — serve identical requests from memory without calling the model
+- **Semantic Caching** — match semantically similar requests using embedding similarity
+- **Intelligent Routing** — route requests dynamically based on keywords, token length, context length, time of day, budget consumption, ML classifiers, or embedding similarity
+- **Cost Dashboard** — monitor spending by group and API key from the UI
 
 ### Observability
 
-- **Prometheus Metrics**: Detailed metrics for monitoring
-- **Grafana Dashboards**: Pre-built dashboards for visualization
-- **OpenTelemetry**: Distributed tracing and telemetry
-- **ClickHouse**: Long-term metrics storage
-- **Performance Tracking**: Detailed performance metrics
+- **Prometheus Metrics** — request rate, latency, token usage, cache hits, guardrail triggers, fallback activations, and more, exposed on a dedicated metrics endpoint
+- **OpenTelemetry Tracing** — end-to-end traces of every request, exportable to any OTLP-compatible backend
+- **Event Tracking** — UI-level visibility into events per route with time filtering
+- **UI Monitoring** — web interface for routes, groups, keys, cost trends, and feature status
 
-## Technology Stack
+### Multi-Provider Support
 
-### Backend
+- **Native providers** — OpenAI, Anthropic, Google Gemini, DeepSeek, Mistral, Azure OpenAI
+- **OpenAI-compatible endpoints** — Ollama, vLLM, OpenRouter, and any on-premises deployment
 
-- **Python**: Core application language
-- **FastAPI**: High-performance web framework
-- **Pydantic**: Data validation and settings management
-- **SQLAlchemy**: Database ORM
-- **Celery**: Background task processing
+---
 
-### Data & Caching
+## Enterprise Capabilities
 
-- **PostgreSQL**: Data persistence
-- **Redis / Valkey**: Caching and message broker
-- **ClickHouse**: Metrics storage
+:::info[Enterprise Feature]
+The following capabilities are available exclusively in the **Enterprise edition**. [Contact sales](mailto:sales@radicalbit.ai) for licensing information.
+:::
 
-### Infrastructure
+- **Identity Provider Integration** — sync users, groups, and roles from Keycloak (or a custom IDP) into the gateway
+- **Role-Based Access Control** — three built-in roles (Admin, Builder, Auditor) with granular permissions
+- **SSO / OIDC Authentication** — OpenID Connect-based single sign-on for the admin interface
+- **JWT Token Authentication** — users can call gateway endpoints directly with IDP-issued tokens instead of gateway API keys
+- **Project-Level User Association** — assign users to specific projects with role-scoped visibility
 
-- **Docker**: Containerization
-- **Docker Compose**: Orchestration
-- **Prometheus**: Metrics collection
-- **Grafana**: Metrics visualization
-- **Loki**: Log aggregation
-- **OpenTelemetry**: Distributed tracing
-
-### AI Models
-
-- **OpenAI**: GPT models and embeddings
-- **Anthropic**: Claude models
-- **Google**: Gemini models
-- **Self-hosted**: Ollama, vLLM, and other OpenAI-compatible models
-
-## Architecture
-
-### Core Components
-
-- **Gateway Core**: Main application logic and model invocation
-- **Route Manager**: Route configuration and management
-- **Guardrail Engine**: Content filtering and safety
-- **Fallback Manager**: Automatic failover
-- **Cache Manager**: Exact and semantic response caching
-- **Routing Engine**: Deterministic and semantic routing
-- **Limiter**: Rate, token, and budget limiting
-- **Metrics Worker**: Background metrics processing
-
-## Contact
-
-- **Email**: info@radicalbit.ai
-- **Phone**: +39 02 37920598
-- **Website**: https://radicalbit.ai
-- **Sales**: sales@radicalbit.ai
-
-## Next Steps
-
-- **[Getting Started](../getting-started/installation.md)** - Set up your first gateway instance
-- **[Configuration Guide](../configuration/advanced-configuration.md)** - Learn about configuration
-- **[Enterprise](./enterprise.md)** - Learn about enterprise features

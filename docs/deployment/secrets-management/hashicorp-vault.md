@@ -60,32 +60,6 @@ export VAULT_ROLE_ID=your-role-id
 export VAULT_SECRET_ID=your-secret-id
 ```
 
-## Docker Compose Example
-
-```yaml
-services:
-  vault:
-    image: hashicorp/vault:1.18
-    ports:
-      - "8200:8200"
-    environment:
-      VAULT_DEV_ROOT_TOKEN_ID: "root"
-      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
-    cap_add:
-      - IPC_LOCK
-
-  gateway:
-    environment:
-      ENABLED_PLUGINS: "hashicorp_vault"
-      VAULT_ADDR: "http://vault:8200"
-      VAULT_TOKEN: "root"
-      VAULT_MOUNT_PATH: "secret"
-      VAULT_SECRET_PATH: "gateway"
-      VAULT_KV_VERSION: "v2"
-    depends_on:
-      - vault
-```
-
 ## Dependencies
 
 - `hvac==2.4.0` — installed automatically from `requirements.txt` when the plugin is enabled

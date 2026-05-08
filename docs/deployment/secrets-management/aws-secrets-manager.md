@@ -62,18 +62,6 @@ export AWS_ACCESS_KEY_ID=AKIA...
 export AWS_SECRET_ACCESS_KEY=wJalrXU...
 ```
 
-## Docker Compose Example
-
-```yaml
-services:
-  gateway:
-    environment:
-      ENABLED_PLUGINS: "aws_secrets_manager"
-      AWS_REGION: "eu-west-1"
-      AWS_SECRET_NAME: "gateway/secrets"
-      # No explicit credentials — uses IAM role attached to the instance
-```
-
 ## Dependencies
 
 - `boto3>=1.26.0` — installed automatically from `requirements.txt` when the plugin is enabled

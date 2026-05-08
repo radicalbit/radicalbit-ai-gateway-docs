@@ -42,6 +42,26 @@ This creates:
 Save your model API Key into a `secrets.yaml` file. See [Secrets Management](../deployment/secrets-management/index.md) for full details, including support for AWS Secrets Manager, HashiCorp Vault, GCP Secret Manager, and Azure Key Vault.
 :::
 
+### ✨ Don't want to write YAML by hand?
+
+The Gateway has a built-in **AI config generator**. Describe what you need in plain language and it produces a valid, ready-to-use `config.yaml` for you — including guardrails, caching, routing rules, or any combination of features.
+
+> *"A customer service route on GPT-4o with PII masking, a 60 req/min rate limit, and semantic caching using text-embedding-3-small"*
+
+The generator validates the config automatically and retries if anything is wrong. To enable it, set the following environment variable before starting the gateway:
+
+```bash
+CONFIG_GENERATOR_OPENAI_API_KEY=sk-your-key-here
+```
+
+| Variable | Default | Description |
+|---|---|---|
+| `CONFIG_GENERATOR_OPENAI_API_KEY` | — | **Required.** Enables the generator. |
+| `CONFIG_GENERATOR_OPENAI_MODEL` | `gpt-4.1` | Model to use for generation. |
+| `CONFIG_GENERATOR_OPENAI_BASE_URL` | — | Custom endpoint (e.g. for Azure or a local model). |
+
+Once enabled, a **Generate** button appears in the project configuration editor in the UI.
+
 ---
 
 ## 3. Load, Approve, and Serve
@@ -75,8 +95,12 @@ from openai import OpenAI
 
 openai_client = OpenAI(
     base_url="http://localhost:9000/v1",
-    model="my-project/gpt-pirate-route",
     api_key="sk-rb-******",
+)
+
+response = openai_client.chat.completions.create(
+    model="my-project/gpt-pirate-route",
+    messages=[{"role": "user", "content": "Hello!"}],
 )
 ```
 

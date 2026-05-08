@@ -80,7 +80,7 @@ When this plugin is enabled, the gateway's OpenAI-compatible endpoints accept Ke
 curl -X POST http://gateway:9000/v1/chat/completions \
   -H "Authorization: Bearer <keycloak-jwt-token>" \
   -H "Content-Type: application/json" \
-  -d '{"model": "my-route", "messages": [{"role": "user", "content": "Hello"}]}'
+  -d '{"model": "my-project/my-route", "messages": [{"role": "user", "content": "Hello"}]}'
 ```
 
 The gateway validates the JWT against Keycloak and resolves the user's associated gateway group for route-level access control.
@@ -113,39 +113,6 @@ Syncs users from RBAC groups into the gateway's user table:
 Controlled by `KEYCLOAK_IDP_RBAC_CRON`, `KEYCLOAK_IDP_RBAC_GROUPS`, and `KEYCLOAK_IDP_RBAC_ADMIN_GROUPS`.
 
 ---
-
-## Docker Compose Example
-
-```yaml
-services:
-  keycloak:
-    image: quay.io/keycloak/keycloak:26.0
-    command: start-dev
-    environment:
-      KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
-      KC_DB_USERNAME: keycloak
-      KC_DB_PASSWORD: keycloak
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
-    ports:
-      - "8080:8080"
-
-  gateway:
-    image: radicalbit/ai-gateway:latest
-    environment:
-      ENABLED_PLUGINS: "keycloak_idp,registry_oidc_auth"
-      KEYCLOAK_IDP_SERVER_URL: "http://keycloak:8080"
-      KEYCLOAK_IDP_ADMIN_USER: "admin"
-      KEYCLOAK_IDP_ADMIN_PASSWORD: "admin"
-      KEYCLOAK_IDP_ADMIN_REALM: "master"
-      KEYCLOAK_IDP_APP_REALM: "gateway"
-      KEYCLOAK_IDP_IMPORT_GROUPS: "api-users,internal"
-      KEYCLOAK_IDP_RBAC_GROUPS: "gateway-users"
-      KEYCLOAK_IDP_RBAC_ADMIN_GROUPS: "gateway-admins"
-    depends_on:
-      - keycloak
-```
 
 ---
 

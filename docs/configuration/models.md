@@ -58,50 +58,49 @@ routes:
 
 ## Supported Providers
 
+The gateway has native support for the following providers. The `model` field always follows the `provider/model-name` format.
+
 ### OpenAI
+
 ```yaml
 chat_models:
   - model_id: gpt-4o
     model: openai/gpt-4o
     credentials:
       api_key: !secret OPENAI_API_KEY
-    params:
-      temperature: 0.7
-      max_tokens: 1000
 ```
 
-### Ollama (Local Models / OpenAI-compatible)
+Common models: `openai/gpt-4o`, `openai/gpt-4o-mini`, `openai/o1`, `openai/o3-mini`
+
+### Anthropic
+
 ```yaml
 chat_models:
-  - model_id: llama3
-    model: openai/llama3.2:3b
+  - model_id: claude
+    model: anthropic/claude-3-5-sonnet-latest
     credentials:
-      base_url: "http://host.docker.internal:11434/v1"
-    params:
-      temperature: 0.7
-      top_p: 0.9
-    # Use either `prompt` OR `prompt_ref` (mutually exclusive)
-    prompt_ref: "ollama_system.md"
-    role: system
+      api_key: !secret ANTHROPIC_API_KEY
 ```
+
+Common models: `anthropic/claude-3-5-sonnet-latest`, `anthropic/claude-3-haiku-20240307`
+
+:::note
+The gateway automatically handles Anthropic-specific streaming behavior and prompt caching.
+:::
 
 ### Google Gemini
+
 ```yaml
 chat_models:
-  - model_id: gemini-pro
+  - model_id: gemini
     model: google-genai/gemini-2.5-flash
     credentials:
-      api_key: !secret GOOGLE_API_KEY
-    params:
-      temperature: 0.7
-      max_output_tokens: 1024
-    prompt: "You are a helpful assistant powered by Google Gemini."
-    role: system
+      api_key: !secret GOOGLE_API_KEY   # required — no env fallback
 ```
 
-**Important**: The `api_key` is **required** for Gemini models.
+Common models: `google-genai/gemini-2.5-flash`, `google-genai/gemini-2.5-pro`
 
-**Gemini Embedding Models:**
+Embedding models use a `models/` prefix:
 ```yaml
 embedding_models:
   - model_id: gemini-embedding
@@ -109,14 +108,79 @@ embedding_models:
     credentials:
       api_key: !secret GOOGLE_API_KEY
     params:
-      task_type: RETRIEVAL_QUERY  # Optional: RETRIEVAL_DOCUMENT, SEMANTIC_SIMILARITY, CLASSIFICATION, CLUSTERING
+      task_type: RETRIEVAL_QUERY  # RETRIEVAL_DOCUMENT | SEMANTIC_SIMILARITY | CLASSIFICATION | CLUSTERING
 ```
 
-**Key differences:**
-- **Provider identifier**: Use `google-genai`
-- **API key requirement**: `api_key` is mandatory
-- **Model format for embeddings**: Use `models/gemini-embedding-001` (with `models/` prefix)
-- **Multimodal support**: Gemini chat models support multimodal content (text, images, files)
+### DeepSeek
+
+```yaml
+chat_models:
+  - model_id: deepseek
+    model: deepseek/deepseek-chat
+    credentials:
+      api_key: !secret DEEPSEEK_API_KEY
+```
+
+Common models: `deepseek/deepseek-chat`, `deepseek/deepseek-reasoner`
+
+:::note
+DeepSeek uses its own tokenizer for accurate token counting — this is handled automatically.
+:::
+
+### Mistral
+
+```yaml
+chat_models:
+  - model_id: mistral
+    model: mistralai/mistral-large-latest
+    credentials:
+      api_key: !secret MISTRAL_API_KEY
+```
+
+Common models: `mistralai/mistral-large-latest`, `mistralai/mistral-nemo-latest`
+
+### Azure OpenAI
+
+```yaml
+chat_models:
+  - model_id: azure-gpt4o
+    model: azure/my-deployment-name
+    credentials:
+      api_key: !secret AZURE_OPENAI_KEY
+      api_version: "2024-02-01"
+      # azure_ad_token: !secret AZURE_AD_TOKEN  # alternative to api_key
+```
+
+### OpenAI-compatible endpoints
+
+Any provider that exposes an OpenAI-compatible API — Ollama, vLLM, OpenRouter, or any on-premises deployment — works by using the `openai/` prefix with a `base_url`:
+
+```yaml
+chat_models:
+  # Ollama (local)
+  - model_id: llama3
+    model: openai/llama3.2:3b
+    credentials:
+      base_url: "http://host.docker.internal:11434/v1"
+
+  # vLLM (on-premises)
+  - model_id: vllm-model
+    model: openai/your-deployed-model
+    credentials:
+      base_url: "http://vllm-server:8000/v1"
+      api_key: !secret VLLM_API_KEY  # if required
+
+  # OpenRouter
+  - model_id: openrouter-model
+    model: openai/meta-llama/llama-3.1-8b-instruct
+    credentials:
+      base_url: "https://openrouter.ai/api/v1"
+      api_key: !secret OPENROUTER_API_KEY
+```
+
+:::tip
+Need a provider not listed here? Additional integrations can be developed on request — [contact us](../reference/contacts.md).
+:::
 
 ### Mock Models (Testing)
 ```yaml
@@ -363,6 +427,6 @@ routes:
 
 ## Next Steps
 
-- **[Fallback Configuration](../configuration/fallback.md)** - Set up automatic failover
+- **[Fallback](../features/fallback.md)** - Set up automatic failover
 - **[Advanced Configuration](../configuration/advanced-configuration.md)** - Enterprise configuration options
 - **[API Reference](../api-reference/endpoints.md)** - Complete API documentation

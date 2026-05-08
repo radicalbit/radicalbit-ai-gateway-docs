@@ -30,7 +30,7 @@ The gateway accepts API keys via the `Authorization: Bearer` header (sent by Ope
 **Request Body:**
 ```json
 {
-  "model": "route-name",
+  "model": "project-name/route-name",
   "messages": [
     {
       "role": "user",
@@ -38,7 +38,7 @@ The gateway accepts API keys via the `Authorization: Bearer` header (sent by Ope
     }
   ],
   "temperature": 0.7,
-  "max_tokens": 100,
+  "max_tokens": 100
 }
 ```
 
@@ -46,7 +46,7 @@ The gateway accepts API keys via the `Authorization: Bearer` header (sent by Ope
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `model` | string | Yes | The route name from your configuration |
+| `model` | string | Yes | The route in `project-name/route-name` format |
 | `messages` | array | Yes | Array of message objects |
 | `temperature` | number | No | Sampling temperature (0.0 to 2.0) |
 | `max_tokens` | number | No | Maximum tokens to generate |
@@ -69,7 +69,7 @@ The gateway accepts API keys via the `Authorization: Bearer` header (sent by Ope
   "id": "chatcmpl-123",
   "object": "chat.completion",
   "created": 1677652288,
-  "model": "route-name",
+  "model": "project-name/route-name",
   "choices": [
     {
       "index": 0,
@@ -97,7 +97,7 @@ The gateway accepts API keys via the `Authorization: Bearer` header (sent by Ope
 **Request Body:**
 ```json
 {
-  "model": "route-name",
+  "model": "project-name/route-name",
   "input": "The text to embed"
 }
 ```
@@ -106,7 +106,7 @@ The gateway accepts API keys via the `Authorization: Bearer` header (sent by Ope
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `model` | string | Yes | The route name with embedding models |
+| `model` | string | Yes | The route in `project-name/route-name` format |
 | `input` | string/array | Yes | Text to embed (string or array of strings) |
 
 **Response:**
@@ -120,7 +120,7 @@ The gateway accepts API keys via the `Authorization: Bearer` header (sent by Ope
       "embedding": [0.1, 0.2, 0.3, ...]
     }
   ],
-  "model": "route-name",
+  "model": "project-name/route-name",
   "usage": {
     "prompt_tokens": 5,
     "total_tokens": 5
@@ -145,7 +145,7 @@ The gateway operates in **stateless mode** only. Setting `previous_response_id` 
 **Request Body:**
 ```json
 {
-  "model": "route-name",
+  "model": "project-name/route-name",
   "input": "What is the capital of France?",
   "instructions": "You are a helpful assistant.",
   "stream": false,
@@ -157,7 +157,7 @@ The gateway operates in **stateless mode** only. Setting `previous_response_id` 
 The `input` field also accepts a list of message objects:
 ```json
 {
-  "model": "route-name",
+  "model": "project-name/route-name",
   "input": [
     {"role": "user", "content": "What is the capital of France?"}
   ]
@@ -168,7 +168,7 @@ The `input` field also accepts a list of message objects:
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
-| `model` | string | Yes | Gateway route name |
+| `model` | string | Yes | The route in `project-name/route-name` format |
 | `input` | string or array | Yes | User prompt or list of message objects |
 | `instructions` | string | No | System-level instructions (equivalent to a system message) |
 | `stream` | boolean | No | Whether to stream the response |
@@ -187,7 +187,7 @@ The `input` field also accepts a list of message objects:
   "id": "resp_123",
   "object": "response",
   "created_at": 1677652288,
-  "model": "route-name",
+  "model": "project-name/route-name",
   "output": [
     {
       "type": "message",

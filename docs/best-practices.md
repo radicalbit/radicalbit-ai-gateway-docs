@@ -10,15 +10,15 @@ This guide provides best practices for configuring, deploying, and maintaining t
 ```yaml
 # Good: Descriptive and clear
 chat_models:
-  - model_id: gpt-4o-mini-production
-    model: openai/gpt-4o-mini
-  - model_id: gpt-4o-mini-production
+  - model_id: customer-service-gpt4o
+    model: openai/gpt-4o
+  - model_id: cost-efficient-gpt4o-mini
     model: openai/gpt-4o-mini
 
 # Avoid: Generic or unclear names
 chat_models:
   - model_id: model1
-    model: openai/gpt-4o-mini
+    model: openai/gpt-4o
   - model_id: model2
     model: openai/gpt-4o-mini
 ```
@@ -68,35 +68,39 @@ routes:
 
 #### Comprehensive Fallback Chains
 ```yaml
+# Good: Multiple fallback options
+chat_models:
+  - model_id: gpt-4o
+    model: openai/gpt-4o
+  - model_id: gpt-4o-mini
+    model: openai/gpt-4o-mini
+  - model_id: claude-3-sonnet
+    model: anthropic/claude-3-5-sonnet-latest
+
 routes:
   production:
     chat_models:
-      - gpt-4o-mini
+      - gpt-4o
       - gpt-4o-mini
       - claude-3-sonnet
     fallback:
-      # Good: Multiple fallback options
-      - target: gpt-4o-mini
+      - target: gpt-4o
         fallbacks:
           - gpt-4o-mini
           - claude-3-sonnet
-      - target: gpt-4o-mini
-        fallbacks:
-          - claude-3-sonnet
-          - gpt-4o-mini
 ```
 
 ```yaml
+# Avoid: Single point of failure
+chat_models:
+  - model_id: gpt-4o
+    model: openai/gpt-4o
+
 routes:
   production:
     chat_models:
-      - gpt-4o-mini
-      - gpt-4o-mini
-    fallback:
-      # Avoid: Single point of failure
-      - target: gpt-4o-mini
-        fallbacks:
-          - gpt-4o-mini
+      - gpt-4o
+    # No fallback configured
 ```
 
 ---
@@ -275,10 +279,7 @@ resources:
 ```
 
 #### Monitor Resource Usage
-```bash
-# Good: Regular resource monitoring
-docker stats --no-stream gateway
-```
+Use your infrastructure's native monitoring (container runtime stats, Kubernetes metrics, cloud provider dashboards) to track CPU and memory consumption of the gateway process.
 
 ### 3. Connection Pooling
 Tune connection settings for your traffic profile by configuring the upstream model provider's client or your reverse proxy (e.g., NGINX) accordingly.
@@ -346,16 +347,11 @@ routes:
 
 ### 2. Blue-Green Deployment
 
-```bash
-# Example: blue-green deployment strategy (conceptual)
-docker compose -f docker-compose.blue.yml up -d
-# wait for health check
-docker compose -f docker-compose.green.yml down
-```
+Run two identical gateway instances (blue and green) behind a load balancer. Serve the new configuration on the inactive instance, verify it via the `/health` endpoint, then switch traffic over and shut down the old instance.
 
 ### 3. Health Checks
 
-Configure health checks at the infrastructure level (Docker, Kubernetes, load balancer) pointing to the gateway's `/health` endpoint.
+Configure health checks at the infrastructure level (Kubernetes, load balancer, or your container orchestrator) pointing to the gateway's `/health` endpoint.
 
 ---
 

@@ -6,12 +6,6 @@ This page covers fallback configuration for the Radicalbit AI Gateway based on t
 
 Fallback in the Radicalbit AI Gateway provides automatic failover when primary models fail or become unavailable. The system supports both chat and embedding model fallbacks with configurable `target` and `fallbacks` lists.
 
-With the **new configuration structure**:
-
-- **Models are defined at top-level** (`chat_models`, `embedding_models`)
-- **Routes reference models by ID** (strings)
-- Fallback chains always reference **model IDs**
-
 ---
 
 ## Fallback Structure

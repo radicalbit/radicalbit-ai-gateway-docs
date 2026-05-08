@@ -51,7 +51,7 @@ When an IDP plugin is enabled, users can authenticate to the gateway's OpenAI-co
 curl -X POST http://gateway:9000/v1/chat/completions \
   -H "Authorization: Bearer <idp-jwt-token>" \
   -H "Content-Type: application/json" \
-  -d '{"model": "my-route", "messages": [{"role": "user", "content": "Hello"}]}'
+  -d '{"model": "my-project/my-route", "messages": [{"role": "user", "content": "Hello"}]}'
 ```
 
 The gateway validates the JWT against the configured identity provider and resolves the associated gateway group for route-level access control.

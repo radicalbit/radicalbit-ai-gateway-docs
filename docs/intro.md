@@ -57,11 +57,11 @@ The Radicalbit AI Gateway serves different roles within an organization:
 The Gateway is designed to be decoupled from your application development. The two are independent processes:
 
 1. **Build your application** — a chat assistant, a RAG pipeline, or any GenAI app. Focus on your core logic without worrying about guardrails, caching, or metrics.
-2. **Configure the Gateway** — write a `config.yaml` file that defines routes, models, and any control or monitoring logic. See the [configuration guide](./configuration/advanced-configuration.md).
-3. **Integrate** — point your LLM client to the Gateway by setting:
-   - the **route name** (in place of the model name, matching your `config.yaml`)
+2. **Create a project and configure the Gateway** — every configuration lives inside a [project](./configuration/projects.md). Write a `config.yaml` that defines your models and routes, then load, approve, and serve it.
+3. **Integrate** — point your LLM client to the Gateway using:
    - the **Gateway base URL**
    - the **Gateway API Key** (generated from the UI)
+   - `project-name/route-name` as the model parameter
 
 All traffic flows through the Gateway from that point on.
 
@@ -70,7 +70,7 @@ All traffic flows through the Gateway from that point on.
 ## Get Started
 
 ### For Developers
-- **[Installation](./getting-started/installation.md)** — Set up your Gateway
+- **[Quick Start](./quick-start.md)** — Up and running in 5 minutes
 - **[Basic Configuration](./configuration/basic-setup.md)** — Essential configuration
 - **[Advanced Configuration](./configuration/advanced-configuration.md)** — Practical configurations
 
@@ -79,4 +79,10 @@ All traffic flows through the Gateway from that point on.
 - **[Telemetry](./operations/telemetry.md)** — Gateway traces
 - **[Troubleshooting](./troubleshooting/common-issues.md)** — Common issues and solutions
 
-**Ready to get started?** Begin with the [installation guide](./getting-started/installation.md).
+**Ready to get started?** Begin with the [Quick Start guide](./quick-start.md).
+
+---
+
+## Supported Providers
+
+The gateway has native support for OpenAI, Anthropic, Google Gemini, DeepSeek, Mistral, and Azure OpenAI. Any provider exposing an OpenAI-compatible endpoint — Ollama, vLLM, OpenRouter, or an on-premises deployment — also works out of the box. See [Model Configuration](./configuration/models.md) for the full list and configuration examples. Additional integrations can be developed on request — [contact us](./reference/contacts.md).

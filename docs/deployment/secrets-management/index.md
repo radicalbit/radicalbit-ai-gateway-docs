@@ -1,4 +1,4 @@
-# Getting Started
+# Secrets Management
 
 The Radicalbit AI Gateway uses `!secret KEY` references in `config.yaml` to keep API keys and other sensitive values out of your configuration files. When the gateway loads a configuration that contains `!secret OPENAI_API_KEY`, it resolves the value from a configured secrets backend.
 
@@ -37,18 +37,7 @@ chat_models:
       api_key: !secret OPENAI_API_KEY
 ```
 
-### Docker Compose
-
-Mount the file as a read-only volume:
-
-```yaml
-services:
-  gateway:
-    image: radicalbit/ai-gateway:latest
-    volumes:
-      - ./config.yaml:/radicalbit_ai_gateway/config.yaml:ro
-      - ./secrets.yaml:/radicalbit_ai_gateway/secrets.yaml:ro
-```
+The `secrets.yaml` file must be mounted into the container at `/radicalbit_ai_gateway/secrets.yaml`.
 
 :::warning
 Never commit `secrets.yaml` to version control. Add it to `.gitignore`.

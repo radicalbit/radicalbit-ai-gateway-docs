@@ -78,18 +78,9 @@ export GCP_SECRET_LABEL=app=gateway
 
 When `GCP_SECRET_LABEL` is not set, all secrets in the project are loaded at startup.
 
-## Docker Compose Example
-
-```yaml
-services:
-  gateway:
-    environment:
-      ENABLED_PLUGINS: "gcp_secret_manager"
-      GCP_PROJECT_ID: "my-gcp-project"
-      GCP_SM_CREDENTIALS: "/secrets/service-account.json"
-    volumes:
-      - ./service-account.json:/secrets/service-account.json:ro
-```
+:::note
+If authenticating via a service account JSON file, mount it into the container at the path configured in `GCP_SM_CREDENTIALS`. When running on GCP with Workload Identity (GKE, Cloud Run, Compute Engine), `GCP_SM_CREDENTIALS` can be omitted.
+:::
 
 ## Dependencies
 

@@ -37,11 +37,6 @@ For single-instance deployments, caching may work without a Redis `cache` sectio
 
 Caching is configured per-route via the `caching` section.
 
-With the **new config structure**:
-
-- Models are defined at top-level (`chat_models`, `embedding_models`)
-- Routes reference models by **model ID** (strings)
-
 ### Exact Cache (Basic)
 
 ```yaml
@@ -179,6 +174,6 @@ For semantic cache, the gateway also stores/queries the embedding vectors for si
 
 ## Next Steps
 
-- **[Fallback](../configuration/fallback.md)** - Set up automatic failover
+- **[Fallback](./fallback.md)** - Set up automatic failover
 - **[Monitoring](../operations/monitoring.md)** - Set up observability and metrics
 - **[API Reference](../api-reference/endpoints.md)** - Complete API documentation

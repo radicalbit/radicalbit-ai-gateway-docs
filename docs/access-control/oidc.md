@@ -115,41 +115,6 @@ Users can initiate logout via `/auth/logout`. The gateway:
 
 ---
 
-## Docker Compose Example
-
-```yaml
-services:
-  keycloak:
-    image: quay.io/keycloak/keycloak:26.0
-    command: start-dev
-    environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
-    ports:
-      - "8080:8080"
-
-  gateway:
-    image: radicalbit/ai-gateway:latest
-    environment:
-      ENABLED_PLUGINS: "keycloak_idp,registry_oidc_auth"
-      KEYCLOAK_IDP_SERVER_URL: "http://keycloak:8080"
-      KEYCLOAK_IDP_ADMIN_USER: "admin"
-      KEYCLOAK_IDP_ADMIN_PASSWORD: "admin"
-      KEYCLOAK_IDP_ADMIN_REALM: "master"
-      KEYCLOAK_IDP_APP_REALM: "gateway"
-      KEYCLOAK_IDP_IMPORT_GROUPS: "api-users"
-      KEYCLOAK_IDP_RBAC_GROUPS: "gateway-users"
-      KEYCLOAK_IDP_RBAC_ADMIN_GROUPS: "gateway-admins"
-      OIDC_CLIENT_ID: "gateway-client"
-      OIDC_SECRET_KEY: "your-client-secret"
-      OIDC_SERVER_METADATA_URL: "http://keycloak:8080/realms/gateway/.well-known/openid-configuration"
-      SESSION_SECRET_KEY: "a-strong-random-secret"
-    ports:
-      - "9000:9000"
-    depends_on:
-      - keycloak
-```
-
 ---
 
 ## Dependencies
