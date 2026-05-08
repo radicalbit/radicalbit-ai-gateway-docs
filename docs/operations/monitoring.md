@@ -84,5 +84,5 @@ The UI is typically available at the same host as the gateway, on a separate por
 
 ## Next Steps
 
-- **[Configuration Guide](./configuration/advanced-configuration.md)** - Complete configuration reference
-- **[API Reference](./api-reference/endpoints.md)** - Complete API documentation
+- **[Configuration Guide](../configuration/advanced-configuration.md)** - Complete configuration reference
+- **[API Reference](../api-reference/endpoints.md)** - Complete API documentation

@@ -5,7 +5,7 @@ The Radicalbit AI Gateway implements the OpenAI API specification — including 
 ## Base URL
 
 ```
-http://localhost:8000
+http://localhost:9000
 ```
 
 ## Authentication
@@ -14,8 +14,10 @@ http://localhost:8000
 ```bash
 curl -H "Authorization: Bearer your-api-key" \
      -H "Content-Type: application/json" \
-     http://localhost:8000/v1/chat/completions
+     http://localhost:9000/v1/chat/completions
 ```
+
+The gateway accepts API keys via the `Authorization: Bearer` header (sent by OpenAI SDKs and compatible libraries) or the `X-Api-Key` header for direct API calls.
 
 ## Endpoints
 

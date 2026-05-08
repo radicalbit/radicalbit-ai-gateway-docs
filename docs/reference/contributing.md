@@ -278,13 +278,13 @@ We use semantic versioning (MAJOR.MINOR.PATCH):
 By contributing to the Radicalbit AI Gateway, you agree that your contributions will be subject to the commercial licensing terms of the project. For detailed licensing information, please contact our commercial team:
 
 - **Email**: sales@radicalbit.ai
-- **Website**: https://radicalbit.com
+- **Website**: https://radicalbit.ai
 
 See our [Enterprise](./enterprise.md) page for detailed commercial licensing options.
 
 ## Next Steps
 
-- **[Installation](./getting-started/installation.md)** - Set up your development environment
-- **[Configuration Guide](./configuration/advanced-configuration.md)** - Learn about configuration options
-- **[API Reference](./api-reference/endpoints.md)** - Understand the API
-- **[Best Practices](./best-practices.md)** - Follow development best practices
+- **[Installation](../getting-started/installation.md)** - Set up your development environment
+- **[Configuration Guide](../configuration/advanced-configuration.md)** - Learn about configuration options
+- **[API Reference](../api-reference/endpoints.md)** - Understand the API
+- **[Best Practices](../best-practices.md)** - Follow development best practices

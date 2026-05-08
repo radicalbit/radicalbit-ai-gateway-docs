@@ -254,7 +254,7 @@ chat_models:
 ```yaml
 chat_models:
   - model_id: unreliable-model
-    model: openai/gpt-3.5-turbo
+    model: openai/gpt-4o-mini
     retry_attempts: 5
 ```
 
@@ -281,6 +281,7 @@ chat_models:
     # Use either `prompt` OR `prompt_ref` (mutually exclusive)
     prompt_ref: "assistant.md"
     role: system
+```
 
 ### Role-Based Prompt
 ```yaml
@@ -302,8 +303,8 @@ Model IDs should be unique **within each top-level section**.
 chat_models:
   - model_id: gpt-4o        # ✅ Unique
     model: openai/gpt-4o
-  - model_id: gpt-3.5-turbo # ✅ Unique
-    model: openai/gpt-3.5-turbo
+  - model_id: gpt-4o-mini # ✅ Unique
+    model: openai/gpt-4o-mini
 ```
 
 ### Route References
@@ -349,7 +350,7 @@ chat_models:
 ```yaml
 chat_models:
   - model_id: debug-model
-    model: openai/gpt-3.5-turbo
+    model: openai/gpt-4o-mini
     retry_attempts: 1  # Reduce retries for faster debugging
 
 routes:

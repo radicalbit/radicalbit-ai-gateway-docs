@@ -10,15 +10,15 @@ This guide provides best practices for configuring, deploying, and maintaining t
 ```yaml
 # Good: Descriptive and clear
 chat_models:
-  - model_id: gpt-3.5-turbo-production
-    model: openai/gpt-3.5-turbo
+  - model_id: gpt-4o-mini-production
+    model: openai/gpt-4o-mini
   - model_id: gpt-4o-mini-production
     model: openai/gpt-4o-mini
 
 # Avoid: Generic or unclear names
 chat_models:
   - model_id: model1
-    model: openai/gpt-3.5-turbo
+    model: openai/gpt-4o-mini
   - model_id: model2
     model: openai/gpt-4o-mini
 ```
@@ -30,14 +30,14 @@ Use `prompt` with an explicit `role`:
 # Good: Specific and clear instructions
 chat_models:
   - model_id: customer-service
-    model: openai/gpt-3.5-turbo
+    model: openai/gpt-4o-mini
     prompt: "You are a helpful customer service assistant. Be polite, professional, and focus on resolving customer issues efficiently."
     role: system
 
 # Avoid: Generic or unclear prompts
 chat_models:
   - model_id: assistant
-    model: openai/gpt-3.5-turbo
+    model: openai/gpt-4o-mini
     prompt: "You are helpful."
     role: system
 ```
@@ -72,15 +72,15 @@ routes:
   production:
     chat_models:
       - gpt-4o-mini
-      - gpt-3.5-turbo
+      - gpt-4o-mini
       - claude-3-sonnet
     fallback:
       # Good: Multiple fallback options
       - target: gpt-4o-mini
         fallbacks:
-          - gpt-3.5-turbo
+          - gpt-4o-mini
           - claude-3-sonnet
-      - target: gpt-3.5-turbo
+      - target: gpt-4o-mini
         fallbacks:
           - claude-3-sonnet
           - gpt-4o-mini
@@ -91,12 +91,12 @@ routes:
   production:
     chat_models:
       - gpt-4o-mini
-      - gpt-3.5-turbo
+      - gpt-4o-mini
     fallback:
       # Avoid: Single point of failure
       - target: gpt-4o-mini
         fallbacks:
-          - gpt-3.5-turbo
+          - gpt-4o-mini
 ```
 
 ---
@@ -133,7 +133,7 @@ guardrails:
     behavior: block
     parameters:
       prompt_ref: "toxicity_check.md"
-      model_id: gpt-3.5-turbo  # Use faster model
+      model_id: gpt-4o-mini  # Use faster model
       temperature: 0.0
       max_tokens: 50
 ```
@@ -281,14 +281,7 @@ docker stats --no-stream gateway
 ```
 
 ### 3. Connection Pooling
-If your deployment exposes connection pool settings, tune them for your traffic profile:
-
-```yaml
-connection_pool:
-  max_connections: 100
-  max_keepalive: 30
-  timeout: 30
-```
+Tune connection settings for your traffic profile by configuring the upstream model provider's client or your reverse proxy (e.g., NGINX) accordingly.
 
 ---
 
@@ -326,29 +319,29 @@ Use different configurations or overlays per environment (dev/staging/prod). Wit
 ```yaml
 # config.dev.yaml
 chat_models:
-  - model_id: gpt-3.5-turbo
-    model: openai/gpt-3.5-turbo
+  - model_id: gpt-4o-mini
+    model: openai/gpt-4o-mini
     credentials:
       api_key: !secret DEV_OPENAI_API_KEY
 
 routes:
   dev-route:
     chat_models:
-      - gpt-3.5-turbo
+      - gpt-4o-mini
 ```
 
 ```yaml
 # config.prod.yaml
 chat_models:
-  - model_id: gpt-3.5-turbo
-    model: openai/gpt-3.5-turbo
+  - model_id: gpt-4o-mini
+    model: openai/gpt-4o-mini
     credentials:
       api_key: !secret PROD_OPENAI_API_KEY
 
 routes:
   prod-route:
     chat_models:
-      - gpt-3.5-turbo
+      - gpt-4o-mini
 ```
 
 ### 2. Blue-Green Deployment
@@ -362,16 +355,7 @@ docker compose -f docker-compose.green.yml down
 
 ### 3. Health Checks
 
-```yaml
-# Good: Multiple health check endpoints (conceptual)
-health_checks:
-  - endpoint: /health
-    interval: 30s
-    timeout: 10s
-  - endpoint: /metrics
-    interval: 60s
-    timeout: 5s
-```
+Configure health checks at the infrastructure level (Docker, Kubernetes, load balancer) pointing to the gateway's `/health` endpoint.
 
 ---
 
@@ -419,6 +403,6 @@ Maintain runbooks for common incidents:
 
 ## Next Steps
 
-- **[Configuration Examples](./configuration/examples.md)** - Practical configuration examples
+- **[Advanced Configuration](./configuration/advanced-configuration.md)** - Full configuration reference
 - **[Production Deployment](./deployment/production.md)** - Production deployment guide
-- **[Monitoring](./monitoring.md)** - Comprehensive monitoring setup
+- **[Monitoring](./operations/monitoring.md)** - Comprehensive monitoring setup

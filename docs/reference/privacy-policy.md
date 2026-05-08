@@ -45,41 +45,7 @@ The gateway includes built-in privacy features:
 - **Access Control**: API key-based authentication with groups and route associations
 - **Audit Logging**: Request and response logging for monitoring and analysis
 
-## Privacy Features
-
-The gateway provides tools to help protect privacy:
-
-- **PII Detection**: Use Presidio guardrails to detect personally identifiable information (PII) in input and output
-- **PII Anonymization**: Automatically mask or replace PII with placeholders before processing or returning responses
-- **Content Filtering**: Apply guardrails to filter sensitive content
-- **Request Logging**: Track and log requests for security and compliance monitoring
-
 ## Configuration
-
-### Privacy Settings
-
-Configure privacy settings in your gateway configuration:
-
-```yaml
-# Privacy configuration
-privacy:
-  # Data retention
-  retention:
-    logs: 30 days
-    metrics: 90 days
-    cache: 5 minutes
-  
-  # PII protection
-  pii_protection:
-    enabled: true
-    entities: ["EMAIL_ADDRESS", "PHONE_NUMBER", "CREDIT_CARD"]
-  
-  # Audit logging
-  audit_logging:
-    enabled: true
-    level: INFO
-    fields: ["timestamp", "user_id", "action", "resource"]
-```
 
 ### Guardrails for Privacy
 
@@ -98,7 +64,6 @@ guardrails:
   - name: pii_anonymizer
     type: presidio_anonymizer
     where: io
-    behavior: warn
     parameters:
       language: en
       entities: ["EMAIL_ADDRESS", "PHONE_NUMBER"]
@@ -216,20 +181,19 @@ This privacy policy may be updated:
 
 For privacy questions:
 
-- **Email**: privacy@radicalbit.com
-- **Website**: https://radicalbit.com/privacy
+- **Email**: privacy@radicalbit.ai
+- **Website**: https://radicalbit.ai/privacy
 - **Address**: [Company Address]
 
 ### Data Protection Officer
 
 For data protection questions:
 
-- **Email**: dpo@radicalbit.com
+- **Email**: dpo@radicalbit.ai
 - **Phone**: [Phone Number]
 
 ## Next Steps
 
-- **[Configuration Guide](./configuration/advanced-configuration.md)** - Learn about privacy configuration
-- **[Best Practices](./best-practices.md)** - Follow privacy best practices
-- **[Support](./support.md)** - Get help with privacy questions
+- **[Configuration Guide](../configuration/advanced-configuration.md)** - Learn about privacy configuration
+- **[Best Practices](../best-practices.md)** - Follow privacy best practices
 - **[Enterprise](./enterprise.md)** - Review commercial licensing information

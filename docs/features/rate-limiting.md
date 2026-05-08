@@ -48,7 +48,7 @@ rate_limiting:
   max_requests: 100
 ```
 
-**Note**: Other algorithms (`sliding_window`, `sliding_window_counter`) may exist in the schema, but if they are not implemented by your gateway version, behavior will still be fixed-window.
+**Alternative algorithm**: `aligned_fixed_window` — time-aligns windows for fairer distribution across clients.
 
 ---
 
@@ -182,5 +182,5 @@ X-RateLimit-Reset: 1640995200
 
 - **[Token Limiting](./token-limiting.md)** - Configure token-based limits
 - **[Budget Limiting](./budget-limiting.md)** - Set up cost controls
-- **[Monitoring](../monitoring.md)** - Set up observability and metrics
+- **[Monitoring](../operations/monitoring.md)** - Set up observability and metrics
 - **[API Reference](../api-reference/endpoints.md)** - Complete API documentation

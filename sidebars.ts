@@ -32,8 +32,11 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Configuration',
       items: [
+        'configuration/projects',
         'configuration/basic-setup',
         'configuration/advanced-configuration',
+        'configuration/models',
+        'configuration/fallback',
       ],
     },
     {
@@ -46,7 +49,6 @@ const sidebars: SidebarsConfig = {
         'features/budget-limiting',
         'features/semantic-caching',
         'features/advanced-routing',
-        'configuration/fallback',
       ],
     },
     {
@@ -104,7 +106,12 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Reference',
       items: [
+        'reference/about',
         'reference/contacts',
+        'reference/enterprise',
+        'reference/privacy-policy',
+        'reference/terms-of-service',
+        'reference/contributing',
       ],
     },
   ],

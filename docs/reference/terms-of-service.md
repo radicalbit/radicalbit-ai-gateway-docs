@@ -199,12 +199,12 @@ Upon termination:
 
 ### Jurisdiction
 
-These terms are governed by:
+These terms are governed by the laws of Italy.
 
-- **Governing Law**: [Applicable Law]
-- **Jurisdiction**: [Applicable Jurisdiction]
-- **Dispute Resolution**: [Dispute Resolution Process]
-- **Arbitration**: [Arbitration Process]
+- **Governing Law**: Italian Law
+- **Jurisdiction**: Courts of Milan, Italy
+- **Dispute Resolution**: Negotiation, then binding arbitration
+- **Arbitration**: Administered under Italian arbitration rules
 
 ### Legal Compliance
 
@@ -221,17 +221,14 @@ Users must comply with:
 
 For general questions:
 
-- **Email**: legal@radicalbit.com
-- **Website**: https://radicalbit.com/legal
-- **Address**: [Company Address]
+- **Email**: legal@radicalbit.ai
+- **Website**: https://radicalbit.ai
 
 ### Legal Contact
 
 For legal questions:
 
-- **Email**: legal@radicalbit.com
-- **Phone**: [Phone Number]
-- **Address**: [Legal Address]
+- **Email**: legal@radicalbit.ai
 
 ## Severability
 
@@ -245,5 +242,4 @@ These terms constitute the entire agreement between you and Radicalbit regarding
 
 - **[Enterprise](./enterprise.md)** - Review commercial licensing information
 - **[Privacy Policy](./privacy-policy.md)** - Review privacy practices
-- **[Support](./support.md)** - Get help and support
 - **[Contributing](./contributing.md)** - Learn how to contribute

@@ -298,4 +298,4 @@ routes:
 
 - **[Model Configuration](./models.md)** - Detailed model setup guide
 - **[Advanced Configuration](./advanced-configuration.md)** - Enterprise configuration options
-- **[Monitoring](../monitoring.md)** - Observability and metrics setup
+- **[Monitoring](../operations/monitoring.md)** - Observability and metrics setup

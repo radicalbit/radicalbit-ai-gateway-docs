@@ -225,5 +225,5 @@ Semantic cache keys are typically derived from:
 
 - **[Caching](./caching.md)** - Learn about exact caching strategies
 - **[Fallback](../configuration/fallback.md)** - Set up automatic failover
-- **[Monitoring](../monitoring.md)** - Set up observability and metrics
+- **[Monitoring](../operations/monitoring.md)** - Set up observability and metrics
 - **[API Reference](../api-reference/endpoints.md)** - Complete API documentation

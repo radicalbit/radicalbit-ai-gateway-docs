@@ -3,10 +3,6 @@ import TabItem from '@theme/TabItem';
 
 # Advanced Configuration
 
-:::info
-*This page is under development.*
-:::
-
 In this page we are going to explain how to configure the Gateway routes in all its component and features.
 
 - **[Routes](#routes)**

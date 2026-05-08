@@ -129,5 +129,5 @@ X-Budget-Reset: 1640995200
 
 - **[Rate Limiting](./rate-limiting.md)** - Configure request limits
 - **[Token Limiting](./token-limiting.md)** - Set up token-based limits
-- **[Monitoring](../monitoring.md)** - Set up observability and metrics
+- **[Monitoring](../operations/monitoring.md)** - Set up observability and metrics
 - **[API Reference](../api-reference/endpoints.md)** - Complete API documentation

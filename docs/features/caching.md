@@ -180,5 +180,5 @@ For semantic cache, the gateway also stores/queries the embedding vectors for si
 ## Next Steps
 
 - **[Fallback](../configuration/fallback.md)** - Set up automatic failover
-- **[Monitoring](../monitoring.md)** - Set up observability and metrics
+- **[Monitoring](../operations/monitoring.md)** - Set up observability and metrics
 - **[API Reference](../api-reference/endpoints.md)** - Complete API documentation

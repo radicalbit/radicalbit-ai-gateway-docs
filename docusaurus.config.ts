@@ -110,7 +110,7 @@ const config: Config = {
             },
             {
               label: 'Commercial Licensing',
-              to: '/enterprise',
+              to: '/reference/enterprise',
             },
           ],
         },
