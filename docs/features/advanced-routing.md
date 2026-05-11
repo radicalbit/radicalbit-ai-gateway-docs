@@ -6,12 +6,6 @@ This page covers intelligent routing configuration for the Radicalbit AI Gateway
 
 Intelligent routing in the Radicalbit AI Gateway allows you to automatically select which model handles a request based on rule-based logic. Instead of always routing to a fixed model, routing evaluates incoming requests against configurable rules — such as keywords in the user message, token count (per-message or full conversation), time of day, or budget consumption — and directs each request to the most appropriate model.
 
-With the **new configuration structure**:
-
-- **Routing configs are defined at top-level** (`routing`) as a list of named configurations
-- **Routes reference routing configs by name** (strings)
-- Models are defined at top-level (`chat_models`, `embedding_models`) and referenced by ID
-
 There are three routing categories:
 
 | Category | `type` value | Decision basis | Added latency |
@@ -328,7 +322,7 @@ All cron expressions are evaluated in **UTC**. Make sure to adjust your schedule
 
 The **budget** rule routes requests based on the current budget consumption ratio, allowing you to switch to cheaper models as spending approaches the budget limit.
 
-**How it works**: The gateway computes a **combined** usage ratio across both input and output budgets. It sums the two configured limits (`max_budget` = input `max_budget` + output `max_budget`) and sums the remaining budgets for both, then calculates `usage_ratio = 1 - (total_remaining / total_max_budget)`. It then sorts `output_mapping` entries by `threshold` descending and selects the first entry whose threshold is less than or equal to the usage ratio.
+**How it works**: The gateway tracks cumulative spending (input + output token costs combined) against the single `max_budget` configured on the route. It calculates `usage_ratio = 1 - (remaining_budget / max_budget)`, then sorts `output_mapping` entries by `threshold` descending and selects the first entry whose threshold is less than or equal to the usage ratio.
 
 **Conditions type**: `BudgetConditions` — an object with a `threshold` field (float, 0.0 to 1.0)
 
@@ -376,7 +370,7 @@ routes:
 
 **Behavior**:
 - Entries are sorted by `threshold` **descending** (highest first) — the highest threshold that the usage ratio meets or exceeds wins
-- The usage ratio is computed over the **combined input + output budget**, in the example above $150 total. A `threshold` of `0.8` triggers when $120 or more has been consumed across both
+- The usage ratio is computed against the single `max_budget` value. In the example above, a `threshold` of `0.8` triggers when $120 or more of the $150 budget has been spent (input + output costs combined)
 - If no threshold is met, or if no budget limiter is configured, `default_model_id` is used
 
 ---
@@ -708,7 +702,7 @@ Write conditions that are representative of real user messages. More diverse exa
 
 ## Next Steps
 
-- **[Fallback Configuration](../configuration/fallback.md)** - Set up automatic failover when models fail
+- **[Fallback](./fallback.md)** - Set up automatic failover when models fail
 - **[Budget Limiting](./budget-limiting.md)** - Configure budget limits (required for budget routing)
 - **[Semantic Caching](./semantic-caching.md)** - Another embedding-based feature for caching similar requests
 - **[Advanced Configuration](../configuration/advanced-configuration.md)** - Enterprise configuration options

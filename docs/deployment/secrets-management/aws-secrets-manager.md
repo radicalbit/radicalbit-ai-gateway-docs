@@ -1,5 +1,9 @@
 # AWS Secrets Manager
 
+:::info[Enterprise Feature]{className="enterprise-badge"}
+This feature is available exclusively in the **Enterprise edition** of the Radicalbit AI Gateway. [Contact sales](mailto:sales@radicalbit.ai) for licensing information.
+:::
+
 This plugin enables the gateway to resolve `!secret` references from AWS Secrets Manager instead of a static `secrets.yaml` file.
 
 All gateway secrets are stored in **one AWS Secrets Manager secret** as a JSON object of key-value pairs. Each `!secret KEY` reference fetches the corresponding key from that single secret.
@@ -56,18 +60,6 @@ export AWS_SECRET_NAME=gateway/secrets
 export AWS_REGION=eu-west-1
 export AWS_ACCESS_KEY_ID=AKIA...
 export AWS_SECRET_ACCESS_KEY=wJalrXU...
-```
-
-## Docker Compose Example
-
-```yaml
-services:
-  gateway:
-    environment:
-      ENABLED_PLUGINS: "aws_secrets_manager"
-      AWS_REGION: "eu-west-1"
-      AWS_SECRET_NAME: "gateway/secrets"
-      # No explicit credentials — uses IAM role attached to the instance
 ```
 
 ## Dependencies

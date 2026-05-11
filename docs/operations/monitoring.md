@@ -8,18 +8,18 @@ The Radicalbit AI Gateway exposes a wealth of metrics via a Prometheus endpoint,
 
 | Metric Name                               | Description                                         | Labels                                   |
 | ----------------------------------------- | --------------------------------------------------- | ---------------------------------------- |
-| `gateway_requests_total`                  | Total number of requests processed.                 | `http_method`, `http_status_code`, `route_name` |
+| `gateway_requests_total_total`            | Total number of requests processed.                 | `http_method`, `http_status_code`, `route_name` |
 | `gateway_request_duration_milliseconds`   | Histogram of end-to-end request latency.            | `route_name`                             |
 | `gateway_model_invocations_total`         | Number of times a specific model was invoked.       | `route_name`, `model_name`               |
 | `gateway_invocation_duration_milliseconds`| Histogram of latency for individual model calls.    | `route_name`, `model_name`               |
 | `gateway_fallbacks_triggered_total`       | Number of times a fallback was triggered.           | `route_name`, `target`, `fallback`       |
 | `gateway_guardrails_triggered_total`      | Number of times a guardrail was triggered.          | `route_name`, `name`, `type`, `behavior` |
-| `gateway_tokens_total_input_tokens_total` | Total number of input tokens processed.             | `route_name`, `model_name`               |
-| `gateway_tokens_total_output_tokens_total`| Total number of output tokens processed.            | `route_name`, `model_name`               |
+| `gateway_tokens_total_input_total`        | Total number of input tokens processed.             | `route_name`, `model_name`               |
+| `gateway_tokens_total_output_total`       | Total number of output tokens processed.            | `route_name`, `model_name`               |
 | `gateway_cache_hit_total`                 | Total number of cache hits.                         | `route_name`                             |
 | `gateway_rate_limiting_total`             | Total number of times rate limiting was triggered.  | `route_name`                             |
-| `gateway_token_input_limiting_total`      | Total number of times input token limit was hit.    | `route_name`, `model_name`               |
-| `gateway_token_output_limiting_total`     | Total number of times output token limit was hit.   | `route_name`, `model_name`               |
+| `gateway_token_input_limiting_total`      | Total number of times input token limit was hit.    | `route_name`                             |
+| `gateway_token_output_limiting_total`     | Total number of times output token limit was hit.   | `route_name`                             |
 
 ## Accessing Metrics
 
@@ -49,10 +49,10 @@ gateway_request_duration_milliseconds_bucket{route_name="customer-service",le="+
 gateway_model_invocations_total{route_name="customer-service",model_name="gpt-3.5-turbo"} 75
 gateway_model_invocations_total{route_name="customer-service",model_name="gpt-4o-mini"} 75
 
-# HELP gateway_tokens_total_input_tokens_total Total number of input tokens processed
-# TYPE gateway_tokens_total_input_tokens_total counter
-gateway_tokens_total_input_tokens_total{route_name="customer-service",model_name="gpt-3.5-turbo"} 15000
-gateway_tokens_total_input_tokens_total{route_name="customer-service",model_name="gpt-4o-mini"} 12000
+# HELP gateway_tokens_total_input_total Total number of input tokens processed
+# TYPE gateway_tokens_total_input_total counter
+gateway_tokens_total_input_total{route_name="customer-service",model_name="gpt-3.5-turbo"} 15000
+gateway_tokens_total_input_total{route_name="customer-service",model_name="gpt-4o-mini"} 12000
 ```
 
 
@@ -84,5 +84,5 @@ The UI is typically available at the same host as the gateway, on a separate por
 
 ## Next Steps
 
-- **[Configuration Guide](./configuration/advanced-configuration.md)** - Complete configuration reference
-- **[API Reference](./api-reference/endpoints.md)** - Complete API documentation
+- **[Configuration Guide](../configuration/advanced-configuration.md)** - Complete configuration reference
+- **[API Reference](../api-reference/endpoints.md)** - Complete API documentation

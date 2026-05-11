@@ -8,11 +8,6 @@ Budget limiting in the Radicalbit AI Gateway controls costs by setting a limit o
 
 A single time window tracks total spending — when the combined cost of input and output tokens crosses the configured threshold within the window, further requests are rejected until the window resets.
 
-With the **configuration structure**:
-
-- Models are defined at top-level (`chat_models`, `embedding_models`)
-- Routes reference models by **model ID** (strings)
-
 ---
 
 ## Budget Limiting Configuration
@@ -129,5 +124,5 @@ X-Budget-Reset: 1640995200
 
 - **[Rate Limiting](./rate-limiting.md)** - Configure request limits
 - **[Token Limiting](./token-limiting.md)** - Set up token-based limits
-- **[Monitoring](../monitoring.md)** - Set up observability and metrics
+- **[Monitoring](../operations/monitoring.md)** - Set up observability and metrics
 - **[API Reference](../api-reference/endpoints.md)** - Complete API documentation

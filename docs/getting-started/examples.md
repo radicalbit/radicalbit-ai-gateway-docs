@@ -9,7 +9,7 @@ The Radicalbit AI Gateway is fully compatible with the OpenAI standard. This mea
 |-----------|-------|
 | `base_url` | Your Gateway URL (e.g., `http://localhost:9000/v1`) |
 | `api_key` | Your Gateway API Key (generated from the UI) |
-| `model` | The **route name** defined in your `config.yaml` |
+| `model` | `project-name/route-name` — the project and route defined in your `config.yaml` |
 
 The examples below show how to do this with the most common Python frameworks.
 
@@ -35,7 +35,7 @@ routes:
       - gpt-5.1-assistant
 ```
 
-The route name (`my-assistant`) is what you pass as the `model` parameter in your application code. The Gateway handles the rest.
+Routes are accessed using the format `project-name/route-name`. If your project is called `my-project` and your route is `my-assistant`, you pass `my-project/my-assistant` as the `model` parameter. The Gateway handles the rest.
 
 ---
 
@@ -55,7 +55,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="my-assistant",  # route name from config.yaml
+    model="my-project/my-assistant",  # project-name/route-name
     messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "What is the capital of France?"},
@@ -77,7 +77,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 llm = ChatOpenAI(
     openai_api_base="http://localhost:9000/v1",
     openai_api_key="your-gateway-api-key",
-    model_name="my-assistant",  # route name from config.yaml
+    model_name="my-project/my-assistant",  # project-name/route-name
 )
 
 messages = [
@@ -115,7 +115,7 @@ from llama_index.llms.openai import OpenAI
 llm = OpenAI(
     api_base="http://localhost:9000/v1",
     api_key="your-gateway-api-key",
-    model="my-assistant",  # route name from config.yaml
+    model="my-project/my-assistant",  # project-name/route-name
 )
 
 response = llm.complete("What is the capital of France?")
@@ -158,7 +158,7 @@ class Answer(BaseModel):
     country: str
 
 response = client.chat.completions.create(
-    model="my-assistant",  # route name from config.yaml
+    model="my-project/my-assistant",  # project-name/route-name
     messages=[
         {"role": "user", "content": "What is the capital of France?"},
     ],
@@ -181,7 +181,7 @@ from haystack.dataclasses import ChatMessage
 generator = OpenAIChatGenerator(
     api_base_url="http://localhost:9000/v1",
     api_key="your-gateway-api-key",  # pass as a Secret or plain string
-    model="my-assistant",  # route name from config.yaml
+    model="my-project/my-assistant",  # project-name/route-name
 )
 
 messages = [
@@ -237,7 +237,7 @@ user_proxy.initiate_chat(
 import litellm
 
 response = litellm.completion(
-    model="openai/my-assistant",  # openai/ prefix + route name from config.yaml
+    model="openai/my-project/my-assistant",  # openai/ prefix + project-name/route-name
     messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "What is the capital of France?"},
@@ -259,7 +259,7 @@ curl http://localhost:9000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer your-gateway-api-key" \
   -d '{
-    "model": "my-assistant",
+    "model": "my-project/my-assistant",
     "messages": [
       {"role": "system", "content": "You are a helpful assistant."},
       {"role": "user", "content": "What is the capital of France?"}
@@ -285,7 +285,7 @@ client = OpenAI(
 )
 
 stream = client.chat.completions.create(
-    model="my-assistant",
+    model="my-project/my-assistant",
     messages=[{"role": "user", "content": "Tell me a short story."}],
     stream=True,
 )

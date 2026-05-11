@@ -1,5 +1,9 @@
 # HashiCorp Vault
 
+:::info[Enterprise Feature]{className="enterprise-badge"}
+This feature is available exclusively in the **Enterprise edition** of the Radicalbit AI Gateway. [Contact sales](mailto:sales@radicalbit.ai) for licensing information.
+:::
+
 This plugin enables the gateway to resolve `!secret` references from HashiCorp Vault instead of a static `secrets.yaml` file.
 
 Secrets are stored in Vault's KV engine (v1 or v2). The provider reads a single secret at `VAULT_MOUNT_PATH/VAULT_SECRET_PATH` and resolves individual keys from it.
@@ -54,32 +58,6 @@ export VAULT_TOKEN=root
 export VAULT_ADDR=http://vault:8200
 export VAULT_ROLE_ID=your-role-id
 export VAULT_SECRET_ID=your-secret-id
-```
-
-## Docker Compose Example
-
-```yaml
-services:
-  vault:
-    image: hashicorp/vault:1.18
-    ports:
-      - "8200:8200"
-    environment:
-      VAULT_DEV_ROOT_TOKEN_ID: "root"
-      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
-    cap_add:
-      - IPC_LOCK
-
-  gateway:
-    environment:
-      ENABLED_PLUGINS: "hashicorp_vault"
-      VAULT_ADDR: "http://vault:8200"
-      VAULT_TOKEN: "root"
-      VAULT_MOUNT_PATH: "secret"
-      VAULT_SECRET_PATH: "gateway"
-      VAULT_KV_VERSION: "v2"
-    depends_on:
-      - vault
 ```
 
 ## Dependencies

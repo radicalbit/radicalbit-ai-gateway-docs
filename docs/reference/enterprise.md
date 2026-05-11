@@ -1,114 +1,46 @@
 # Enterprise
 
-This page provides information about enterprise features and services for the Radicalbit AI Gateway.
+The Enterprise edition of the Radicalbit AI Gateway is designed for organizations that need to operate AI infrastructure at scale, with strong governance, security controls, and integration into existing identity systems.
 
-## Enterprise Features
+It includes everything in the standard edition, plus the following capabilities.
 
-### 🚀 Core Capabilities
+---
 
-- **Guardrails**: Content safety and filtering
-- **Fallback**: Automatic failover between models
-- **Caching**: Redis and in-memory caching support
-- **Rate Limiting**: Request and token-based limiting
-- **Budget Limiting**: Cost control and monitoring
-- **Metrics**: Comprehensive monitoring and observability
-- **API Key Management**: Secure API key handling
-- **Plugin System**: Extensible architecture
+## Access Control
 
+Enterprise deployments can integrate the gateway with an existing **Identity Provider (IDP)** to centralize user and group management. Rather than managing gateway users manually, your organization's existing identity infrastructure is used as the source of truth.
 
-### 🛡️ Security Features
+Key capabilities:
 
-- **Content Safety**: AI-powered guardrails for safe content
-- **API Key Security**: Secure credential management
-- **Request Validation**: Input validation and sanitization
-- **Audit Logging**: Request and response logging
+- **IDP Integration** — currently supports Keycloak, with additional providers available on request. Users and groups are automatically synchronized from the IDP into the gateway on a configurable schedule.
+- **Role-Based Access Control** — three built-in roles with granular permissions:
+  - **ADMIN** — full access: manage users, groups, API keys, projects, and serve configurations
+  - **BUILDER** — configure projects and mark configurations as ready to serve
+  - **AUDITOR** — read-only access to dashboards, tracing, and metrics
+- **OIDC Single Sign-On** — the gateway admin interface supports SSO via standard OpenID Connect, so users log in with their existing organizational credentials
+- **JWT Token Authentication** — users can call gateway API endpoints directly using IDP-issued JWT tokens, without needing separately managed gateway API keys
 
-### 📊 Monitoring and Analytics
+See [Access Control](../access-control/index.md) for configuration details.
 
-- **Metrics Collection**: Request counts, response times, error rates
-- **Performance Monitoring**: Gateway performance tracking
-- **Cost Tracking**: Token usage and cost monitoring
-- **Health Checks**: Service availability monitoring
+---
 
-## Enterprise Services
+## Secrets Management
 
-### Professional Services
+In production environments, API keys and other sensitive credentials should not live inside configuration files. The gateway supports pluggable **secrets backends** that resolve `!secret KEY` references at startup from a secure external store.
 
-#### Consulting
+Supported providers:
 
-- **Architecture Review**: Review your AI infrastructure
-- **Implementation Planning**: Plan your gateway deployment
-- **Performance Optimization**: Optimize your configuration
-- **Configuration Management**: Manage complex configurations
+- **AWS Secrets Manager** — secrets stored as a single JSON object
+- **HashiCorp Vault** — key-value pairs under a configurable path, with token or AppRole authentication
+- **Google Cloud Secret Manager** — individual secrets per key, with label-based filtering
+- **Azure Key Vault** — individual secrets per key, with optional prefix filtering
 
-#### Implementation
+When a secrets plugin is enabled, no `secrets.yaml` file is needed — the plugin replaces it transparently. Your `config.yaml` remains unchanged.
 
-- **Custom Development**: Build custom features and integrations
-- **Integration Services**: Integrate with existing systems
-- **Deployment Services**: Deploy to production environments
-- **Testing Services**: Comprehensive testing and validation
+Custom secrets providers can also be implemented as plugins. See [Secrets Management](../deployment/secrets-management/index.md) for details.
 
-#### Training
+---
 
-- **Basic Training**: Getting started with the gateway
-- **Advanced Training**: Advanced configuration and optimization
-- **Administrator Training**: System administration and management
-- **Developer Training**: Custom development and integration
+## Licensing
 
-### Support Services
-
-#### Priority Support
-
-- **Faster Response Times**: Priority response times
-- **Dedicated Support**: Dedicated support engineer
-- **Phone Support**: Direct phone support
-- **Remote Assistance**: Remote troubleshooting and assistance
-
-#### SLA
-
-- **Response Times**: Guaranteed response times
-- **Resolution Times**: Target resolution times
-- **Uptime**: Service level agreements
-- **Escalation**: Escalation procedures
-
-## Commercial Licensing
-
-### License Information
-
-The Radicalbit AI Gateway is available under commercial licensing terms for enterprise use. For detailed licensing information and commercial terms, please contact our commercial team.
-
-### Contact Commercial Team
-
-For licensing inquiries, commercial terms, and enterprise agreements:
-
-- **Email**: sales@radicalbit.ai
-- **Phone**: +39 02 37920598
-- **Website**: https://radicalbit.ai
-- **Sales Team**: sales@radicalbit.ai
-
-### Enterprise Licensing Options
-
-#### Commercial License
-
-- **Commercial Use**: Full commercial usage rights
-- **Enterprise Features**: Access to enterprise features
-- **Priority Support**: Dedicated support channels
-- **SLA Guarantees**: Service level agreements
-- **Custom Terms**: Flexible licensing terms
-- **Volume Discounts**: Volume-based pricing
-
-#### Professional License
-
-- **Professional Use**: Professional usage rights
-- **Standard Support**: Standard support channels
-- **Basic Features**: Core gateway features
-- **Standard Terms**: Standard licensing terms
-- **Renewal Options**: Flexible renewal terms
-
-## Next Steps
-
-- **[Getting Started](./getting-started/installation.md)** - Set up your first gateway instance
-- **[Configuration Guide](./configuration/advanced-configuration.md)** - Learn how to configure the gateway
-- **[Guardrails](./features/guardrails.md)** - Implement content safety
-- **[API Reference](./api-reference/endpoints.md)** - Complete API documentation
-- **[Support](./support.md)** - Get help and support
+For licensing inquiries and enterprise agreements: sales@radicalbit.ai

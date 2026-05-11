@@ -6,11 +6,6 @@ This page covers rate limiting configuration and features in the Radicalbit AI G
 
 Rate limiting in the Radicalbit AI Gateway controls the number of requests that can be made within a specific time window, helping to manage costs and prevent abuse.
 
-With the **new configuration structure**:
-
-- Models are defined at top-level (`chat_models`, `embedding_models`)
-- Routes reference models by **model ID** (strings)
-
 ---
 
 ## Rate Limiting Types
@@ -39,7 +34,7 @@ routes:
 
 ### Fixed Window
 
-The gateway uses the fixed window algorithm for rate limiting. This counts requests within fixed time windows:
+The `fixed_window` algorithm counts requests within rolling fixed-duration windows:
 
 ```yaml
 rate_limiting:
@@ -48,7 +43,16 @@ rate_limiting:
   max_requests: 100
 ```
 
-**Note**: Other algorithms (`sliding_window`, `sliding_window_counter`) may exist in the schema, but if they are not implemented by your gateway version, behavior will still be fixed-window.
+### Aligned Fixed Window
+
+The `aligned_fixed_window` algorithm works like `fixed_window` but aligns window boundaries to the clock (e.g., top of the hour), so all clients reset at the same predictable moment. Window sizes must divide evenly into 24 hours (e.g., `1 minute`, `15 minutes`, `1 hour`).
+
+```yaml
+rate_limiting:
+  algorithm: aligned_fixed_window
+  window_size: 1 hour
+  max_requests: 1000
+```
 
 ---
 
@@ -106,17 +110,6 @@ rate_limiting:
   window_size: 5 minutes
   max_requests: 500
 ```
-
-### Algorithm Configuration
-```yaml
-# Fixed window (currently implemented)
-rate_limiting:
-  algorithm: fixed_window
-  window_size: 1 minute
-  max_requests: 100
-```
-
-**Note**: While you can specify `sliding_window` or `sliding_window_counter` in the configuration, your gateway may still only implement fixed window limiting.
 
 ---
 
@@ -182,5 +175,5 @@ X-RateLimit-Reset: 1640995200
 
 - **[Token Limiting](./token-limiting.md)** - Configure token-based limits
 - **[Budget Limiting](./budget-limiting.md)** - Set up cost controls
-- **[Monitoring](../monitoring.md)** - Set up observability and metrics
+- **[Monitoring](../operations/monitoring.md)** - Set up observability and metrics
 - **[API Reference](../api-reference/endpoints.md)** - Complete API documentation

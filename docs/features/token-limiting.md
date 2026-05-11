@@ -6,82 +6,6 @@ This page covers token limiting configuration and features in the Radicalbit AI 
 
 Token limiting controls the number of tokens consumed by requests within a specific time window, helping to manage costs and prevent abuse.
 
-With the **new configuration structure**:
-
-- Models are defined at top-level (`chat_models`, `embedding_models`)
-- Routes reference models by **model ID** (strings)
-
----
-
-## Token Limiting Scopes
-
-Token limiting supports three scopes to control how limits are applied:
-
-| Scope | Description | Use Case |
-|-------|-------------|----------|
-| `route` (default) | Limits shared across all users for a route | Global route limits, cost control per route |
-| `user` | Limits per API key/user | Per-user quotas, individual user limits |
-| `group` | Limits per group (multiple users share the same limit) | Team/organization limits, shared quotas |
-
-### Route Scope (Default)
-
-When `scope: route` is set (or omitted), all requests to the route share the same token limit pool:
-
-```yaml
-chat_models:
-  - model_id: gpt-4o
-    model: openai/gpt-4o
-
-routes:
-  production:
-    chat_models:
-      - gpt-4o
-    token_limiting:
-      scope: route  # Optional, default value
-      input:
-        algorithm: fixed_window
-        window_size: 1 hour
-        max_token: 1000000
-      output:
-        algorithm: fixed_window
-        window_size: 1 hour
-        max_token: 1000000
-```
-
-### User Scope
-
-Each API key has its own independent token limit:
-
-```yaml
-token_limiting:
-  scope: user  # Each API key has its own limit
-  input:
-    algorithm: fixed_window
-    window_size: 1 hour
-    max_token: 100000
-  output:
-    algorithm: fixed_window
-    window_size: 1 hour
-    max_token: 500000
-```
-
-### Group Scope
-
-All API keys belonging to the same group share a common token limit:
-
-```yaml
-token_limiting:
-  scope: group  # All users in the same group share the limit
-  input:
-    algorithm: fixed_window
-    window_size: 1 day
-    max_token: 1000000
-  output:
-    algorithm: fixed_window
-    window_size: 1 day
-    max_token: 5000000
-```
-
 ---
 
 ## Configuration
@@ -103,8 +27,7 @@ routes:
 ```
 
 **Parameters:**
-- `scope`: (`route`, `user`, `group`) – optional, default `route`
-- `algorithm`: limiting algorithm (commonly `fixed_window`)
+- `algorithm`: limiting algorithm (`fixed_window` or `aligned_fixed_window`)
 - `window_size`: time window for the limit (e.g., `10 seconds`, `1 minute`, `1 hour`)
 - `max_token`: maximum number of tokens allowed within the window
 
@@ -139,5 +62,5 @@ When a token limit is exceeded, the gateway returns an HTTP **429 (Too Many Requ
 
 - **[Rate Limiting](./rate-limiting.md)** - Configure rate-based limits
 - **[Budget Limiting](./budget-limiting.md)** - Set up cost controls
-- **[Monitoring](../monitoring.md)** - Set up observability and metrics
+- **[Monitoring](../operations/monitoring.md)** - Set up observability and metrics
 - **[API Reference](../api-reference/endpoints.md)** - Complete API documentation

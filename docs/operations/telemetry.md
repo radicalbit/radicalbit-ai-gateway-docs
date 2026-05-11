@@ -20,7 +20,7 @@ environment:
   COLLECTOR_BASE_URL: http://otel-collector:4318/v1/traces
 ```
 
-When using the provided `docker-compose.yaml`, the `otel-collector` service is started automatically alongside the gateway and ClickHouse — no extra steps are needed.
+The gateway stack includes a built-in OTel Collector alongside ClickHouse — when both are running, no extra configuration is needed beyond setting `COLLECTOR_BASE_URL`.
 
 :::tip
 `COLLECTOR_BASE_URL` must include the full path (e.g. `/v1/traces`). Unlike `OTLP_EXPORTERS`, no path is appended automatically.

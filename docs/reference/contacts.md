@@ -1,4 +1,4 @@
-# Contatcs
+# Contacts
 
 
 - **Email**: info@radicalbit.ai

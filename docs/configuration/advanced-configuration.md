@@ -3,10 +3,6 @@ import TabItem from '@theme/TabItem';
 
 # Advanced Configuration
 
-:::info
-*This page is under development.*
-:::
-
 In this page we are going to explain how to configure the Gateway routes in all its component and features.
 
 - **[Routes](#routes)**
@@ -192,13 +188,10 @@ Mount a host folder containing prompt files and configure the directories via en
 
 - `PROMPTS_DIR`: directory for chat model prompts (`prompt_ref`)
 
-Example (docker compose snippet):
-```yaml
-environment:
-  PROMPTS_DIR: "/radicalbit_ai_gateway/radicalbit_ai_gateway/prompts"
-volumes:
-  - ${PROMPTS_HOST_DIR:-./prompts}:/radicalbit_ai_gateway/radicalbit_ai_gateway/prompts:ro
-```
+Set the environment variable and mount the prompts directory into the container:
+
+- **Environment variable:** `PROMPTS_DIR=/radicalbit_ai_gateway/radicalbit_ai_gateway/prompts`
+- **Mount:** your local prompts folder → `/radicalbit_ai_gateway/radicalbit_ai_gateway/prompts` (read-only)
 
 ### Embeddings
 
@@ -262,237 +255,68 @@ volumes:
 
 ## Guardrails
 
-Guardrails are defined at the **top level** of `config.yaml` and then **referenced by name** inside a route. This allows the same guardrail to be reused across multiple routes.
+Guardrails are defined at the **top level** and **referenced by name** inside routes, so the same guardrail can be reused across multiple routes.
 
 ```yaml
 guardrails:
-  - name: my_guardrail       # unique identifier
-    type: ...                # guardrail type
-    where: input             # input | output | io
-    behavior: block          # block | soft_block | warn (not needed for redact types)
-    response_message: "..."  # optional message returned to the user when triggered
-    parameters: ...          # type-specific settings
+  - name: my_guardrail
+    type: contains          # starts_with | ends_with | contains | regex | presidio_analyzer | presidio_anonymizer | judge
+    where: input            # input | output | io
+    behavior: block         # block | soft_block | warn  (not needed for presidio_anonymizer)
+    response_message: "..." # optional — returned to the user when triggered
+    parameters: ...         # type-specific
 
 routes:
   your-route:
     chat_models:
       - your-model
     guardrails:
-      - my_guardrail         # reference by name
+      - my_guardrail        # reference by name
 ```
 
-- **`name`**: Unique identifier, used to reference the guardrail from a route.
-- **`type`**: The guardrail type (see subsections below).
-- **`where`**: Where to apply it — `input` (user message), `output` (model response), or `io` (both).
-- **`behavior`**: Action when triggered — `block` (reject), `soft_block` (reject with friendly message), `warn` (log and continue). Not required for redact types.
-- **`response_message`**: Optional message returned to the user when the guardrail fires.
-- **`parameters`**: Type-specific configuration.
-
-### Text Control
-
-Fast, rule-based filters using pattern matching. These run with minimal latency and should be your first line of defence.
-
-| Type | Description |
-|------|-------------|
-| `starts_with` | Triggers if the text starts with any of the specified strings |
-| `ends_with` | Triggers if the text ends with any of the specified strings |
-| `contains` | Triggers if the text contains any of the specified substrings |
-| `regex` | Triggers if the text matches any of the specified regular expressions |
-
-All four types use the same `parameters` key: **`values`** — a list of strings or patterns to match against.
-
-**Example:**
-```yaml
-guardrails:
-  - name: profanity_filter
-    type: contains
-    where: input
-    behavior: block
-    parameters:
-      values: ["inappropriate", "offensive", "spam"]
-    response_message: "Content blocked due to inappropriate language"
-
-  - name: email_detector
-    type: regex
-    where: io
-    behavior: block
-    parameters:
-      values: ['\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b']
-    response_message: "Email addresses are not allowed"
-
-routes:
-  your-route:
-    chat_models:
-      - your-model
-    guardrails:
-      - profanity_filter
-      - email_detector
-```
-
-### PII Detection and Masking
-
-PII guardrails are powered by [Microsoft Presidio](https://microsoft.github.io/presidio/) and support two types:
-
-- **`presidio_analyzer`** — a *Check* guardrail that detects PII and blocks or warns depending on `behavior`.
-- **`presidio_anonymizer`** — a *Redact* guardrail that masks detected PII with placeholders (e.g., `<EMAIL_ADDRESS>`). Always redacts; no `behavior` required.
-
-Both types accept the same `parameters`:
-
-- **`language`**: Language of the text (e.g., `en`, `it`).
-- **`entities`**: List of PII entity types to detect (e.g., `EMAIL_ADDRESS`, `PHONE_NUMBER`, `IBAN_CODE`, `IT_IDENTITY_CARD`).
-
-**Example:**
-```yaml
-guardrails:
-  - name: pii_block
-    type: presidio_analyzer
-    where: input
-    behavior: block
-    parameters:
-      language: en
-      entities: ["EMAIL_ADDRESS", "PHONE_NUMBER", "CREDIT_CARD"]
-    response_message: "Personal information detected and blocked"
-
-  - name: pii_mask
-    type: presidio_anonymizer
-    where: io
-    parameters:
-      language: it
-      entities: ["EMAIL_ADDRESS", "IBAN_CODE", "IT_IDENTITY_CARD"]
-
-routes:
-  your-route:
-    chat_models:
-      - your-model
-    guardrails:
-      - pii_block
-      - pii_mask
-```
-
-### LLM-as-a-Judge
-
-The `judge` type uses a language model to semantically evaluate content against a policy defined in a prompt template. It is slower than rule-based filters but can handle complex, context-dependent decisions.
-
-- **`prompt_ref`**: Filename of the prompt template to use (built-in or custom).
-- **`model_id`**: The model used as the judge.
-- **`temperature`**: Sampling temperature for the judge model.
-- **`max_tokens`**: Maximum tokens for the judge's response.
-- **`fallback_model_id`** *(optional)*: A backup model to use if the primary judge fails.
-
-**Built-in prompt templates:**
-
-| Prompt | Purpose |
-|--------|---------|
-| `toxicity_check.md` | Detects offensive, abusive, or harmful content |
-| `business_context_check.md` | Validates if the request aligns with your business domain |
-| `prompt_injection_check.md` | Identifies prompt injection or jailbreak attempts |
-
-Custom prompts can be added by mounting a directory and setting `JUDGE_PROMPTS_DIR`. See the [Guardrails](../features/guardrails.md#custom-prompt-templates) page for details.
-
-**Example:**
-```yaml
-guardrails:
-  - name: toxicity_judge
-    type: judge
-    where: input
-    behavior: block
-    response_message: "🚨 Toxic content detected and blocked"
-    parameters:
-      prompt_ref: "toxicity_check.md"
-      model_id: "gpt-4o-mini"
-      temperature: 0.0
-      max_tokens: 100
-      fallback_model_id: "gpt-3.5-turbo"
-
-routes:
-  your-route:
-    chat_models:
-      - your-model
-    guardrails:
-      - toxicity_judge
-```
-
-For the full guardrails reference including all parameters and behaviors, see the **[Guardrails](../features/guardrails.md)** page.
+→ See **[Guardrails](../features/guardrails.md)** for all types, behaviors, PII detection, LLM-as-a-Judge, and custom prompt templates.
 
 ---
 
 ## Fallback
 
-Defines a chain of backup models to use if the primary model fails (e.g., due to an API error or downtime). The gateway will automatically try the fallbacks in the order they are listed.
+Defines a chain of backup models tried in order when the primary fails.
 
-- **`target`**: The `model_id` of the primary model.
-- **`fallbacks`**: A list of `model_id`s to try in sequence if the `target` fails.
-- **`type`** *(optional)*: Use `embedding` for embedding fallbacks.
-
-**Example (chat fallback):**
 ```yaml
 routes:
   route-name:
     chat_models:
       - openai-4o
       - llama3.2
-      - qwen
     fallback:
-      - target: openai-4o
+      - target: openai-4o      # primary model_id
         fallbacks:
-          - llama3.2
-          - qwen
+          - llama3.2           # tried in order
+      - target: embed-primary  # embedding fallback
+        fallbacks:
+          - embed-backup
+        type: embedding        # omit for chat (default)
 ```
 
-If a request is routed to `openai-4o` and it fails, the gateway will retry the same request with `llama3.2`. If `llama3.2` also fails, it will try `qwen`.
-
-**Example (embedding fallback):**
-```yaml
-routes:
-  route-name:
-    embedding_models:
-      - text-embedding-3-small
-      - text-embedding-ada-002
-    fallback:
-      - target: text-embedding-3-small
-        fallbacks:
-          - text-embedding-ada-002
-        type: embedding
-```
+→ See **[Fallback](../features/fallback.md)** for validation rules, mixed model types, and production examples.
 
 ---
 
 ## Caching
 
-### Exact Cache
+Requires a top-level `cache` block when any route enables caching.
 
-Exact caching serves identical requests from memory instead of calling the LLM again.
-
-- **`type`**: `exact`
-- **`ttl`**: Time-to-live in seconds
-
-At the top level of the `config.yaml`, a `cache` object must be defined if any route has caching enabled.
-
-**Example:**
 ```yaml
+# Exact cache — serves identical requests from memory
 routes:
   route-name:
     chat_models:
       - openai-4o
     caching:
       type: exact
-      ttl: 300
+      ttl: 300            # seconds
 
-cache:
-  redis_host: "valkey"
-  redis_port: 6379
-```
-
-### Semantic Cache
-
-Semantic cache retrieves responses based on similarity. The route must declare:
-
-- at least one `chat_model`
-- one `embedding_model` used to generate embeddings for cache lookup/storage
-
-For each new request, the embedding model is invoked, and a similarity score is computed against stored vectors. If a cached entry exceeds `similarity_threshold`, the cached response is returned.
-
-```yaml
+# Semantic cache — matches similar requests via embeddings
 routes:
   your-route:
     chat_models:
@@ -504,7 +328,7 @@ routes:
       ttl: 60
       embedding_model_id: text-embedding-3-small
       similarity_threshold: 0.80
-      distance_metric: cosine
+      distance_metric: cosine   # cosine | euclidean | dot
       dim: 1536
 
 cache:
@@ -512,48 +336,28 @@ cache:
   redis_port: 6379
 ```
 
-* **`ttl`**: The time-to-live (in seconds) for a cached entry.
-* **`type`**: The caching strategy (`semantic` enables vector-based caching).
-* **`embedding_model_id`**: The embedding model ID used to generate/compare embeddings.
-* **`similarity_threshold`**: Minimum similarity score to accept a cached match.
-* **`distance_metric`**: Similarity metric (`cosine`, `euclidean`, `dot`).
-* **`dim`**: Dimensionality of produced embeddings (must match the model output).
+→ See **[Caching](../features/caching.md)** and **[Semantic Caching](../features/semantic-caching.md)** for full details.
 
 ---
 
 ## Rate Limiting
 
-Controls the number of requests allowed over a time window for a given route.
-
-- **`algorithm`**: The limiting algorithm. Currently, only `fixed_window` is supported.
-- **`window_size`**: The duration of the time window (e.g., `1 minute`, `120 seconds`).
-- **`max_requests`**: The maximum number of requests allowed in that window.
-
-**Example:**
 ```yaml
 routes:
   route-name:
     chat_models:
       - openai-4o
     rate_limiting:
-      algorithm: fixed_window
+      algorithm: fixed_window      # fixed_window | aligned_fixed_window
       window_size: 1 minute
       max_requests: 20
 ```
 
+→ See **[Rate Limiting](../features/rate-limiting.md)** for algorithm details and best practices.
+
 ---
 
 ## Token Limiting
-
-Controls the cumulative number of tokens processed for a route's inputs and outputs over a time window. This is excellent for managing costs.
-
-It has two sections: `input` and `output`.
-
-* **`algorithm`**: The limiting algorithm (e.g., `fixed_window`).
-* **`window_size`**: The duration of the time window.
-* **`max_token`**: The total number of tokens that can be processed in that window.
-
-Example:
 
 ```yaml
 routes:
@@ -562,12 +366,16 @@ routes:
       - openai-4o
     token_limiting:
       input:
+        algorithm: fixed_window
         window_size: 10 seconds
         max_token: 1000
       output:
+        algorithm: fixed_window
         window_size: 10 minutes
         max_token: 500
 ```
+
+→ See **[Token Limiting](../features/token-limiting.md)** and **[Budget Limiting](../features/budget-limiting.md)** for cost control strategies.
 
 ---
 
@@ -605,7 +413,7 @@ routes:
     routing: keyword-routing
 ```
 
-If a user message contains "urgent" or "complex", the request is routed to `gpt-4o`. If it contains "simple", it goes to `gpt-4o-mini`. Otherwise, the `default_model_id` (`gpt-4o-mini`) is used.
+If a user message contains "urgent" or "complex", the request is routed to `gpt-4o`. Otherwise `default_model_id` is used.
 
 **Example (budget routing):**
 ```yaml
@@ -631,9 +439,9 @@ routes:
       max_budget: 150.0
 ```
 
-The threshold is evaluated against the **combined input + output budget**, in this example $150 total. When more than 80% of that combined budget ($120+) has been consumed, requests are automatically routed to the cheaper `gpt-4o-mini` model.
+When more than 80% of the $150 budget is consumed, requests switch to `gpt-4o-mini` automatically.
 
-For full details on all rule types (keyword, token length, time, budget), see the **[Intelligent Routing](../features/advanced-routing.md)** page.
+→ See **[Intelligent Routing](../features/advanced-routing.md)** for all rule types: keyword, token length, context length, time, budget, text classification, and semantic routing.
 
 ---
 

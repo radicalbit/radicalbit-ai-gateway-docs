@@ -6,12 +6,6 @@ This page covers semantic caching configuration and features in the Radicalbit A
 
 Semantic caching in the Radicalbit AI Gateway uses embedding models to identify semantically similar requests, even when they use different wording. This advanced caching strategy improves performance and reduces costs by recognizing that questions like "What is the capital of France?" and "Tell me the capital city of France" are essentially the same query.
 
-With the **new configuration structure**:
-
-- Models are defined at top-level (`chat_models`, `embedding_models`)
-- Routes reference models by **model ID** (strings)
-- Semantic caching is configured **at route level** via `routes.<name>.caching`
-
 ---
 
 ## How Semantic Caching Works
@@ -224,6 +218,6 @@ Semantic cache keys are typically derived from:
 ## Next Steps
 
 - **[Caching](./caching.md)** - Learn about exact caching strategies
-- **[Fallback](../configuration/fallback.md)** - Set up automatic failover
-- **[Monitoring](../monitoring.md)** - Set up observability and metrics
+- **[Fallback](./fallback.md)** - Set up automatic failover
+- **[Monitoring](../operations/monitoring.md)** - Set up observability and metrics
 - **[API Reference](../api-reference/endpoints.md)** - Complete API documentation

@@ -204,16 +204,10 @@ Return JSON:
 }
 ```
 
-**2. Mount the directory and set the environment variable** in Docker Compose:
+**2. Set the environment variable and mount the directory into the container:**
 
-```yaml
-services:
-  gateway:
-    environment:
-      - JUDGE_PROMPTS_DIR=/radicalbit_ai_gateway/radicalbit_ai_gateway/guardrails/judges/custom-prompts
-    volumes:
-      - ./custom-prompts:/radicalbit_ai_gateway/radicalbit_ai_gateway/guardrails/judges/custom-prompts
-```
+- **Environment variable:** `JUDGE_PROMPTS_DIR=/radicalbit_ai_gateway/radicalbit_ai_gateway/guardrails/judges/custom-prompts`
+- **Mount:** your local custom-prompts folder → `/radicalbit_ai_gateway/radicalbit_ai_gateway/guardrails/judges/custom-prompts` (read-only)
 
 Custom prompts are checked before built-in defaults. Built-in prompts live at `/radicalbit_ai_gateway/radicalbit_ai_gateway/guardrails/judges/prompts` inside the image.
 
@@ -321,13 +315,11 @@ guardrails:
 
 ## Monitoring
 
-Track guardrail activity through the following metrics:
+Track guardrail activity through the following metric:
 
 | Metric | Description |
 |--------|-------------|
 | `gateway_guardrails_triggered_total` | Number of times each guardrail was triggered |
-| `gateway_guardrails_duration_milliseconds` | Processing time per guardrail |
-| `gateway_guardrails_blocked_total` | Number of requests blocked by guardrails |
 
 See the [Monitoring guide](../operations/monitoring.md) for details on how to access and visualize these metrics.
 
@@ -337,4 +329,4 @@ See the [Monitoring guide](../operations/monitoring.md) for details on how to ac
 
 - **[Advanced Configuration](../configuration/advanced-configuration.md)** — Complete configuration reference
 - **[Monitoring](../operations/monitoring.md)** — Set up observability
-- **[Fallback Mechanisms](../configuration/fallback.md)** — Implement automatic failover
+- **[Fallback](./fallback.md)** — Implement automatic failover
