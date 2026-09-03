@@ -44,6 +44,7 @@ const sidebars: SidebarsConfig = {
         'features/budget-limiting',
         'features/fallback',
         'features/advanced-routing',
+        'features/mcp',
       ],
     },
 
