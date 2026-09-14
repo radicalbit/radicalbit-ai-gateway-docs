@@ -1,6 +1,6 @@
 # Installation
 
-This guide walks through installing the Radicalbit AI Gateway with Docker Compose — the full stack, running on your machine in a few minutes.
+This guide walks through installing the Radicalbit AI Gateway with Docker Compose. It gets the full stack running on your machine in a few minutes.
 
 :::info
 This guide covers the **open source edition**, self-hosted with Docker. See [Enterprise](../reference/enterprise.md) for the additional governance features available on top of it.
@@ -59,7 +59,7 @@ GATEWAY_TAG=latest docker compose up -d
 docker compose up --build -d
 ```
 
-Both commands start the same stack: the gateway, its UI, and the services it depends on. Wait 20–30 seconds for everything to become healthy, then open **http://localhost:9000** — you should see the Gateway UI.
+Both commands start the same stack: the gateway, its UI, and the services it depends on. Wait 20-30 seconds for everything to become healthy, then open **http://localhost:9000**. You should see the Gateway UI.
 
 ---
 
@@ -95,7 +95,7 @@ Check that the gateway is healthy:
 curl http://localhost:9000/health
 ```
 
-Then open **http://localhost:9000** in your browser. You should land on the Gateway UI with no projects yet — that's expected on a fresh install.
+Then open **http://localhost:9000** in your browser. You should land on the Gateway UI with no projects yet. That's expected on a fresh install.
 
 ---
 
@@ -127,6 +127,6 @@ docker compose down -v
 
 ## Next Steps
 
-- **[Quick Start](../quick-start.md)** — Create your first project, route, and API key
-- **[Basic Configuration](../configuration/basic-setup.md)** — Understand the configuration format
-- **[Secrets Management](../deployment/secrets-management/index.md)** — Store credentials outside `secrets.yaml`
+- **[Quick Start](../quick-start.md)** - Create your first project, route, and API key
+- **[Basic Configuration](../configuration/basic-setup.md)** - Understand the configuration format
+- **[Secrets Management](../deployment/secrets-management/index.md)** - Store credentials outside `secrets.yaml`
