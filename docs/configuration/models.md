@@ -281,7 +281,7 @@ Two model families are supported, with different capabilities and billing:
 - **`gpt-4o-transcribe` / `gpt-4o-mini-transcribe`**: supports `stream: true`. Billed per audio and text token (`input_cost_per_audio_token`, `input_cost_per_million_tokens`, `output_cost_per_million_tokens`). Does not support `response_format: verbose_json`.
 
 :::note
-Transcription models are only supported through the `openai` and `azure` providers.
+Transcription models currently only work with the `openai` and `azure` providers.
 :::
 
 ---
