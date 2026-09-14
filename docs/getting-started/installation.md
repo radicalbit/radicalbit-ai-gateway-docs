@@ -19,7 +19,7 @@ This guide covers the **open source edition**, self-hosted with Docker. See [Ent
 Clone the repository:
 
 ```bash
-git clone https://github.com/radicalbit/radicalbit-ai-gateway
+git clone git@github.com:radicalbit/radicalbit-ai-gateway.git
 cd radicalbit-ai-gateway
 ```
 
@@ -27,7 +27,13 @@ cd radicalbit-ai-gateway
 
 ## 2. Add Your Provider Credentials
 
-The gateway reads model credentials from a `secrets.yaml` file in the project root. Create one:
+The gateway reads model credentials from a `secrets.yaml` file in the project root. Create it by copying the provided template:
+
+```bash
+cp secrets-dummy.yaml secrets.yaml
+```
+
+Then add your provider keys:
 
 ```yaml title="secrets.yaml"
 OPENAI_API_KEY: sk-your-key-here
@@ -65,10 +71,11 @@ Docker Compose brings up these core services:
 |---|---|---|
 | Gateway | `9000` | API and UI |
 | Postgres | `5432` | Stores projects, routes, and configuration |
-| Valkey | `6379` | Cache and task queue |
+| Valkey | `6379` | Task queue (Celery broker) |
+| Valkey Cache | `6380` | Backs the response cache (exact and semantic caching) |
 | ClickHouse | `8123` / `9002` | Stores traces and metrics |
-| OTel Collector | — | Forwards traces to ClickHouse |
-| Metrics Worker | — | Processes usage metrics and alert rules |
+| OTel Collector | n/a | Forwards traces to ClickHouse |
+| Metrics Worker | n/a | Processes usage metrics and alert rules |
 
 A few optional tools are also started, useful for inspecting data while testing locally:
 
@@ -76,7 +83,7 @@ A few optional tools are also started, useful for inspecting data while testing 
 |---|---|---|
 | Adminer | `8090` | Browse the Postgres database |
 | ClickHouse UI | `5521` | Browse traces and metrics |
-| RedisInsight | `5540` | Browse the Valkey cache |
+| RedisInsight | `5540` | Browse both Valkey instances (task queue and cache) |
 
 ---
 
