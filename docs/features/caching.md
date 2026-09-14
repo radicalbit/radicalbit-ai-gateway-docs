@@ -1,7 +1,5 @@
 # Caching
 
-This page covers caching configuration and features in the Radicalbit AI Gateway.
-
 ## Overview
 
 Caching in the Radicalbit AI Gateway improves performance and reduces costs by storing responses for frequently repeated requests.

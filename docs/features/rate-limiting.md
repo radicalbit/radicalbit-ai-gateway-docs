@@ -1,7 +1,5 @@
 # Rate Limiting
 
-This page covers rate limiting configuration and features in the Radicalbit AI Gateway.
-
 ## Overview
 
 Rate limiting in the Radicalbit AI Gateway controls the number of requests that can be made within a specific time window, helping to manage costs and prevent abuse.

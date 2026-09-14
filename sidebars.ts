@@ -5,7 +5,12 @@ const sidebars: SidebarsConfig = {
     // ── Entry point ──────────────────────────────────────────────────────────
     'intro',
 
-    // ── First action: get something running ──────────────────────────────────
+    // ── First action: install, then get something running ────────────────────
+    {
+      type: 'doc',
+      id: 'getting-started/installation',
+      label: 'Installation',
+    },
     {
       type: 'doc',
       id: 'quick-start',
@@ -46,6 +51,13 @@ const sidebars: SidebarsConfig = {
         'features/advanced-routing',
         'features/mcp',
       ],
+    },
+
+    // ── Cross-cutting request metadata ───────────────────────────────────────
+    {
+      type: 'doc',
+      id: 'tags',
+      label: 'Tags',
     },
 
     // ── Operate ──────────────────────────────────────────────────────────────

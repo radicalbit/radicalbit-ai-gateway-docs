@@ -1,7 +1,5 @@
 # Semantic Caching
 
-This page covers semantic caching configuration and features in the Radicalbit AI Gateway.
-
 ## Overview
 
 Semantic caching in the Radicalbit AI Gateway uses embedding models to identify semantically similar requests, even when they use different wording. This advanced caching strategy improves performance and reduces costs by recognizing that questions like "What is the capital of France?" and "Tell me the capital city of France" are essentially the same query.

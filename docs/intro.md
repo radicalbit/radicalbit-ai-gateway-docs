@@ -70,6 +70,7 @@ All traffic flows through the Gateway from that point on.
 ## Get Started
 
 ### For Developers
+- **[Installation](./getting-started/installation.md)** — Install and start the gateway with Docker Compose
 - **[Quick Start](./quick-start.md)** — Up and running in 5 minutes
 - **[Basic Configuration](./configuration/basic-setup.md)** — Essential configuration
 - **[Advanced Configuration](./configuration/advanced-configuration.md)** — Practical configurations

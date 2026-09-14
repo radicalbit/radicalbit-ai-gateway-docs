@@ -1,7 +1,5 @@
 # Budget Limiting
 
-This page covers budget limiting configuration and features in the Radicalbit AI Gateway.
-
 ## Overview
 
 Budget limiting in the Radicalbit AI Gateway controls costs by setting a limit on the **combined budget** (input + output) consumed across all models in a route, helping to manage AI usage expenses.
