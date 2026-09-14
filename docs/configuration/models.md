@@ -11,6 +11,7 @@ With the **new configuration structure**:
 - Models are defined at **top-level** under:
   - `chat_models` (for chat/completions)
   - `embedding_models` (for embeddings)
+  - `transcription_models` (for audio transcription)
 - Routes **do not contain full model objects** anymore.
   - Routes reference models by **model ID** (string lists)
 
@@ -53,6 +54,8 @@ routes:
 - **`role`**: Role used when injecting `prompt`/`prompt_ref` (allowed: `system` or `developer` when `prompt` is set)
 - **`input_cost_per_million_tokens`**: Cost per million input tokens
 - **`output_cost_per_million_tokens`**: Cost per million output tokens
+- **`input_cost_per_second`**: Cost per second of audio input, for duration-based billing (used by `whisper-1`)
+- **`input_cost_per_audio_token`**: Cost per audio input token, distinct from a text input token (used by the `gpt-4o-transcribe` family)
 
 ---
 
@@ -248,6 +251,39 @@ routes:
       - emb-small
 ```
 
+### Transcription Models
+Used for audio transcription (speech-to-text).
+
+Definition:
+```yaml
+transcription_models:
+  - model_id: whisper
+    model: openai/whisper-1
+    credentials:
+      api_key: !secret OPENAI_API_KEY
+
+  - model_id: gpt4o-transcribe
+    model: openai/gpt-4o-transcribe
+    credentials:
+      api_key: !secret OPENAI_API_KEY
+```
+
+Usage in routes:
+```yaml
+routes:
+  speech-to-text:
+    transcription_models:
+      - whisper
+```
+
+Two model families are supported, with different capabilities and billing:
+- **`whisper-1`**: supports `response_format: verbose_json` (language, duration, segments). Billed per second of audio (`input_cost_per_second`). Does not support streaming.
+- **`gpt-4o-transcribe` / `gpt-4o-mini-transcribe`**: supports `stream: true`. Billed per audio and text token (`input_cost_per_audio_token`, `input_cost_per_million_tokens`, `output_cost_per_million_tokens`). Does not support `response_format: verbose_json`.
+
+:::note
+Transcription models are only supported through the `openai` and `azure` providers.
+:::
+
 ---
 
 ## Credentials Configuration
@@ -374,6 +410,7 @@ chat_models:
 ### Route References
 - Every ID listed in `routes.<route>.chat_models` must match a `chat_models[].model_id`
 - Every ID listed in `routes.<route>.embedding_models` must match an `embedding_models[].model_id`
+- Every ID listed in `routes.<route>.transcription_models` must match a `transcription_models[].model_id`
 
 ### Credential Validation
 - Many hosted providers require API keys
@@ -405,7 +442,7 @@ chat_models:
 
 ### Common Issues
 
-1. **Model Not Found**: Verify the `model_id` exists in `chat_models` / `embedding_models` and is correctly referenced by routes/fallbacks
+1. **Model Not Found**: Verify the `model_id` exists in `chat_models` / `embedding_models` / `transcription_models` and is correctly referenced by routes/fallbacks
 2. **Authentication Errors**: Check API keys and `credentials` configuration
 3. **Prompt File Not Found**: If using `prompt_ref`, ensure the Markdown file exists in the mounted `PROMPTS_DIR` inside the container and the filename matches the configured value.
 4. **Cost Assignment**: Ensure model names match those in the price list file (if used)

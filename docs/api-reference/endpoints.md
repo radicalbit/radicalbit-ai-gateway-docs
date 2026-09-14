@@ -1,6 +1,6 @@
 # API Reference
 
-The Radicalbit AI Gateway implements the OpenAI API specification — including Chat Completions, Embeddings, and the Responses API — making it compatible with existing OpenAI libraries and tools.
+The Radicalbit AI Gateway implements the OpenAI API specification — including Chat Completions, Embeddings, Audio Transcriptions, and the Responses API — making it compatible with existing OpenAI libraries and tools.
 
 ## Base URL
 
@@ -127,6 +127,81 @@ The gateway accepts API keys via the `Authorization: Bearer` header (sent by Ope
   }
 }
 ```
+
+### Audio Transcriptions
+
+**Endpoint:** `POST /v1/audio/transcriptions`
+
+**Description:** Transcribes audio into text, following the OpenAI Audio API format. Unlike the other endpoints, the request body is `multipart/form-data`, not JSON.
+
+**Request Body (multipart/form-data):**
+```bash
+curl http://localhost:9000/v1/audio/transcriptions \
+  -H "Authorization: Bearer your-api-key" \
+  -F model="project-name/route-name" \
+  -F file="@audio.mp3" \
+  -F language="en"
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | The route in `project-name/route-name` format |
+| `file` | file | Yes | The audio file to transcribe |
+| `language` | string | No | Language of the input audio, in ISO-639-1 format (e.g. `en`) |
+| `prompt` | string | No | Text to guide the model's style, or to continue a previous audio segment |
+| `response_format` | string | No | `json` (default) or `verbose_json`. `verbose_json` is only supported by `whisper-1` models |
+| `temperature` | number | No | Sampling temperature (0.0 to 1.0) |
+| `stream` | boolean | No | Stream the transcript as it's generated, via SSE. Only supported by the `gpt-4o-transcribe` family, not by `whisper-1` |
+
+:::note
+The gateway supports two model families, with different capabilities:
+- **`whisper-1`**: returns a full `verbose_json` response with language, duration and segments, but does not support streaming.
+- **`gpt-4o-transcribe` family** (`gpt-4o-transcribe`, `gpt-4o-mini-transcribe`): supports streaming, but only returns a plain `json` response.
+:::
+
+**Response (`response_format: "json"`):**
+```json
+{
+  "text": "Hello, how are you today?"
+}
+```
+
+**Response (`response_format: "verbose_json"`, whisper-1 only):**
+```json
+{
+  "language": "english",
+  "duration": 3.2,
+  "text": "Hello, how are you today?",
+  "segments": [
+    {
+      "id": 0,
+      "start": 0.0,
+      "end": 3.2,
+      "text": "Hello, how are you today?"
+    }
+  ]
+}
+```
+
+**Streaming Response:**
+
+When `stream` is `true`, the gateway returns a Server-Sent Events (SSE) stream of transcript deltas, ending with a `[DONE]` marker:
+
+```
+data: {"type":"transcript.text.delta","delta":"Hello,"}
+
+data: {"type":"transcript.text.delta","delta":" how are you today?"}
+
+data: {"type":"transcript.text.done","text":"Hello, how are you today?"}
+
+data: [DONE]
+```
+
+:::warning
+`stream: true` is not supported by `whisper-1` and returns an error.
+:::
 
 ### Responses API
 
