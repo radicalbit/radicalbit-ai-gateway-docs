@@ -1,6 +1,6 @@
 # Intelligent Routing
 
-This page covers intelligent routing configuration for the Radicalbit AI Gateway, enabling dynamic model selection based on configurable rules.
+Without routing rules, every request goes to the same fixed model. Intelligent routing sends each request to the model that fits it best, based on keywords, token count, time of day, or budget.
 
 ## Overview
 

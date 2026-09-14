@@ -1,6 +1,6 @@
 # Semantic Caching
 
-This page covers semantic caching configuration and features in the Radicalbit AI Gateway.
+Exact caching only matches identical requests. Semantic caching also catches requests that are worded differently but mean the same thing, using embeddings to compare them.
 
 ## Overview
 

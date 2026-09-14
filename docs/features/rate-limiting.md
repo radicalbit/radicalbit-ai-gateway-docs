@@ -1,6 +1,6 @@
 # Rate Limiting
 
-This page covers rate limiting configuration and features in the Radicalbit AI Gateway.
+Without a rate limit, a route can receive an unlimited number of requests in any time window. Rate limiting caps that number, helping to manage costs and prevent abuse.
 
 ## Overview
 

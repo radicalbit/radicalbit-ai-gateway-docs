@@ -1,6 +1,6 @@
 # Token Limiting
 
-This page covers token limiting configuration and features in the Radicalbit AI Gateway.
+Without a token limit, requests can consume an unlimited number of tokens in a given time window. Token limiting caps that consumption, helping to manage costs and prevent abuse.
 
 ## Overview
 
