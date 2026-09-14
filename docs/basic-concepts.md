@@ -84,9 +84,10 @@ Always choose a clear and descriptive name.
 
 Each key listed under `routes` defines a separate API endpoint with its own configuration.
 
-Within each route, you can declare two primary model lists (by ID):
+Within each route, you can declare three primary model lists (by ID):
 * *chat_models*
 * *embedding_models*
+* *transcription_models*
 
 Both types are fully compliant with the **OpenAI standard**. Their detailed configuration is defined at top-level and explained later in the documentation.
 
@@ -160,14 +161,14 @@ The following operations are available, even without an IDP integration:
 
 ### Routes
 
-A Route defines the **set of models, logic, and controls managed by the Gateway** for your application. A route can include all the models (chat and embedding) used in your application, or be segmented based on your specific requirements.
+A Route defines the **set of models, logic, and controls managed by the Gateway** for your application. A route can include all the models (chat, embedding, and transcription) used in your application, or be segmented based on your specific requirements.
 
 It is important to understand that each route appears as a separate entry in the “Routes” section of the UI.
 
 You configure a Route by defining it in the `config.yaml` file. The configuration allows you to specify:
 
 * **Route name**
-* **Which model IDs to use** (chat and optional embeddings)
+* **Which model IDs to use** (chat, embeddings, and transcription)
 * **Guardrails to apply**
 * **Caching policies (semantic or exact)**
 * **Rate limits and token limits**

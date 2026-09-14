@@ -78,7 +78,7 @@ curl http://localhost:9000/v1/chat/completions \
   }'
 ```
 
-This applies to all OpenAI-compatible endpoints: Chat Completions, Embeddings, and Responses API.
+This applies to all OpenAI-compatible endpoints: Chat Completions, Embeddings, Audio Transcriptions, and Responses API.
 
 ---
 

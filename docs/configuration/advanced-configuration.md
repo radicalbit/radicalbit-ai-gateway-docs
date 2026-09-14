@@ -16,7 +16,7 @@ In this page we are going to explain how to configure the Gateway routes in all 
 
 The gateway's entire behavior is controlled by a single YAML configuration file. This file defines:
 
-- **Reusable model definitions** at top-level (`chat_models`, `embedding_models`)
+- **Reusable model definitions** at top-level (`chat_models`, `embedding_models`, `transcription_models`)
 - **Routes** that reference models by **model ID**
 - **Optional features** applied per-route (guardrails, fallback, caching, limits, etc.)
 
