@@ -1,5 +1,7 @@
 # Caching
 
+Without caching, every request reaches the model, even repeated ones. Caching stores responses so repeated or similar requests are served faster and at a lower cost.
+
 ## Overview
 
 Caching in the Radicalbit AI Gateway improves performance and reduces costs by storing responses for frequently repeated requests.

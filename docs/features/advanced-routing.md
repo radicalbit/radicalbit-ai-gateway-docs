@@ -1,5 +1,7 @@
 # Intelligent Routing
 
+Without routing rules, every request goes to the same fixed model. Intelligent routing sends each request to the model that fits it best, based on keywords, token count, time of day, or budget.
+
 ## Overview
 
 Intelligent routing in the Radicalbit AI Gateway allows you to automatically select which model handles a request based on rule-based logic. Instead of always routing to a fixed model, routing evaluates incoming requests against configurable rules — such as keywords in the user message, token count (per-message or full conversation), time of day, or budget consumption — and directs each request to the most appropriate model.

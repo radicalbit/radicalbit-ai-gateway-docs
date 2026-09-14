@@ -1,5 +1,7 @@
 # Token Limiting
 
+Without a token limit, requests can consume an unlimited number of tokens in a given time window. Token limiting caps that consumption, helping to manage costs and prevent abuse.
+
 ## Overview
 
 Token limiting controls the number of tokens consumed by requests within a specific time window, helping to manage costs and prevent abuse.

@@ -1,5 +1,7 @@
 # Budget Limiting
 
+Without a budget limit, spending on a route can grow without any cap. Budget limiting stops requests once the combined input and output cost crosses a threshold you set.
+
 ## Overview
 
 Budget limiting in the Radicalbit AI Gateway controls costs by setting a limit on the **combined budget** (input + output) consumed across all models in a route, helping to manage AI usage expenses.

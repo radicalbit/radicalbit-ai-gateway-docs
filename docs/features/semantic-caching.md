@@ -1,5 +1,7 @@
 # Semantic Caching
 
+Exact caching only matches identical requests. Semantic caching also catches requests that are worded differently but mean the same thing, using embeddings to compare them.
+
 ## Overview
 
 Semantic caching in the Radicalbit AI Gateway uses embedding models to identify semantically similar requests, even when they use different wording. This advanced caching strategy improves performance and reduces costs by recognizing that questions like "What is the capital of France?" and "Tell me the capital city of France" are essentially the same query.
