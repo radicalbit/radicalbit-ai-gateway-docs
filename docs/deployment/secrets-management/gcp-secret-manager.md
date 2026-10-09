@@ -63,7 +63,7 @@ export GCP_PROJECT_ID=my-gcp-project
 
 ## Label-Based Filtering
 
-When `GCP_SECRET_LABEL` is set, only secrets with the matching label are loaded at startup. This is useful when a GCP project contains many secrets but only a subset belong to the gateway.
+When `GCP_SECRET_LABEL` is set, only secrets with the matching label are loaded. This is useful when a GCP project contains many secrets but only a subset belong to the gateway.
 
 ```bash
 # Tag secrets with a label
@@ -76,7 +76,9 @@ export GCP_PROJECT_ID=my-gcp-project
 export GCP_SECRET_LABEL=app=gateway
 ```
 
-When `GCP_SECRET_LABEL` is not set, all secrets in the project are loaded at startup.
+When `GCP_SECRET_LABEL` is not set, all secrets in the project are loaded.
+
+The plugin reads the secret value of every secret in scope each time the gateway loads the backend, and that includes every request from the [Secrets section](./secrets-section.md#backend-cost-and-scoping-what-the-gateway-loads). On a project that holds many secrets unrelated to the gateway, set `GCP_SECRET_LABEL` to keep that cost down. A secret without the label is not loaded at all, so a `!secret` reference to it does not resolve.
 
 :::note
 If authenticating via a service account JSON file, mount it into the container at the path configured in `GCP_SM_CREDENTIALS`. When running on GCP with Workload Identity (GKE, Cloud Run, Compute Engine), `GCP_SM_CREDENTIALS` can be omitted.

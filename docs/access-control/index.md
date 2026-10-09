@@ -40,6 +40,7 @@ Access Control uses three roles with granular permissions:
 | Mark config as ready to be served | Yes | Yes | No |
 | Serve (approve) configuration | Yes | No | No |
 | View dashboards and tracing | Yes | Yes | Yes |
+| View the [Secrets section](../deployment/secrets-management/secrets-section.md) | Yes | Yes | Yes |
 
 ---
 

@@ -57,8 +57,8 @@ export ENABLED_PLUGINS="<plugin_name>"
 
 All plugins share the same behavior:
 
-- Secrets are bulk-loaded at startup and cached in memory
-- Authentication failures cause the gateway to fail to start (errors are caught early)
+- The secrets backend is read each time the gateway needs it: when it registers a project's routes (at startup and on every publish), when it validates the `!secret` references of a configuration, and on every request from the [Secrets section](./secrets-section.md). Nothing is cached between those reads, so a rotated secret value takes effect the next time the routes that use it are registered.
+- If the backend cannot be read when the gateway registers a project's routes, the error is logged and that project is skipped. The other projects still start.
 - The `!secret KEY` pattern in `config.yaml` works unchanged — the plugin is transparent to your configuration
 
 ### Supported Providers
@@ -71,6 +71,12 @@ All plugins share the same behavior:
 | [Azure Key Vault](./azure-key-vault.md) | `azure_keyvault` | One secret per key, prefix filtering available |
 
 Need to integrate with a different system? See [Creating a Custom Secrets Plugin](./custom-plugin.md).
+
+---
+
+## Seeing Your Secret Keys in the UI
+
+The [Secrets section](./secrets-section.md) of the gateway UI lists the secret keys the backend holds and the projects that use each one, so you can copy the exact key into a configuration. It never shows a secret value.
 
 ---
 
