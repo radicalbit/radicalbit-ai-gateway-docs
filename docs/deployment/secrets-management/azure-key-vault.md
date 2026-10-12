@@ -6,7 +6,7 @@ This feature is available exclusively in the **Enterprise edition** of the Radic
 
 This plugin enables the gateway to resolve `!secret` references from Azure Key Vault instead of a static `secrets.yaml` file.
 
-The plugin bulk-loads all secrets from the configured vault at startup, caches them in memory, and resolves every `!secret KEY` reference from that cache.
+Each time the gateway loads the backend, the plugin reads every secret in scope from the configured vault and resolves every `!secret KEY` reference from what it read. The gateway loads the backend when it registers a project's routes, when it validates a configuration, and on every request from the [Secrets section](./secrets-section.md). Nothing is cached between loads.
 
 ## Enabling the Plugin
 
@@ -65,6 +65,8 @@ When `AZURE_KEYVAULT_SECRET_PREFIX` is set, only secrets whose name starts with 
 ```bash
 export AZURE_KEYVAULT_SECRET_PREFIX=gateway-
 ```
+
+The prefix limits which secret values are read. The vault's secret list is still read in full. Every load reads the secret value of each secret in scope, including every request from the [Secrets section](./secrets-section.md#backend-cost-and-scoping-what-the-gateway-loads). In a vault that holds many secrets unrelated to the gateway, set a prefix to keep that cost down. A secret outside the prefix is not loaded at all, so a `!secret` reference to it does not resolve.
 
 ## Dependencies
 

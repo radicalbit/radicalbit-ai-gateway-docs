@@ -85,6 +85,7 @@ const sidebars: SidebarsConfig = {
       label: 'Secrets Management',
       items: [
         'deployment/secrets-management/index',
+        'deployment/secrets-management/secrets-section',
         'deployment/secrets-management/aws-secrets-manager',
         'deployment/secrets-management/hashicorp-vault',
         'deployment/secrets-management/gcp-secret-manager',

@@ -26,7 +26,7 @@ See [Access Control](../access-control/index.md) for configuration details.
 
 ## Secrets Management
 
-In production environments, API keys and other sensitive credentials should not live inside configuration files. The gateway supports pluggable **secrets backends** that resolve `!secret KEY` references at startup from a secure external store.
+In production environments, secret values such as model provider API keys should not live inside configuration files. The gateway supports pluggable **secrets backends** that resolve `!secret KEY` references from a secure external store when it registers a project's routes.
 
 Supported providers:
 
@@ -38,6 +38,8 @@ Supported providers:
 When a secrets plugin is enabled, no `secrets.yaml` file is needed — the plugin replaces it transparently. Your `config.yaml` remains unchanged.
 
 Custom secrets providers can also be implemented as plugins. See [Secrets Management](../deployment/secrets-management/index.md) for details.
+
+The **Secrets section** of the UI lists the secret keys the backend holds and the projects whose published configuration uses each one. It never shows a secret value. Every authenticated role can read it. **Used in projects** lists only the projects the reader is a member of, and an admin sees all of them. See [The Secrets Section](../deployment/secrets-management/secrets-section.md).
 
 ---
 
