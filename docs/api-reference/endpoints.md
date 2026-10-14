@@ -1,6 +1,6 @@
 # API Reference
 
-The Radicalbit AI Gateway implements the OpenAI API specification — including Chat Completions, Embeddings, Audio Transcriptions, and the Responses API — making it compatible with existing OpenAI libraries and tools.
+The Radicalbit AI Gateway implements the OpenAI API specification — including Chat Completions, Embeddings, Audio Transcriptions, and the Responses API — making it compatible with existing OpenAI libraries and tools. It also proxies Typesafe's decision API for [decision models](#decision-models).
 
 ## Base URL
 
@@ -282,6 +282,107 @@ The `input` field also accepts a list of message objects:
   }
 }
 ```
+
+### Decision Models
+
+**Endpoint:** `POST /v1/systemone`
+
+**Description:** Asks a [decision model](../features/decision-models.md) (Typesafe's Jev) structured questions about a piece of input, and returns a typed answer with a confidence for each question. The endpoint mirrors [Typesafe's API](https://docs.typesafe.ai): the body uses Typesafe's format, except that `model` is your gateway route. The gateway forwards the request and returns Typesafe's status and body unchanged.
+
+:::tip
+Any Typesafe client works through the gateway. Point its base URL at the gateway, use a gateway API key, and set `model` to `project-name/route-name`.
+:::
+
+:::warning
+Streaming is not supported. The response is always returned in one piece.
+:::
+
+**Request Body:**
+```json
+{
+  "model": "project-name/route-name",
+  "state": "My card was charged twice and I need the money back today!",
+  "questions": {
+    "intent": {
+      "type": "choice",
+      "instructions": "What does the customer want?",
+      "criteria": {
+        "refund": "Wants money back",
+        "information": "Wants an explanation",
+        "complaint": "Wants to complain"
+      }
+    },
+    "is_urgent": {
+      "type": "noul",
+      "instructions": "Does this convey urgency?"
+    },
+    "frustration": {
+      "type": "score",
+      "instructions": "How frustrated is the customer?",
+      "criteria": ["Calm", "Mildly annoyed", "Clearly frustrated", "Angry"]
+    }
+  }
+}
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | The route in `project-name/route-name` format. The gateway replaces it with the configured Typesafe model |
+| `state` | string/object/array | Yes | The input to evaluate. Route input guardrails check and redact its text values |
+| `questions` | object | Yes | Map of question id to question object |
+| other fields | any | No | Forwarded to Typesafe unchanged |
+
+**Question Object:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `type` | string | Yes | `choice`, `score` or `noul` |
+| `instructions` | string | Yes | The question to answer |
+| `criteria` | object/array | Depends on `type` | `choice`: map of option to description. `score`: ordered list of levels. `noul`: optional description of what yes and no mean |
+
+**Question Types:**
+
+| Type | Answers | Main answer field |
+|------|---------|-------------------|
+| `choice` | One option out of a set | `choice`, with `probabilities` and `confidence` |
+| `score` | A position on an ordered scale | `score`, with `probabilities` and `confidence` |
+| `noul` | A yes/no statement | `noul`, the probability (0 to 1) that the statement is true |
+
+See [Typesafe's documentation](https://docs.typesafe.ai/primitives) for the full question and answer format.
+
+**Response:**
+```json
+{
+  "model": "jev-1.13.0",
+  "answers": {
+    "intent": {
+      "type": "choice",
+      "choice": "refund",
+      "confidence": 1.0,
+      "probabilities": { "refund": 1.0, "information": 0.0, "complaint": 0.0 }
+    }
+  },
+  "usage": {
+    "input_tokens": 337,
+    "output_tokens": 31
+  }
+}
+```
+
+The response is Typesafe's body, unchanged. `model` holds the Typesafe model that answered, not your route. Cost is computed on `usage.input_tokens` only. See [Limits and Cost](../features/decision-models.md#limits-and-cost).
+
+**Errors:**
+
+| Status | Cause |
+|--------|-------|
+| `400` | Unknown route, a route with no decision models, or a guardrail block or soft block (`guardrail_violation_bad_request`) |
+| `401` | Missing or invalid gateway key, or a key that does not belong to the route |
+| `422` | The request body is invalid, for example `model` is missing |
+| `429` | A rate, token or budget limit is full |
+| `502` | No decision model answered (`model_invoker_bad_gateway`) |
+| Other `4xx` | Returned by Typesafe and forwarded unchanged. They are not retried and do not trigger fallback |
 
 ---
 

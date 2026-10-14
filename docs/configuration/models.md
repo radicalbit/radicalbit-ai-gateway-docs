@@ -12,6 +12,7 @@ With the **new configuration structure**:
   - `chat_models` (for chat/completions)
   - `embedding_models` (for embeddings)
   - `transcription_models` (for audio transcription)
+  - `decision_models` (for structured decisions, see [Decision Models](../features/decision-models.md))
 - Routes **do not contain full model objects** anymore.
   - Routes reference models by **model ID** (string lists)
 
@@ -283,6 +284,28 @@ Two model families are supported, with different capabilities and billing:
 :::note
 Transcription models currently only work with the `openai` and `azure` providers.
 :::
+
+### Decision Models
+Used for structured decisions (classification, triage, scoring) through Typesafe's Jev.
+
+Definition:
+```yaml
+decision_models:
+  - model_id: jev
+    model: typesafe/jev-latest
+    credentials:
+      api_key: !secret TYPESAFE_API_KEY
+```
+
+Usage in routes:
+```yaml
+routes:
+  triage:
+    decision_models:
+      - jev
+```
+
+Decision models are called on `POST /v1/systemone` and bill input tokens only. See [Decision Models](../features/decision-models.md) for calling, guardrails, limits, caching and fallback.
 
 ---
 

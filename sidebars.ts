@@ -50,6 +50,7 @@ const sidebars: SidebarsConfig = {
         'features/fallback',
         'features/advanced-routing',
         'features/mcp',
+        'features/decision-models',
       ],
     },
 
