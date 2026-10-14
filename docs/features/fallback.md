@@ -24,7 +24,7 @@ routes:
 
 - **`target`**: The `model_id` of the primary model.
 - **`fallbacks`**: List of `model_id`s to try in order if `target` fails.
-- **`type`**: Use `embedding` for embedding fallbacks. Omit for chat (default).
+- **`type`**: Use `embedding` for embedding fallbacks, `transcription` for transcription fallbacks or `decision` for [decision model](./decision-models.md) fallbacks. Omit for chat (default).
 
 ---
 
@@ -70,8 +70,8 @@ routes:
 
 ## Validation Rules
 
-- `target` and all `fallbacks` must be listed in the route's `chat_models` (or `embedding_models` for embedding fallbacks)
-- Chat fallbacks can only reference chat models, embedding fallbacks only embedding models
+- `target` and all `fallbacks` must be listed in the route's model list for that `type` (`chat_models`, `embedding_models`, `transcription_models` or `decision_models`)
+- A fallback can only reference models of its own type: chat with chat, embedding with embedding, and so on
 - The gateway rejects configurations that violate these rules at startup
 
 ---
