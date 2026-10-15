@@ -76,7 +76,7 @@ In the Gateway UI:
 
 ## 4. Create a Group and API Key
 
-Go to the **Groups** section to create a group, then to the **API Key** section to create a key.
+Go to the **Groups** section to create a group and associate it with your routes, then to the **Credentials** section to create a credential and associate it with the group. See [Credentials](../credentials.md).
 
 :::warning
 The key will be visible only once — save it securely.

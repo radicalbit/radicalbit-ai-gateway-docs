@@ -352,7 +352,7 @@ Gateway-side errors:
 | Status | Cause |
 |--------|-------|
 | `400` | Unknown route, a route with no decision models, or a guardrail block or soft block |
-| `401` | Missing or invalid gateway key, or a key that does not belong to the route |
+| `401` | Missing, invalid or [expired](../credentials.md#expiration) gateway key, or a key that does not belong to the route |
 | `422` | The request body is invalid, for example `model` is missing |
 | `429` | A rate, token or budget limit is full |
 | `502` | No decision model answered |
