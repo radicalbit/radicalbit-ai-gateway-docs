@@ -60,7 +60,7 @@ Guardrails belong to one of two classes:
 | `regex` | Check | Text matches a regular expression | `values: ['\b[A-Z]{2,}\b']` |
 | `presidio_analyzer` | Check | Detects PII using Microsoft Presidio | `language: en`, `entities: ["EMAIL_ADDRESS"]` |
 | `presidio_anonymizer` | Redact | Masks PII using Microsoft Presidio | `language: en`, `entities: ["EMAIL_ADDRESS"]` |
-| `judge` | Check | Semantic evaluation via an LLM-as-a-Judge | `prompt_ref: "toxicity_check.md"`, `model_id: "gpt-4o-mini"` |
+| `judge` | Check | Semantic evaluation via an LLM-as-a-Judge | `prompt_ref: "toxicity_check.md"` or `prompt: "..."`, `model_id: "gpt-4o-mini"` |
 
 ---
 
@@ -163,7 +163,7 @@ Semantic evaluation using a language model as a "judge". The `JudgeEngine` passe
 ### How It Works
 
 1. The input or output text is extracted and normalized.
-2. The text is inserted into a **prompt template** (`prompt_ref`).
+2. The text is inserted into a **prompt template**, written inline (`prompt`) or loaded from a file (`prompt_ref`).
 3. The LLM defined in `model_id` is invoked via LangChain's `init_chat_model()`.
 4. The response is parsed into a `JudgeResult` object.
 5. The `is_triggered` flag determines whether the guardrail fires.
@@ -186,6 +186,32 @@ Semantic evaluation using a language model as a "judge". The `JudgeEngine` passe
 | `toxicity_check.md` | Detects offensive, abusive, or harmful content |
 | `business_context_check.md` | Validates if the request aligns with your business domain |
 | `prompt_injection_check.md` | Identifies prompt injection or jailbreak attempts |
+
+### Setting the Judge Prompt
+
+Every judge needs a prompt. Set it in exactly one of two ways:
+
+- **`prompt`**: the prompt text, written inline in `config.yaml`.
+- **`prompt_ref`**: a built-in prompt or a Markdown file from your custom prompts directory.
+
+`prompt` and `prompt_ref` are mutually exclusive. The configuration is rejected if both are set, if neither is, or if `prompt_ref` names a file the gateway cannot find.
+
+```yaml
+guardrails:
+  - name: medical_advice_judge
+    type: judge
+    where: input
+    behavior: block
+    parameters:
+      prompt: |
+        You are a compliance officer for a retail chatbot.
+        Flag the text if it asks for a diagnosis, a dosage or any other medical advice.
+      model_id: "gpt-4o-mini"
+```
+
+The gateway appends the reasoning instruction and the text under review to the prompt, so an inline prompt only has to say what to flag.
+
+Use `prompt` for short prompts that belong with the guardrail. Use `prompt_ref` for long prompts, or to change a prompt per environment without touching `config.yaml`.
 
 ### Custom Prompt Templates
 

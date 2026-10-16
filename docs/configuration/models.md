@@ -467,7 +467,7 @@ chat_models:
 
 1. **Model Not Found**: Verify the `model_id` exists in `chat_models` / `embedding_models` / `transcription_models` and is correctly referenced by routes/fallbacks
 2. **Authentication Errors**: Check API keys and `credentials` configuration
-3. **Prompt File Not Found**: If using `prompt_ref`, ensure the Markdown file exists in the mounted `PROMPTS_DIR` inside the container and the filename matches the configured value.
+3. **Prompt File Not Found**: The configuration is rejected with `Prompt file not found: <prompt_ref>`. Ensure the Markdown file exists in the mounted `PROMPTS_DIR` inside the container and the filename matches the configured value.
 4. **Cost Assignment**: Ensure model names match those in the price list file (if used)
 
 ### Debug Configuration
