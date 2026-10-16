@@ -73,7 +73,7 @@ Your route is now live. You will see it listed in the Routes section of the UI.
 
 ## 5. Create a Group and API Key
 
-Go to **Groups** and create a group (e.g. `my-team`). Then go to **API Keys**, create a key, and associate it with the `my-assistant` route inside the `quickstart` project.
+Go to **Groups**, create a group (e.g. `my-team`) and associate it with the `my-assistant` route inside the `quickstart` project. Then go to **Credentials**, create a credential and associate it with the `my-team` group. See [Credentials](./credentials.md) for the options, such as an expiry date.
 
 :::warning
 The key is shown only once — copy it and store it securely.

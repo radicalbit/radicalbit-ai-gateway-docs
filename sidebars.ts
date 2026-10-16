@@ -23,6 +23,11 @@ const sidebars: SidebarsConfig = {
       id: 'basic-concepts',
       label: 'Basic Concepts',
     },
+    {
+      type: 'doc',
+      id: 'credentials',
+      label: 'Credentials',
+    },
 
     // ── Configure (models + routes — the minimum viable config) ─────────────
     {

@@ -17,7 +17,7 @@ curl -H "Authorization: Bearer your-api-key" \
      http://localhost:9000/v1/chat/completions
 ```
 
-The gateway accepts API keys via the `Authorization: Bearer` header (sent by OpenAI SDKs and compatible libraries) or the `X-Api-Key` header for direct API calls.
+The gateway reads the [credential](../credentials.md) from the `Authorization: Bearer` header, which OpenAI SDKs and compatible libraries send for you. A credential past its [expiry date](../credentials.md#expiration) is rejected with `401` and code `key_expired_unauthorized`.
 
 ## Endpoints
 
@@ -378,7 +378,7 @@ The response is Typesafe's body, unchanged. `model` holds the Typesafe model tha
 | Status | Cause |
 |--------|-------|
 | `400` | Unknown route, a route with no decision models, or a guardrail block or soft block (`guardrail_violation_bad_request`) |
-| `401` | Missing or invalid gateway key, or a key that does not belong to the route |
+| `401` | Missing, invalid or [expired](../credentials.md#expiration) gateway key, or a key that does not belong to the route |
 | `422` | The request body is invalid, for example `model` is missing |
 | `429` | A rate, token or budget limit is full |
 | `502` | No decision model answered (`model_invoker_bad_gateway`) |
@@ -389,23 +389,34 @@ The response is Typesafe's body, unchanged. `model` holds the Typesafe model tha
 ## Error Responses
 
 ### Standard Error Format
+
+Errors follow the OpenAI error format, so OpenAI SDKs raise them as regular API errors:
+
 ```json
 {
   "error": {
-    "message": "Error description",
-    "type": "invalid_request_error",
-    "code": "route_not_found"
+    "message": "The route name [my-project/my-route] was not found in the config",
+    "type": "gateway_error",
+    "param": null,
+    "code": "gateway_bad_request"
   }
 }
 ```
 
+- `type` is the error family, for example `authentication_error`, `rate_limit_error` or `guardrail_error`.
+- `code` is the specific error. Use it to tell errors apart.
+
 ### Common Error Codes
 
-| Code | Description | Solution |
-|------|-------------|----------|
-| `route_not_found` | Route name not found in configuration | Check route name in config.yaml |
-| `model_not_found` | Model not found in route | Verify model configuration |
-| `guardrail_blocked` | Content blocked by guardrail | Review guardrail configuration |
-| `rate_limit_exceeded` | Rate limit exceeded | Adjust rate limiting configuration |
-| `token_limit_exceeded` | Token limit exceeded | Adjust token limiting configuration |
-| `authentication_failed` | Invalid API key | Check API key format and permissions |
+| Status | Code | Description | Solution |
+|--------|------|-------------|----------|
+| `400` | `gateway_bad_request` | Unknown route, or a route with no models of the requested kind | Check the `model` field (`project-name/route-name`) and the route configuration |
+| `400` | `guardrail_violation_bad_request` | Content blocked by a guardrail | Review the guardrail configuration |
+| `401` | `key_missing_unauthorized` | No credential in the request | Send the credential in the `Authorization: Bearer` header |
+| `401` | `key_invalid_unauthorized` | Unknown credential, or a credential whose group is not linked to the route | Check the credential value and its group's routes |
+| `401` | `key_expired_unauthorized` | "API key has expired.": the credential's [expiry date](../credentials.md#expiration) has passed | Ask an Admin for a new credential |
+| `401` | `invalid_jwt_token` | Invalid identity provider token (Enterprise, see [Access Control](../access-control/index.md)) | Get a new token from the identity provider |
+| `429` | `request_rate_limited` | [Rate limit](../features/rate-limiting.md) exceeded | Retry later, or raise the limit |
+| `429` | `token_limit_rate_limited` | [Token limit](../features/token-limiting.md) exceeded | Retry later, or raise the limit |
+| `429` | `budget_limit_rate_limited` | [Budget limit](../features/budget-limiting.md) exceeded | Raise the budget, or wait for the next budget window |
+| `502` | `model_invoker_bad_gateway` | No [decision model](../features/decision-models.md) answered, fallbacks included | Check Typesafe's status and the fallback configuration |
