@@ -17,7 +17,7 @@ curl -H "Authorization: Bearer your-api-key" \
      http://localhost:9000/v1/chat/completions
 ```
 
-The gateway reads the [credential](../credentials.md) from the `Authorization: Bearer` header, which OpenAI SDKs and compatible libraries send for you. A credential past its [expiry date](../credentials.md#expiration) is rejected with `401` and code `key_expired_unauthorized`.
+The gateway reads the [credential](../credentials.md) from the `Authorization: Bearer` header, which OpenAI SDKs and compatible libraries send for you. A credential past its [expiry date](../credentials.md#expiration) is rejected with `401` and code `key_expired_unauthorized`. After a [rotation](../credentials.md#rotation), the previous value works only until the grace period ends, and is then rejected with `401` and code `key_invalid_unauthorized`, like a wrong value.
 
 ## Endpoints
 
@@ -386,6 +386,95 @@ The response is Typesafe's body, unchanged. `model` holds the Typesafe model tha
 
 ---
 
+### Credential Rotation
+
+[Rotation](../credentials.md#rotation) is also available through the management API, the one the UI uses, under `/public/api/v1`. It applies to credentials created in the gateway only.
+
+#### Rotate a credential
+
+`POST /public/api/v1/keys/{uuid}/rotation`
+
+Gives the credential a new value. `gracePeriod` is required: a duration such as `"1 hour"`, `"24 hours"`, `"7 days"` or `"2 weeks"`, or `null` for [no grace period](../credentials.md#no-grace-period).
+
+```bash
+curl -X POST http://localhost:9000/public/api/v1/keys/3f6c2a1e-8d4b-4c1a-9e2f-5b7d8c9a0e11/rotation \
+     -H "Content-Type: application/json" \
+     -d '{"gracePeriod": "24 hours"}'
+```
+
+The response is the credential, with the new value in `apiKey`. It is the only time the new value is returned:
+
+```json
+{
+  "uuid": "3f6c2a1e-8d4b-4c1a-9e2f-5b7d8c9a0e11",
+  "name": "billing-service",
+  "owner": "gateway",
+  "apiKey": "sk-rb-*******************",
+  "expiresOn": "2026-12-31",
+  "state": "active",
+  "graceEndsAt": "2026-10-20T09:30:00Z",
+  "rotationState": "in_grace",
+  "lastRotatedAt": "2026-10-19T09:30:00Z",
+  "group": { "...": "..." },
+  "limits": []
+}
+```
+
+**Grace period bounds:**
+
+- At least 1 hour, at most 365 days.
+- It must end no later than the credential's expiry (23:59:59 UTC on `expiresOn`).
+- Within 1 hour of expiry, only `null` is accepted.
+
+A grace period out of bounds is rejected with `422`, in the same shape as any other invalid body:
+
+```json
+{
+  "detail": [
+    {
+      "type": "value_error",
+      "loc": ["body", "gracePeriod"],
+      "msg": "The grace period would end after the credential expires (2026-12-31 23:59:59+00:00)",
+      "input": "7 days"
+    }
+  ],
+  "body": "{\"gracePeriod\": \"7 days\"}"
+}
+```
+
+#### End a grace period
+
+`DELETE /public/api/v1/keys/{uuid}/rotation`
+
+Ends the running grace period: the previous value stops working at once. The credential itself is not deleted. The response is the credential, with its value masked.
+
+```bash
+curl -X DELETE http://localhost:9000/public/api/v1/keys/3f6c2a1e-8d4b-4c1a-9e2f-5b7d8c9a0e11/rotation
+```
+
+#### Rotation fields
+
+Every credential read (`GET /public/api/v1/keys`, `GET /public/api/v1/keys/{uuid}`, and the responses above) carries these fields:
+
+| Field | Description |
+|-------|-------------|
+| `rotationState` | `none`: never rotated. `in_grace`: the grace period is running. `grace_ending`: the grace period ends within 24 hours. `rotated`: rotated, and the previous value no longer works |
+| `graceEndsAt` | When the previous value stops working (UTC). Set only while the grace period is running (`in_grace` or `grace_ending`), `null` otherwise |
+| `lastRotatedAt` | When the credential was last rotated (UTC), or `null` if never |
+
+**Errors:**
+
+| Status | Code | Cause |
+|--------|------|-------|
+| `404` | `key_not_found` | No credential with that UUID |
+| `405` | `key_operation_method_not_allowed` | Rotation of a credential from the identity provider, or of an expired credential |
+| `409` | `key_rotation_conflict` | `POST`: a grace period is already running (end it first), or another rotation of the same credential happened at the same time (retry). `DELETE`: no grace period is running |
+| `422` | | `gracePeriod` is missing, malformed or out of bounds |
+
+Errors other than `422` follow the [standard error format](#standard-error-format), with type `auth_registry_error`.
+
+---
+
 ## Error Responses
 
 ### Standard Error Format
@@ -413,7 +502,7 @@ Errors follow the OpenAI error format, so OpenAI SDKs raise them as regular API 
 | `400` | `gateway_bad_request` | Unknown route, or a route with no models of the requested kind | Check the `model` field (`project-name/route-name`) and the route configuration |
 | `400` | `guardrail_violation_bad_request` | Content blocked by a guardrail | Review the guardrail configuration |
 | `401` | `key_missing_unauthorized` | No credential in the request | Send the credential in the `Authorization: Bearer` header |
-| `401` | `key_invalid_unauthorized` | Unknown credential, or a credential whose group is not linked to the route | Check the credential value and its group's routes |
+| `401` | `key_invalid_unauthorized` | Unknown credential, a credential whose group is not linked to the route, or a [previous value](../credentials.md#after-the-grace-period) used after its grace period | Check the credential value and its group's routes. After a rotation, ask an Admin for the new value |
 | `401` | `key_expired_unauthorized` | "API key has expired.": the credential's [expiry date](../credentials.md#expiration) has passed | Ask an Admin for a new credential |
 | `401` | `invalid_jwt_token` | Invalid identity provider token (Enterprise, see [Access Control](../access-control/index.md)) | Get a new token from the identity provider |
 | `429` | `request_rate_limited` | [Rate limit](../features/rate-limiting.md) exceeded | Retry later, or raise the limit |

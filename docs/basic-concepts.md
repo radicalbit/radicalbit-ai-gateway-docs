@@ -157,7 +157,7 @@ The following operations are available, even without an IDP integration:
 * **Create an API Key:** For use as the client key for your model in your application, optionally with an expiry date.
 * **Create a Group:** To be associated with one or more API Keys and routes.
 
-See [Credentials](./credentials.md) for how API keys are created, how they expire and what an Admin can do with them.
+See [Credentials](./credentials.md) for how API keys are created, how they expire, how they are rotated and what an Admin can do with them.
 
 ---
 
