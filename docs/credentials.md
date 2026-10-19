@@ -124,7 +124,7 @@ A request made with the previous value after the grace period gets the same `401
 }
 ```
 
-The gateway keeps no record of earlier values, so it can't tell a caller their value was rotated. A caller who sees this error after a rotation needs the new value from an Admin.
+The gateway keeps no record of earlier values, so it can't tell a caller their value was rotated.
 
 When the credential reaches its [expiry date](#expiration), neither value works, even if a grace period was still running. The new value gets `key_expired_unauthorized`, the previous one `key_invalid_unauthorized`.
 
