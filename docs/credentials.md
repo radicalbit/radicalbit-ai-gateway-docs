@@ -134,5 +134,4 @@ When the credential reaches its [expiry date](#expiration), neither value works,
 
 - [Basic Concepts](./basic-concepts.md): groups, routes and how they fit together
 - [Access Control](./access-control/index.md): signing in with your identity provider (Enterprise)
-- [API Reference](./api-reference/endpoints.md#credential-rotation): rotating a credential through the API
 - [API Reference](./api-reference/endpoints.md#error-responses): all the errors a caller can receive
