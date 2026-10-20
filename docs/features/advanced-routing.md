@@ -704,5 +704,5 @@ Write conditions that are representative of real user messages. More diverse exa
 
 - **[Fallback](./fallback.md)** - Set up automatic failover when models fail
 - **[Budget Limiting](./budget-limiting.md)** - Configure budget limits (required for budget routing)
-- **[Semantic Caching](./semantic-caching.md)** - Another embedding-based feature for caching similar requests
+- **[Caching](./caching.md)** - Another embedding-based feature, for caching similar requests
 - **[Advanced Configuration](../configuration/advanced-configuration.md)** - Enterprise configuration options

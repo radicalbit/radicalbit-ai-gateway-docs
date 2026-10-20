@@ -48,7 +48,6 @@ const sidebars: SidebarsConfig = {
       items: [
         'features/guardrails',
         'features/caching',
-        'features/semantic-caching',
         'features/rate-limiting',
         'features/token-limiting',
         'features/budget-limiting',

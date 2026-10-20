@@ -328,7 +328,7 @@ routes:
       ttl: 60
       embedding_model_id: text-embedding-3-small
       similarity_threshold: 0.80
-      distance_metric: cosine   # cosine | euclidean | dot
+      distance_metric: cosine   # cosine | euclidean | inner_product
       dim: 1536
 
 cache:
@@ -336,7 +336,7 @@ cache:
   redis_port: 6379
 ```
 
-→ See **[Caching](../features/caching.md)** and **[Semantic Caching](../features/semantic-caching.md)** for full details.
+→ See **[Caching](../features/caching.md)** for full details.
 
 ---
 
