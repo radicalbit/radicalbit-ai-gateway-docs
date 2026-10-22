@@ -75,7 +75,7 @@ Docker Compose brings up these core services:
 | Valkey Cache | `6380` | Backs the response cache (exact and semantic caching) |
 | ClickHouse | `8123` / `9002` | Stores traces and metrics |
 | OTel Collector | n/a | Forwards traces to ClickHouse |
-| Metrics Worker | n/a | Processes usage metrics and alert rules |
+| Metrics Worker | n/a | Processes usage metrics and records alert history |
 
 A few optional tools are also started, useful for inspecting data while testing locally:
 
