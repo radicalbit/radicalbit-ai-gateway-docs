@@ -35,7 +35,7 @@ The Gateway gives you all the tools needed to make your AI applications — and 
 
 - **Detailed Metrics**: investigate performance and usage across routes and models.
 - **Gateway Tracing**: end-to-end traces of every request processed by the Gateway.
-- **Event Notifications**: receive alerts based on configured conditions.
+- **Alerts**: receive [email alerts](./features/alerts.md) when guardrails block, fallbacks trigger or limits run out.
 
 ---
 

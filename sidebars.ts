@@ -55,6 +55,7 @@ const sidebars: SidebarsConfig = {
         'features/advanced-routing',
         'features/mcp',
         'features/decision-models',
+        'features/alerts',
       ],
     },
 
