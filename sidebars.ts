@@ -51,6 +51,7 @@ const sidebars: SidebarsConfig = {
         'features/rate-limiting',
         'features/token-limiting',
         'features/budget-limiting',
+        'features/credential-limits',
         'features/fallback',
         'features/advanced-routing',
         'features/mcp',
