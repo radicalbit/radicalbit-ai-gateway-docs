@@ -164,7 +164,7 @@ Semantic evaluation using a language model as a "judge". The `JudgeEngine` passe
 
 1. The input or output text is extracted and normalized.
 2. The text is inserted into a **prompt template** (`prompt_ref`).
-3. The LLM defined in `model_id` is invoked via LangChain's `init_chat_model()`.
+3. The LLM defined in `model_id` is invoked through its provider, asking for structured output (a JSON schema or a forced tool call, depending on the provider).
 4. The response is parsed into a `JudgeResult` object.
 5. The `is_triggered` flag determines whether the guardrail fires.
 6. If the primary model fails, an optional `fallback_model_id` is tried automatically.
@@ -175,7 +175,7 @@ Semantic evaluation using a language model as a "judge". The `JudgeEngine` passe
 |-----------|-------------|
 | **JudgePromptManager** | Loads built-in and user-defined prompt templates |
 | **PromptTemplate** | Defines structured LLM prompts with formatting and output schema |
-| **PydanticOutputParser** | Parses model output into a `JudgeResult` object |
+| **Structured output** | Validates the model's reply against the `JudgeResult` schema |
 | **Model Cache** | Optimizes repeated model usage by caching initialized instances |
 | **Fallback Logic** | Retries with a fallback model if the primary fails |
 
