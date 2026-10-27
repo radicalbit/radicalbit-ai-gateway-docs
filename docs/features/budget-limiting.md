@@ -8,6 +8,10 @@ Budget limiting in the Radicalbit AI Gateway controls costs by setting a limit o
 
 A single time window tracks total spending — when the combined cost of input and output tokens crosses the configured threshold within the window, further requests are rejected until the window resets.
 
+:::info
+A route budget and a [project budget](./project-budget.md) exclude each other: while the project has a budget, its routes can't declare `budget_limiting`, and while the published configuration has routes with `budget_limiting`, the project can't get a budget.
+:::
+
 ---
 
 ## Budget Limiting Configuration
