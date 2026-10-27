@@ -151,6 +151,7 @@ chat_models:
     model: azure/my-deployment-name
     credentials:
       api_key: !secret AZURE_OPENAI_KEY
+      api_base: "https://my-resource.openai.azure.com"
       api_version: "2024-02-01"
       # azure_ad_token: !secret AZURE_AD_TOKEN  # alternative to api_key
 ```
