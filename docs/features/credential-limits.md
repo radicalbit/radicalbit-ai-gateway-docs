@@ -77,6 +77,88 @@ To delete a limit, open its menu (⋮) in the list and choose **Delete**. If ale
 
 ---
 
+## Applying Limits from a Group
+
+A group holds no limits. From a group you can copy a set of limits onto every credential in it, in one step:
+
+- each credential receives its own copy, with its own counter: the credentials don't share a quota;
+- only the credentials in the group at that moment receive them. A credential added to the group later gets nothing;
+- removing a credential from the group does not touch the limits it already has;
+- after the copy, the limits belong to each credential: change or delete them from **Credentials**.
+
+A group with no credentials has nobody to copy the limits to, so applying is refused.
+
+### Conflicts
+
+A credential that already has a limit with the same category, window type and window is a conflict. You decide each conflict:
+
+- **Skip** (the default) leaves that credential's limit as it is;
+- **Overwrite** replaces its max with the new one. The counter is kept: what the credential already consumed in the current window still counts.
+
+Nothing is overwritten unless you choose to.
+
+### Expired and Externally Managed Credentials
+
+Expired credentials in the group receive the limits too, even though they can't make requests. Groups and credentials synced from the identity provider can receive limits like gateway-managed ones.
+
+### From the UI
+
+1. Open **Groups**, then the row menu (⋮), or the menu of the group page, and choose **Apply limits to credentials**.
+2. Fill one row per limit, as when adding limits to a credential. Add more rows with **Add another limit**.
+3. The **Preview** lists every credential in the group with what it receives: **New** for a limit it doesn't have yet, the old and new max for a conflict. Choose **Skip** or **Overwrite** for each conflict, or all at once with **Skip all** / **Overwrite all**. Expired credentials are marked.
+4. Choose **Apply to N credentials**. The result says how many limits were added, overwritten and skipped.
+
+### With the API
+
+`POST /public/api/v1/groups/{group_uuid}/limits` copies the limits onto the credentials in the group, in a single transaction. `limits` takes the same fields as [adding limits to a credential](#add-limits). `skip` lists the conflicts to leave as they are: **a conflict not listed in `skip` is overwritten**.
+
+```bash
+curl -X POST http://localhost:9000/public/api/v1/groups/<group_uuid>/limits \
+  -H "Content-Type: application/json" \
+  -d '{
+    "limits": [
+      { "category": "request_rate", "algorithm": "FIXED_WINDOW", "windowSize": "1 minute", "value": 50 },
+      { "category": "budget", "algorithm": "ALIGNED_FIXED_WINDOW", "windowSize": "1 day", "value": 20 }
+    ],
+    "skip": [
+      { "keyUuid": "<key_uuid>", "category": "request_rate", "algorithm": "FIXED_WINDOW", "windowSize": "1 minute" }
+    ]
+  }'
+```
+
+| Field of `skip` | Required | Description |
+|-----------------|----------|-------------|
+| `keyUuid` | Yes | The credential whose limit stays as it is |
+| `category` | Yes | The category of the limit |
+| `algorithm` | No | `FIXED_WINDOW` (default) or `ALIGNED_FIXED_WINDOW` |
+| `windowSize` | Yes | The window, in any unit: `60` and `1 minute` are the same window |
+
+The response says, for each credential and each limit, what happened: `added`, `overwritten` or `skipped`. On a conflict it also gives the max the credential had before (`previousValue`).
+
+```json
+{
+  "members": [
+    {
+      "keyUuid": "3b9e…",
+      "keyName": "billing-service",
+      "expired": false,
+      "limits": [
+        { "category": "request_rate", "algorithm": "FIXED_WINDOW", "windowSize": "1 minute", "outcome": "skipped", "previousValue": 100.0, "newValue": 50.0 },
+        { "category": "budget", "algorithm": "ALIGNED_FIXED_WINDOW", "windowSize": "1 day", "outcome": "added", "previousValue": null, "newValue": 20.0 }
+      ]
+    }
+  ]
+}
+```
+
+| Status | When |
+|--------|------|
+| `400` | The group has no credentials (`group_has_no_credentials_bad_request`) |
+| `404` | The group does not exist |
+| `422` | The request is invalid, for example a window outside the list. `loc` points at the field, e.g. `["body", "limits", 0, "windowSize"]` |
+
+---
+
 ## Managing Limits with the API
 
 The management API is served by the gateway under `/public/api/v1`. In the Enterprise edition, with access control enabled, these endpoints are reserved to the ADMIN role.
