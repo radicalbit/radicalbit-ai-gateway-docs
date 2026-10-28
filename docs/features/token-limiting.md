@@ -52,6 +52,12 @@ cache:
 
 ---
 
+## What Counts
+
+A request's own model call counts, and so do the calls the gateway makes on its behalf: [LLM and decision judges](./guardrails.md#cost-and-limits), and [semantic and decision routing](./advanced-routing.md#cost-of-routing-calls). Each is counted at the price of the model it calls. Adding a judge or a model-based router to a route makes its limits fill faster.
+
+---
+
 ## Error Handling
 
 When a token limit is exceeded, the gateway returns an HTTP **429 (Too Many Requests)** error.

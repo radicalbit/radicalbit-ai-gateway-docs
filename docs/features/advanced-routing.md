@@ -1,18 +1,33 @@
 # Intelligent Routing
 
-Without routing rules, every request goes to the same fixed model. Intelligent routing sends each request to the model that fits it best, based on keywords, token count, time of day, or budget.
+Without routing rules, every request goes to the same fixed model. Intelligent routing sends each request to the model that fits it best, based on keywords, token count, time of day, budget, or what the request is about.
 
 ## Overview
 
 Intelligent routing in the Radicalbit AI Gateway allows you to automatically select which model handles a request based on rule-based logic. Instead of always routing to a fixed model, routing evaluates incoming requests against configurable rules — such as keywords in the user message, token count (per-message or full conversation), time of day, or budget consumption — and directs each request to the most appropriate model.
 
-There are three routing categories:
+There are four routing categories:
 
 | Category | `type` value | Decision basis | Added latency |
 |---|---|---|---|
 | [Deterministic](#deterministic-routing) | `deterministic` | Rule evaluated locally | Negligible |
 | [Text Classification](#text-classification-routing) | `text_classification` | External ML classifier over HTTP | HTTP call latency |
 | [Semantic](#semantic-routing) | `semantic` | Embedding similarity against example utterances | Embedding call latency (startup + per query) |
+| [Decision](#decision-routing) | `decision` | A decision model picks among described models | Decision model call latency (per query) |
+
+### What a Router Sees
+
+Routing runs after the route's **redact guardrails**, for every routing type. A router, and any service it calls (a classifier, an embedding model, a decision model), only sees the redacted text. The route's configured system prompt is added after routing, so routers never see it.
+
+:::info Redaction runs before routing
+Because routers read redacted text, a `keyword` rule no longer matches a word that a redact guardrail masks, and `token_length` counts the redacted text. If a keyword rule must match a value that a guardrail masks, match the placeholder instead (for example `<EMAIL_ADDRESS>`).
+:::
+
+### Cost of Routing Calls
+
+Semantic and decision routing call a model for every request they route. That call is charged to the request: its tokens and cost count against the route's, the key's and the project's token and budget limits, at the price of the model called, and appear in Usage as routing spend. A routing call can push a counter over its limit. The request after it is the one rejected.
+
+Routing runs before the cache lookup, so a request served from the [cache](./caching.md) still pays for its routing call.
 
 ---
 
@@ -527,7 +542,7 @@ Semantic routing operates in two phases:
 **Query phase** (runs per request):
 
 1. Extracts the **last human message** from the conversation
-2. Embeds it using the same embedding model
+2. Embeds it using the same embedding model. This embedding is charged to the request, see [Cost of Routing Calls](#cost-of-routing-calls). The startup embeddings are not
 3. Computes **cosine similarity** between the message embedding and every stored centroid
 4. If the highest similarity score exceeds `similarity_threshold`, routes to that model
 5. Otherwise, routes to `default_model_id`
@@ -623,6 +638,129 @@ Write conditions that are representative of real user messages. More diverse exa
 
 ---
 
+## Decision Routing
+
+Decision routing asks a [decision model](./decision-models.md), such as Typesafe's Jev, to pick the chat model for each request. You describe each candidate model in plain words. The decision model reads the request and chooses the description that fits it best, with a confidence for each option.
+
+It does the same job as an LLM asked to pick a model, but faster (a few hundred milliseconds) and cheaper (input tokens only). Unlike semantic routing, it needs no example utterances: a description of each model is enough.
+
+### How It Works
+
+For each request:
+
+1. The gateway takes the text to route on: by default the **last human message**, or the conversation if `history: all`.
+2. It asks the decision model one choice question: your `instructions`, with one option per `output_mapping` entry, described by its `description`.
+3. The decision model returns the chosen option and a confidence for each option.
+4. The request goes to the chosen model, unless the confidence is below `min_confidence`.
+
+The decision model only chooses among the `output_mapping` entries. To let it pick `default_model_id`, list that model in `output_mapping` too, with a description.
+
+### Configuration Structure
+
+```yaml
+decision_models:
+  - model_id: jev
+    model: typesafe/jev-latest
+    credentials:
+      api_key: !secret TYPESAFE_API_KEY
+  - model_id: jev-backup
+    model: typesafe/jev-1.13.0
+    credentials:
+      api_key: !secret TYPESAFE_BACKUP_API_KEY
+
+chat_models:
+  - model_id: gpt-4o
+    model: openai/gpt-4o
+    credentials:
+      api_key: !secret OPENAI_API_KEY
+  - model_id: gpt-4.1
+    model: openai/gpt-4.1
+    credentials:
+      api_key: !secret OPENAI_API_KEY
+  - model_id: gpt-4o-mini
+    model: openai/gpt-4o-mini
+    credentials:
+      api_key: !secret OPENAI_API_KEY
+
+routing:
+  - name: by-task
+    type: decision
+    decision_model_id: jev
+    fallback_model_id: jev-backup
+    instructions: Choose the model best suited to answer this request.
+    default_model_id: gpt-4o-mini
+    min_confidence: 0.6
+    output_mapping:
+      - model_id: gpt-4o
+        description: Emails, contracts and other business documents
+      - model_id: gpt-4.1
+        description: Translation to or from Chinese and Japanese
+      - model_id: gpt-4o-mini
+        description: Short questions and small talk
+
+routes:
+  assistant:
+    chat_models:
+      - gpt-4o
+      - gpt-4.1
+      - gpt-4o-mini
+    routing: by-task
+```
+
+### Routing Config Fields
+
+#### Required Fields
+
+- **`name`**: Unique identifier for the routing config
+- **`type`**: Must be `decision`
+- **`decision_model_id`**: A decision model from the top-level `decision_models`. It does not need to be listed on the route
+- **`instructions`**: The question asked to the decision model, for example "Choose the model best suited to answer this request." Must not be empty
+- **`default_model_id`**: The model used when the decision model cannot choose (see [Fallback to the Default Model](#fallback-to-the-default-model))
+- **`output_mapping`**: At least two entries, each a model and its description
+
+#### Optional Fields
+
+- **`fallback_model_id`**: Another decision model from the top-level `decision_models`, asked when `decision_model_id` fails
+- **`min_confidence`**: A value from `0` to `1`. If the chosen option's confidence is below it, the request goes to `default_model_id`. No default: without it, the decision model's choice is always used
+- **`history`**: `last` (default) sends the last human message. `all` sends the conversation the client sent
+- **`message_roles`**: With `history: all`, the message roles to include: `user`, `assistant`, `system`, `tool`. Default: `user` and `assistant`. Not allowed with `history: last`
+
+### Output Mapping Fields
+
+Each entry in `output_mapping`:
+
+- **`model_id`**: The model to route to. It must be in the route's `chat_models`
+- **`description`**: What this model should handle, in plain words. Must not be empty. The description belongs to the routing, not to the model: the same model can be described differently in two routing configs
+
+:::tip
+The decision model chooses by reading the descriptions, so write them as you would explain the split to a colleague: what kind of request, what language, what length. Keep descriptions distinct from each other. Overlapping descriptions produce low confidence.
+:::
+
+### Fallback to the Default Model
+
+Decision routing **never fails a request**. The request goes to `default_model_id` when:
+
+| Situation | What happens first |
+|-----------|--------------------|
+| The decision model fails (network error, timeout, any error status) | Retried up to its `retry_attempts`, then `fallback_model_id` is asked. If that fails too, the default model is used |
+| The answer is not one of the offered options, or is malformed | The default model is used |
+| The confidence is below `min_confidence` | The default model is used. A confidence equal to `min_confidence` passes |
+| There is no text to route on | The default model is used, with no decision model call |
+
+Tracing shows when and why the default model was used.
+
+### Cost, Limits and Tracing
+
+Each decision routing call is charged to the request, as described in [Cost of Routing Calls](#cost-of-routing-calls), at the decision model's input price. Typesafe adds roughly **260 input tokens** of overhead to every call, on top of the text and the descriptions. This applies to cache hits too, because routing runs before the cache lookup.
+
+Each call is recorded on the request's routing trace: the decision model that answered, whether the fallback was used, the `instructions`, the options, the confidence for each option, the chosen model, whether the default model was used and why, and the text sent.
+
+:::warning
+The text you route on leaves the gateway: it is sent to Typesafe and stored in traces. Routing runs after redact guardrails, so add one to the route if that text may contain personal data. With `history: all`, the whole conversation is sent, not only the last message.
+:::
+
+---
+
 ## Configuration Reference
 
 ### Routing Config
@@ -630,21 +768,28 @@ Write conditions that are representative of real user messages. More diverse exa
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `name` | `string` | Yes | Unique name for the routing config |
-| `type` | `string` | Yes | Routing strategy: `deterministic`, `text_classification`, or `semantic` |
+| `type` | `string` | Yes | Routing strategy: `deterministic`, `text_classification`, `semantic` or `decision` |
 | `default_model_id` | `string` | Yes | Fallback model ID when no rule matches or on error |
 | `rule` | `string` | Deterministic only | Rule type: `keyword`, `token_length`, `context_length`, `time`, or `budget` |
 | `url` | `string` | Text classification only | HTTP endpoint of the external classifier |
 | `timeout` | `float` | No | Classifier request timeout in seconds (default: `5.0`) |
 | `embedding_model_id` | `string` | Semantic only | References a top-level `embedding_models` entry for embedding utterances and queries |
 | `similarity_threshold` | `float` | No | Cosine similarity threshold (default: `0.35`, range: `0.0`–`1.0`). Semantic only |
-| `output_mapping` | `list` | Yes | List of condition-to-model mappings |
+| `decision_model_id` | `string` | Decision only | References a top-level `decision_models` entry that picks the model |
+| `fallback_model_id` | `string` | No | Decision model asked when `decision_model_id` fails. Decision only |
+| `instructions` | `string` | Decision only | The question asked to the decision model |
+| `min_confidence` | `float` | No | Below this confidence (`0.0`–`1.0`), `default_model_id` is used. No default. Decision only |
+| `history` | `string` | No | `last` (default) or `all`. Decision only |
+| `message_roles` | `list[str]` | No | Roles sent with `history: all` (default: `user`, `assistant`). Decision only |
+| `output_mapping` | `list` | Yes | List of condition-to-model mappings. Decision routing needs at least two entries |
 
 ### Output Mapping Entry
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `model_id` | `string` | Yes | Model ID to select when conditions match |
-| `conditions` | varies | Yes | Rule-specific conditions (see below) |
+| `conditions` | varies | All types except decision | Rule-specific conditions (see below) |
+| `description` | `string` | Decision only | What this model should handle, read by the decision model |
 
 ### Conditions by Rule / Type
 
@@ -670,12 +815,14 @@ Write conditions that are representative of real user messages. More diverse exa
 - Use **budget** routing to gracefully degrade to cheaper models as spending increases
 - Use **text classification** routing when intent detection requires an ML model — e.g., sentiment analysis, topic classification, or domain-specific labelling
 - Use **semantic** routing when you want intent-based model selection without deploying an external classifier — just provide example utterances per model
+- Use **decision** routing when describing each model in a sentence is easier than collecting example utterances, or as a faster, cheaper alternative to asking an LLM to pick the model
 
 ### Model Configuration
 - Ensure all models referenced in `output_mapping` and `default_model_id` are defined in `chat_models`
 - All models used in routing must also be listed in the route's `chat_models`
 - Configure cost information on models when using budget routing
 - For semantic routing, ensure the embedding model referenced by `embedding_model_id` is defined in top-level `embedding_models`
+- For decision routing, ensure `decision_model_id` and `fallback_model_id` are defined in top-level `decision_models`. Decision models cannot be routing targets: `output_mapping` and `default_model_id` name chat models only
 
 ### General Tips
 - Keep `output_mapping` entries ordered intentionally — entry order matters for keyword and time rules
@@ -697,6 +844,9 @@ Write conditions that are representative of real user messages. More diverse exa
 5. **Text Classification Always Using Fallback**: Check that the classifier is reachable from the gateway (correct `url`, network connectivity). Verify the response contains a `predictions[0].class` field and that its value matches a label defined in `output_mapping.conditions`. Increase `timeout` if the classifier is slow to respond
 6. **Semantic Routing Always Using Default Model**: Check that the embedding model referenced by `embedding_model_id` is defined in top-level `embedding_models` and is reachable. Review gateway startup logs for initialization warnings. Verify that `similarity_threshold` is not set too high — try lowering it (e.g., from `0.8` to `0.6`) and inspect whether any centroid scores appear in debug logs
 7. **Semantic Routing Selecting the Wrong Model**: Improve `conditions` in `output_mapping` — add more diverse example utterances that better represent the target intent. Ensure conditions across different models are sufficiently distinct (overlapping utterance themes produce overlapping centroids)
+8. **Decision Routing Always Using Default Model**: Open the request's trace: it records why the default model was used. `error` means the decision model and its fallback failed: check the Typesafe key and that the models are reachable. `low_confidence` means `min_confidence` is too high or the descriptions overlap. `unknown_option` means the answer was not one of the offered options. `no_text` means the request had no text to route on
+9. **Keyword Rule Stopped Matching**: Routing reads redacted text. If a redact guardrail masks the keyword, the rule cannot see it. Match the placeholder (for example `<EMAIL_ADDRESS>`) or remove the value from the guardrail's entities
+10. **Limits Fill Faster Than Expected on a Routed Route**: semantic and decision routing calls count against token and budget limits, including on cache hits. See [Cost of Routing Calls](#cost-of-routing-calls)
 
 ---
 
