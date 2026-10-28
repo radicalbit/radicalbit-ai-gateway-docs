@@ -71,7 +71,7 @@ The sync keeps the limits: when a user moves to another group and their credenti
 
 1. Open **Credentials**. The **Limits** column shows how many limits each credential has; hover it to see them.
 2. Open the row menu (⋮) and choose **Manage limits**.
-3. Choose **Add limits**, fill one row per limit (category, window type, window, max), add more rows with **Add limit**, then save.
+3. Choose **Add limits**, fill one row per limit (category, window type, window, max), add more rows with **Add another limit**, then save.
 
 To delete a limit, open its menu (⋮) in the list and choose **Delete**. If alert rules watch that limit, the confirmation says how many will become stale. The rules are not changed.
 
