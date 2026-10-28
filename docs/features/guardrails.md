@@ -61,6 +61,7 @@ Guardrails belong to one of two classes:
 | `presidio_analyzer` | Check | Detects PII using Microsoft Presidio | `language: en`, `entities: ["EMAIL_ADDRESS"]` |
 | `presidio_anonymizer` | Redact | Masks PII using Microsoft Presidio | `language: en`, `entities: ["EMAIL_ADDRESS"]` |
 | `judge` | Check | Semantic evaluation via an LLM-as-a-Judge | `prompt_ref: "toxicity_check.md"`, `model_id: "gpt-4o-mini"` |
+| `decision_judge` | Check | One yes/no question answered by a decision model | `model_id: "jev"`, `instructions: "Is the user asking for legal advice?"` |
 
 ---
 
@@ -245,6 +246,101 @@ guardrails:
       max_tokens: 150
 ```
 
+### Cost and Limits
+
+A judge call is made on behalf of the request it checks, so it is charged to that request. Its tokens and cost count against the route's, the key's and the project's token and budget limits, at the judge model's price, and appear in Usage as judge spend. A judge call can push a counter over its limit. The request after it is the one rejected.
+
+---
+
+## Decision Judge Guardrails
+
+A decision judge asks a [decision model](./decision-models.md), such as Typesafe's Jev, **one yes/no question** about the text. The model does not write an answer. It returns the probability that the answer is yes, and the guardrail triggers when that probability reaches `threshold`. A decision model answers in a few hundred milliseconds and bills input tokens only, so a decision judge is usually faster and cheaper than an LLM judge asking the same question.
+
+What happens when it triggers is the guardrail's `behavior` (`block`, `soft_block` or `warn`), set by you. The model only answers the question.
+
+### How It Works
+
+1. The text is extracted the same way as for an LLM judge: the user messages on input (or the roles in `message_roles`), the last assistant message on output.
+2. The gateway sends the text to the decision model with your `instructions` and `criteria` as one yes/no question.
+3. The model returns the probability that the answer is yes, between 0 and 1.
+4. The guardrail triggers when that probability is **greater than or equal to** `threshold`.
+
+### Configuration
+
+The decision model must be declared under the top-level `decision_models`. It does not need to be listed on the route.
+
+```yaml
+decision_models:
+  - model_id: jev
+    model: typesafe/jev-latest
+    credentials:
+      api_key: !secret TYPESAFE_API_KEY
+  - model_id: jev-backup
+    model: typesafe/jev-1.13.0
+    credentials:
+      api_key: !secret TYPESAFE_BACKUP_API_KEY
+
+guardrails:
+  - name: legal_advice_check
+    type: decision_judge
+    where: input
+    behavior: soft_block
+    response_message: "I can't give legal advice. Please contact our legal team."
+    parameters:
+      model_id: jev
+      fallback_model_id: jev-backup
+      instructions: Is the user asking for legal advice?
+      criteria:
+        true: The user asks what the law allows, or how to act in a legal dispute
+        false: Any other request, including questions about our own terms of service
+      threshold: 0.7
+```
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| `model_id` | Yes | – | A decision model from the top-level `decision_models` |
+| `fallback_model_id` | No | – | Another decision model that answers when `model_id` fails. Must differ from `model_id` |
+| `instructions` | Yes | – | The yes/no question, written by you |
+| `criteria.true` | No | – | What a yes answer means |
+| `criteria.false` | No | – | What a no answer means |
+| `threshold` | No | `0.5` | The guardrail triggers when the probability of yes is at least this value (`0`–`1`) |
+
+The common guardrail fields (`where`, `behavior`, `response_message`, `message_roles`) work as for any other guardrail. There are no built-in questions: write the `instructions` and `criteria` for your own policy.
+
+:::tip
+Clear `criteria` make the answer sharper. Describe the edge cases you care about in `criteria.false` as well as in `criteria.true`. Start with the default `threshold` and raise it if the guardrail triggers too often.
+:::
+
+### Where It Runs
+
+| Traffic | Input | Output |
+|---------|-------|--------|
+| Chat completions, streamed or not | Yes | Yes |
+| Embeddings | Yes | – |
+| [Decision models](./decision-models.md) | Yes | – |
+
+A soft block on a decision-model request returns `400`, as described in [Decision Models](./decision-models.md#guardrails). A guardrail with `where: output` is rejected at startup on a route that has no chat models.
+
+### Failures
+
+A decision judge **fails closed**. The request never passes unchecked:
+
+1. Network errors, timeouts, `429` and `5xx` are retried, up to the model's `retry_attempts`.
+2. If the model still fails, or its answer has no valid probability, `fallback_model_id` answers instead.
+3. If there is no fallback, or it fails too, the request fails with `500` and code `judge_internal_error`.
+
+A `4xx` other than `429` means the question itself was rejected. The fallback would reject it too, so the request fails at once with `judge_internal_error`.
+
+### Cost, Limits and Tracing
+
+A decision judge call is charged to the request it checks, like an [LLM judge call](#cost-and-limits): its input tokens and cost count against the route's, the key's and the project's token and budget limits, at the decision model's input price. Remember the roughly 260-token overhead Typesafe adds to every call.
+
+Each call is recorded on the request's trace: the model that answered, whether the fallback was used, the `instructions`, `criteria` and `threshold`, the probability returned and the text sent.
+
+:::warning
+The text sent to the decision model leaves the gateway and is stored in traces. Put a redact guardrail before the decision judge if that text may contain personal data. In Enterprise, the trace privacy plugin drops the text from stored traces.
+:::
+
 ---
 
 ## Guardrail Behaviors
@@ -265,7 +361,7 @@ Stack guardrails from fastest to slowest for optimal performance:
 
 1. **Traditional Filters** — fast rule-based screening
 2. **Presidio Analysis** — PII detection and masking
-3. **LLM Judge** — deep semantic safety validation
+3. **LLM Judge or Decision Judge** — semantic validation. A decision judge answers in a few hundred milliseconds, an LLM judge usually takes longer
 
 ```mermaid
 graph LR

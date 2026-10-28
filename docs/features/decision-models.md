@@ -18,6 +18,15 @@ The first supported decision model is **Jev** by [Typesafe](https://docs.typesaf
 | Retries and fallback | Transient failures are retried, then the next decision model is tried |
 | Tracing | Every call shows in Tracing as a **Decision model** request |
 
+The gateway also uses decision models for its own work on chat traffic:
+
+| Use | What the decision model answers |
+|-----|-------------------------------|
+| [Decision judge](./guardrails.md#decision-judge-guardrails) | A yes/no question about a request or a response. The guardrail triggers when the probability of yes reaches its threshold |
+| [Decision routing](./advanced-routing.md#decision-routing) | Which of the described chat models should serve the request |
+
+For these, the decision model only needs to be declared under the top-level `decision_models`. It does not need to be on the route.
+
 ---
 
 ## Configuration
@@ -56,7 +65,7 @@ Decision models produce no billable output. Any `output_cost_per_million_tokens`
 
 - The **first** model in a route's `decision_models` serves the traffic. Other models in the list are used only as [fallbacks](#errors-retries-and-fallback).
 - A route can hold decision models alongside chat, embedding and transcription models.
-- [Intelligent routing](./advanced-routing.md) works with chat models only. A `routing` block cannot reference a decision model.
+- [Intelligent routing](./advanced-routing.md) routes chat traffic only. A decision model cannot be a routing target, but it can pick the target with [decision routing](./advanced-routing.md#decision-routing).
 - Every id in a route's `decision_models` must be declared under the top-level `decision_models`. The gateway rejects the configuration at startup otherwise.
 
 ### Complete Example
@@ -384,6 +393,8 @@ Gateway-side errors:
 ## Next Steps
 
 - **[Guardrails](./guardrails.md)** — Define the input checks and redaction applied to `state`
+- **[Decision Judge](./guardrails.md#decision-judge-guardrails)** — Ask a decision model a yes/no question about chat, embedding or decision traffic
+- **[Decision Routing](./advanced-routing.md#decision-routing)** — Let a decision model pick the chat model for each request
 - **[Fallback](./fallback.md)** — Configure failover between models
 - **[Budget Limiting](./budget-limiting.md)** — Cap decision spend per route, key or project
 - **[API Reference](../api-reference/endpoints.md#decision-models)** — Request, response and error reference for `POST /v1/systemone`

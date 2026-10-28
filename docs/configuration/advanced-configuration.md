@@ -260,7 +260,7 @@ Guardrails are defined at the **top level** and **referenced by name** inside ro
 ```yaml
 guardrails:
   - name: my_guardrail
-    type: contains          # starts_with | ends_with | contains | regex | presidio_analyzer | presidio_anonymizer | judge
+    type: contains          # starts_with | ends_with | contains | regex | presidio_analyzer | presidio_anonymizer | judge | decision_judge
     where: input            # input | output | io
     behavior: block         # block | soft_block | warn  (not needed for presidio_anonymizer)
     response_message: "..." # optional — returned to the user when triggered
@@ -274,7 +274,7 @@ routes:
       - my_guardrail        # reference by name
 ```
 
-→ See **[Guardrails](../features/guardrails.md)** for all types, behaviors, PII detection, LLM-as-a-Judge, and custom prompt templates.
+→ See **[Guardrails](../features/guardrails.md)** for all types, behaviors, PII detection, LLM-as-a-Judge, decision judges, and custom prompt templates.
 
 ---
 
@@ -384,7 +384,7 @@ routes:
 Intelligent routing allows the gateway to dynamically select which model handles a request based on configurable rules. Routing configs are defined at top-level under `routing` and referenced by name from routes.
 
 - **`name`**: Unique identifier for the routing config.
-- **`type`** *(optional)*: The routing strategy. Defaults to `deterministic`.
+- **`type`** *(optional)*: The routing strategy: `deterministic`, `text_classification`, `semantic` or `decision`. Defaults to `deterministic`.
 - **`default_model_id`**: Model ID to use when no rule condition matches.
 - **`rule`**: The rule type to apply. One of: `keyword`, `token_length`, `time`, `budget`.
 - **`output_mapping`**: List of entries mapping conditions to model IDs.
@@ -441,7 +441,7 @@ routes:
 
 When more than 80% of the $150 budget is consumed, requests switch to `gpt-4o-mini` automatically.
 
-→ See **[Intelligent Routing](../features/advanced-routing.md)** for all rule types: keyword, token length, context length, time, budget, text classification, and semantic routing.
+→ See **[Intelligent Routing](../features/advanced-routing.md)** for all rule types: keyword, token length, context length, time, budget, text classification, semantic, and decision routing.
 
 ---
 
