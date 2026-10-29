@@ -26,7 +26,7 @@ The window comes from a fixed list:
 
 A month is always 30 days. The gateway stores a window in its largest exact unit: `24 hours` is saved as `1 day`.
 
-Two budgets with the same window type and window are the same budget: adding it a second time is refused. A budget can't be edited: to change it, delete it and add it again.
+Two budgets with the same window type and window are the same budget: adding it a second time is refused: edit the existing one instead.
 
 ---
 
@@ -71,19 +71,24 @@ Alert rules with the **Project** scope watch the project's budgets, with limit a
 
 If the published configuration has routes with `budget_limiting`, the modal lists them, **Add budgets** is disabled, and **Open configuration** takes you to the configuration to fix. If only a draft has them, a warning lists them and adding stays allowed.
 
+To edit a budget, open its menu (⋮) and choose **Edit**. The window type, window and max can change:
+
+- **Only the max changes**: the counter is kept. What the project already spent in the current window still counts against the new max.
+- **The window type or window changes**: it is a different budget, so it replaces the old one and its counter restarts from zero. Before saving, a confirmation says so and, if alert rules watch the old budget and no other budget keeps the same window, how many will become stale.
+
 To delete a budget, open its menu (⋮) and choose **Delete**. If alert rules watch it, the confirmation says how many will become stale; on the last budget, it reminds you that routes can declare `budget_limiting` again.
 
 While a project has a budget, the configuration editor shows a banner: routes can't declare `budget_limiting`.
 
 :::info[Enterprise Feature]{className="enterprise-badge"}
-In the **Enterprise edition**, the project page also shows a **Budget limits** section under **Associated users**. With access control enabled, every role can see a project's budgets; only an **ADMIN** can add or delete them.
+In the **Enterprise edition**, the project page also shows a **Budget limits** section under **Associated users**, with the same menu (⋮) on each budget: **Edit** and **Delete** open the budget modal on that budget. With access control enabled, every role can see a project's budgets; only an **ADMIN** can add, edit or delete them.
 :::
 
 ---
 
 ## Managing the Budget with the API
 
-The management API is served by the gateway under `/public/api/v1`. In the Enterprise edition, with access control enabled, adding and deleting budgets is reserved to the ADMIN role; reading them is open to the project's members.
+The management API is served by the gateway under `/public/api/v1`. In the Enterprise edition, with access control enabled, adding, editing and deleting budgets is reserved to the ADMIN role; reading them is open to the project's members.
 
 ### Add Budgets
 
@@ -126,6 +131,32 @@ curl http://localhost:9000/public/api/v1/projects/<project_uuid>/budget-limits
   }
 ]
 ```
+
+### Change a Budget's Max
+
+`PATCH /public/api/v1/projects/{project_uuid}/budget-limits/{limit_uuid}` changes the max spend and nothing else. The counter is kept: what the project already spent in the current window still counts.
+
+```bash
+curl -X PATCH http://localhost:9000/public/api/v1/projects/<project_uuid>/budget-limits/<limit_uuid> \
+  -H "Content-Type: application/json" \
+  -d '{ "value": 60 }'
+```
+
+The body takes only `value`, greater than 0; any other field is refused. The response is the budget, with the max it had before:
+
+```json
+{
+  "uuid": "2b7e…",
+  "algorithm": "ALIGNED_FIXED_WINDOW",
+  "windowSize": "1 day",
+  "value": 60.0,
+  "previousValue": 40.0,
+  "createdAt": "2026-10-27 10:00:00+00:00",
+  "updatedAt": "2026-10-29 09:30:00+00:00"
+}
+```
+
+To change the window type or the window, add the new budget and delete the old one: its counter starts from zero.
 
 ### Delete a Budget
 
@@ -176,8 +207,8 @@ Errors on these endpoints, and on the configuration endpoints refused because of
 | `400` | `project_budget_limit_conflict_bad_request` | Adding a budget while the published configuration has routes with `budget_limiting` |
 | `400` | `project_config_validation_error` | Saving, publishing or importing a configuration with routes that declare `budget_limiting` while the project has a budget |
 | `400` | `project_budget_limit_already_exists_bad_request` | The project already has a budget with the same window type and window |
-| `404` | | The project or the budget does not exist |
-| `422` | | The request is invalid, for example a window outside the list. `loc` points at the field, e.g. `["body", "limits", 0, "windowSize"]` |
+| `404` | | The project or the budget does not exist, or the budget belongs to another project |
+| `422` | | The request is invalid, for example a window outside the list. `loc` points at the field, e.g. `["body", "limits", 0, "windowSize"]`. When changing a max: a max of 0 or less, or a field other than `value` |
 
 ---
 
