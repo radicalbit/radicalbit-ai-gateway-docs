@@ -45,13 +45,13 @@ The gateway stores a window in its largest exact unit: `60 seconds`, `60` and `1
 
 A credential can hold several limits of the same category, as long as the window type or the window differ. All of them apply, so the tightest one binds first. For example, 100 requests per hour and 1,000 requests per day.
 
-Two limits with the same category, window type and window are the same limit: adding it a second time is refused. Delete the existing one first to replace it.
+Two limits with the same category, window type and window are the same limit: adding it a second time is refused. Edit the existing one instead.
 
 ---
 
 ## Expired Credentials
 
-The limits of an expired credential can no longer be added or deleted. They stay listed, read-only.
+The limits of an expired credential can no longer be added, edited or deleted. They stay listed, read-only.
 
 ---
 
@@ -72,6 +72,11 @@ The sync keeps the limits: when a user moves to another group and their credenti
 1. Open **Credentials**. The **Limits** column shows how many limits each credential has; hover it to see them.
 2. Open the row menu (⋮) and choose **Manage limits**.
 3. Choose **Add limits**, fill one row per limit (category, window type, window, max), add more rows with **Add another limit**, then save.
+
+To edit a limit, open its menu (⋮) in the list and choose **Edit**. The category can't change; the window type, window and max can:
+
+- **Only the max changes**: the counter is kept. What the credential already consumed in the current window still counts against the new max.
+- **The window type or window changes**: it is a different limit, so it replaces the old one and its counter restarts from zero. Before saving, a confirmation says so and, if alert rules watch the old limit and no other limit keeps the same category and window, how many will become stale.
 
 To delete a limit, open its menu (⋮) in the list and choose **Delete**. If alert rules watch that limit, the confirmation says how many will become stale. The rules are not changed.
 
@@ -208,6 +213,33 @@ curl http://localhost:9000/public/api/v1/keys/<key_uuid>/limits
 ]
 ```
 
+### Change a Limit's Max
+
+`PATCH /public/api/v1/keys/{key_uuid}/limits/{limit_uuid}` changes the max and nothing else. The counter is kept: what the credential already consumed in the current window still counts.
+
+```bash
+curl -X PATCH http://localhost:9000/public/api/v1/keys/<key_uuid>/limits/<limit_uuid> \
+  -H "Content-Type: application/json" \
+  -d '{ "value": 200 }'
+```
+
+The body takes only `value`; any other field is refused. For `request_rate`, `token_input` and `token_output` the max must be a whole number. The response is the limit, with the max it had before:
+
+```json
+{
+  "uuid": "6f1c…",
+  "category": "request_rate",
+  "algorithm": "FIXED_WINDOW",
+  "windowSize": "1 hour",
+  "value": 200.0,
+  "previousValue": 100.0,
+  "createdAt": "2026-10-26 10:00:00+00:00",
+  "updatedAt": "2026-10-29 09:30:00+00:00"
+}
+```
+
+To change the window type or the window, add the new limit and delete the old one: its counter starts from zero.
+
 ### Delete a Limit
 
 ```bash
@@ -221,9 +253,9 @@ The response is the deleted limit.
 | Status | When |
 |--------|------|
 | `400` | The credential already has a limit with the same category, window type and window (`credential_limit_already_exists_bad_request`) |
-| `404` | The credential or the limit does not exist |
+| `404` | The credential or the limit does not exist, or the limit belongs to another credential |
 | `405` | The credential has expired (`key_operation_method_not_allowed`) |
-| `422` | The request is invalid, for example a window outside the list. `loc` points at the field, e.g. `["body", "limits", 0, "windowSize"]` |
+| `422` | The request is invalid, for example a window outside the list. `loc` points at the field, e.g. `["body", "limits", 0, "windowSize"]`. When changing a max: a max of 0 or less, a fractional max for requests or tokens (`["body", "value"]`), or a field other than `value` |
 
 ---
 
