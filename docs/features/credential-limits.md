@@ -59,6 +59,8 @@ Limits on different windows are compared by rate: 50 requests per minute is the 
 
 The warning appears after adding limits, after changing a max, and after applying limits to a group, for each credential that received a limit. A conflict left on **Skip** keeps the credential's own max, so it gives no warning.
 
+A limit can also become looser than a route without being touched: when a stricter route is published, when its group is associated with a route, or when the credential joins a group. So the saved limits are checked every time they are read. The **Limits** column of **Credentials** says how many are never reached, and the **Limits** dialog names the route under each of them. In the API, `GET /public/api/v1/keys` and `GET /public/api/v1/keys/{key_uuid}` with `include_limits=true` return them as `limitWarnings`, in the same shape as `warnings` below.
+
 ---
 
 ## Expired Credentials
