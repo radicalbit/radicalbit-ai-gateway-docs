@@ -207,14 +207,10 @@ data: [DONE]
 
 **Endpoint:** `POST /v1/responses`
 
-**Description:** Creates a response using the [OpenAI Responses API](https://platform.openai.com/docs/api-reference/responses) format (stateless Phase 1). The gateway translates the request to Chat Completions internally, so all gateway features (guardrails, caching, rate limiting) apply as usual.
+**Description:** Creates a response with the [OpenAI Responses API](https://platform.openai.com/docs/api-reference/responses). The gateway forwards your request body to the provider as sent, and returns the provider's response, or its stream of events, unchanged. The only field it changes is `model`. Authentication, rate limits, budgets, guardrails, caching, cost tracking and tracing work as for Chat Completions.
 
 :::tip
-The `model` field works exactly like in Chat Completions — it maps to a **route name** from your `config.yaml`, not directly to an upstream model name.
-:::
-
-:::warning
-The gateway operates in **stateless mode** only. Setting `previous_response_id` will return an error. Multi-turn conversations must be managed client-side.
+The `model` field works exactly like in Chat Completions: it is a **route name** from your `config.yaml`, not an upstream model name.
 :::
 
 **Request Body:**
@@ -224,39 +220,13 @@ The gateway operates in **stateless mode** only. Setting `previous_response_id` 
   "input": "What is the capital of France?",
   "instructions": "You are a helpful assistant.",
   "stream": false,
-  "temperature": 0.7,
   "max_output_tokens": 200
 }
 ```
 
-The `input` field also accepts a list of message objects:
-```json
-{
-  "model": "project-name/route-name",
-  "input": [
-    {"role": "user", "content": "What is the capital of France?"}
-  ]
-}
-```
+Every Responses API field reaches the provider: typed `input` items, `tools`, `reasoning`, `include`, `store`, `previous_response_id`, `metadata` and the rest. The route's configured model parameters fill only the fields your request leaves out.
 
-**Parameters:**
-
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `model` | string | Yes | The route in `project-name/route-name` format |
-| `input` | string or array | Yes | User prompt or list of message objects |
-| `instructions` | string | No | System-level instructions (equivalent to a system message) |
-| `stream` | boolean | No | Whether to stream the response |
-| `temperature` | number | No | Sampling temperature |
-| `top_p` | number | No | Nucleus sampling parameter |
-| `max_output_tokens` | integer | No | Maximum output tokens (mapped to `max_completion_tokens`) |
-| `tools` | array | No | Function tools to make available |
-| `tool_choice` | string or object | No | Tool selection strategy |
-| `parallel_tool_calls` | boolean | No | Allow parallel tool calls |
-| `user` | string | No | End-user identifier forwarded to the upstream provider |
-| `previous_response_id` | string | No | **Not supported** — raises an error |
-
-**Response:**
+**Response:** the provider's response object, with `model` set to your route:
 ```json
 {
   "id": "resp_123",
@@ -282,6 +252,39 @@ The `input` field also accepts a list of message objects:
   }
 }
 ```
+
+#### Which models serve it
+
+| Model in `config.yaml` | Served |
+|---|---|
+| `openai/...` (OpenAI) | Yes |
+| `openai/...` with a `base_url` (OpenRouter, vLLM, Mistral, any OpenAI-compatible endpoint) | Yes, if the endpoint serves `/v1/responses`. If it doesn't, you get the endpoint's own error. |
+| `azure/...`, `azure_openai/...` | Yes |
+| `deepseek/...` | Yes |
+| `anthropic/...`, `google-genai/...`, `mistralai/...` | No: `400 ... does not serve the Responses API`. Anthropic and Gemini are reachable through OpenRouter. |
+
+#### Switching models in the middle of a conversation
+
+Most agents keep the conversation themselves: every turn they send the whole history again in `input`. That history can contain items produced by another provider, for example when the route falls back to another model, when a router picks a different model, or after you switch the served configuration. A provider usually rejects another provider's items, so before each attempt the gateway rewrites `input` for the model about to receive it:
+
+- **Messages, tool calls and tool outputs always pass.** The model sees the whole visible conversation.
+- **Reasoning passes only when the model can recognise it as its own.** Otherwise it is dropped. Reasoning is the model's private scratchpad: without it the model thinks again, and the conversation continues.
+- **Item ids pass only when the model accepts them.** Otherwise they are removed, and the items stay.
+
+What each model gets:
+
+| Model in `config.yaml` | Reasoning it gets | Item ids |
+|---|---|---|
+| `openai/...` without `base_url` | only OpenAI's own reasoning | kept; ids in another provider's format are removed |
+| `openai/...` with a `base_url` | none | removed |
+| `deepseek/...` | its own reasoning, and the readable summary of OpenAI's reasoning (see below) | kept |
+| any other model | none | kept |
+
+DeepSeek in thinking mode needs reasoning before each tool call of the current turn. When a tool call came from another model and has none, the gateway adds a short note in its place: `Reasoning not available: this step came from another model.`
+
+:::note
+Behind a `base_url` the gateway can't tell which reasoning the endpoint produced itself, so it sends none, even on a route that uses only that endpoint. The conversation still works; the model reasons again.
+:::
 
 ### Decision Models
 
