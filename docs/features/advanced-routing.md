@@ -722,7 +722,7 @@ routes:
 
 - **`fallback_model_id`**: Another decision model from the top-level `decision_models`, asked when `decision_model_id` fails
 - **`min_confidence`**: A value from `0` to `1`. If the chosen option's confidence is below it, the request goes to `default_model_id`. No default: without it, the decision model's choice is always used
-- **`history`**: `last` (default) sends the last human message. `all` sends the conversation the client sent
+- **`history`**: `last` (default) sends the last human message. `all` sends the conversation the client sent. Guardrails have a [`history` field](./guardrails.md#which-messages-a-guardrail-reads) too, with a different default (`all`) and a `last_n` option
 - **`message_roles`**: With `history: all`, the message roles to include: `user`, `assistant`, `system`, `tool`. Default: `user` and `assistant`. Not allowed with `history: last`
 
 ### Output Mapping Fields
