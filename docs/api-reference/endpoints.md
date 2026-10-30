@@ -263,21 +263,28 @@ Every Responses API field reaches the provider: typed `input` items, `tools`, `r
 | `deepseek/...` | Yes |
 | `anthropic/...`, `google-genai/...`, `mistralai/...` | No: `400 ... does not serve the Responses API`. Anthropic and Gemini are reachable through OpenRouter. |
 
+#### Conversations
+
+There are two ways to continue a conversation, both forwarded to the provider:
+
+- **The client sends the whole history in `input` every turn** (most agents do this, usually with `store: false`). Works with every model above, and with [fallback](../features/fallback.md).
+- **The client sends `previous_response_id`**, and the provider keeps the history. The gateway disables fallback for these requests, because only the provider that stored the response can continue it.
+
+To forbid stored conversations on a route, see [Responses API settings](../configuration/advanced-configuration.md#responses-api-settings).
+
 #### Switching models in the middle of a conversation
 
-Most agents keep the conversation themselves: every turn they send the whole history again in `input`. That history can contain items produced by another provider, for example when the route falls back to another model, when a router picks a different model, or after you switch the served configuration. A provider usually rejects another provider's items, so before each attempt the gateway rewrites `input` for the model about to receive it:
+When the history comes from the client, it can contain items produced by another provider: after a fallback, when a router picks another model, or after you switch the served configuration. A provider usually rejects another provider's items, so before each attempt the gateway rewrites `input` for the model about to receive it:
 
 - **Messages, tool calls and tool outputs always pass.** The model sees the whole visible conversation.
 - **Reasoning passes only when the model can recognise it as its own.** Otherwise it is dropped. Reasoning is the model's private scratchpad: without it the model thinks again, and the conversation continues.
 - **Item ids pass only when the model accepts them.** Otherwise they are removed, and the items stay.
 
-What each model gets:
-
 | Model in `config.yaml` | Reasoning it gets | Item ids |
 |---|---|---|
 | `openai/...` without `base_url` | only OpenAI's own reasoning | kept; ids in another provider's format are removed |
 | `openai/...` with a `base_url` | none | removed |
-| `deepseek/...` | its own reasoning, and the readable summary of OpenAI's reasoning (see below) | kept |
+| `deepseek/...` | its own reasoning, and the readable summary of OpenAI's reasoning | kept |
 | any other model | none | kept |
 
 DeepSeek in thinking mode needs reasoning before each tool call of the current turn. When a tool call came from another model and has none, the gateway adds a short note in its place: `Reasoning not available: this step came from another model.`
@@ -285,6 +292,13 @@ DeepSeek in thinking mode needs reasoning before each tool call of the current t
 :::note
 Behind a `base_url` the gateway can't tell which reasoning the endpoint produced itself, so it sends none, even on a route that uses only that endpoint. The conversation still works; the model reasons again.
 :::
+
+#### Limits
+
+- Only `POST /v1/responses` is served. The endpoints for stored responses (`GET`/`DELETE /v1/responses/{id}`, `cancel`, `input_items`), `compact`, `input_tokens` and the Conversations API return `404`, and `background: true` returns `400`.
+- Output guardrails read the reply's text only, not tool call arguments or reasoning.
+- With output guardrails, or when the reply comes from the cache, a stream is sent only once the whole reply is ready.
+- Fees of the provider's hosted tools (web search, file search, code interpreter) are not added to the cost; only tokens are counted.
 
 ### Decision Models
 

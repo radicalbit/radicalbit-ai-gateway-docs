@@ -68,6 +68,18 @@ routes:
 
 ---
 
+## Responses API
+
+Fallback works on [`POST /v1/responses`](../api-reference/endpoints.md#responses-api) too, with three differences:
+
+- A fallback model that doesn't serve the Responses API is skipped.
+- When streaming, the gateway falls back only before the first event reaches the client.
+- Requests with `previous_response_id` never fall back: only the provider that stored the response can continue it.
+
+The fallback model gets the conversation rewritten for it. See [Switching models in the middle of a conversation](../api-reference/endpoints.md#switching-models-in-the-middle-of-a-conversation).
+
+---
+
 ## Validation Rules
 
 - `target` and all `fallbacks` must be listed in the route's model list for that `type` (`chat_models`, `embedding_models`, `transcription_models` or `decision_models`)

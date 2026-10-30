@@ -64,6 +64,8 @@ routes:
 
 The gateway has native support for the following providers. The `model` field always follows the `provider/model-name` format.
 
+All providers serve Chat Completions. For the Responses API, see [which models serve it](../api-reference/endpoints.md#which-models-serve-it).
+
 ### OpenAI
 
 ```yaml

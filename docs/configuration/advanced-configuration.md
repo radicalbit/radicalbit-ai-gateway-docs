@@ -89,6 +89,23 @@ routes:
       - text-embedding-ada-002
 ```
 
+### Responses API settings
+
+A route can govern the [Responses API](../api-reference/endpoints.md#responses-api) under `responses`:
+
+```yaml
+routes:
+  coding-agents:
+    chat_models:
+      - gpt-4o-mini
+    responses:
+      force_store_false: true
+      allowed_hosted_tools: [web_search]
+```
+
+- **`force_store_false`**: forwards every request with `store: false`, so the provider keeps no response. Requests that continue stored state (`previous_response_id`, `conversation`, `item_reference` items) are rejected. Default: `false`.
+- **`allowed_hosted_tools`**: the tools the provider runs that a request may use (`web_search`, `file_search`, `code_interpreter`, `mcp`...). Tools the client runs (functions, shell, `apply_patch`...) are always allowed. Not set: all are allowed. Empty list: none is.
+
 ---
 
 ## Models
