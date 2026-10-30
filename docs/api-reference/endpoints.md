@@ -207,7 +207,7 @@ data: [DONE]
 
 **Endpoint:** `POST /v1/responses`
 
-**Description:** Creates a response with the [OpenAI Responses API](https://platform.openai.com/docs/api-reference/responses). The request is forwarded to the provider as sent, so every Responses API field is supported. Only some providers serve it: see [Responses API support](../configuration/models.md#responses-api-support).
+**Description:** Creates a response with the [OpenAI Responses API](https://platform.openai.com/docs/api-reference/responses). The request is forwarded to the provider as sent, so every Responses API field is supported.
 
 **Request Body:**
 ```json
@@ -261,9 +261,44 @@ Any other field of the Responses API is forwarded too.
 }
 ```
 
-:::note
-When a conversation moves to another model, the gateway adapts the history in `input` for it. See [Fallback on the Responses API](../features/fallback.md#responses-api).
-:::
+#### Supported providers
+
+| Model in `config.yaml` | Responses API |
+|---|---|
+| `openai/...` | Yes |
+| `openai/...` with a `base_url` | Yes, if the endpoint serves `/v1/responses`; otherwise you get the endpoint's own error |
+| `azure/...`, `azure_openai/...` | Yes |
+| `deepseek/...` | Yes |
+| `anthropic/...`, `google-genai/...`, `mistralai/...` | No: `400 ... does not serve the Responses API`. Anthropic and Gemini are reachable through OpenRouter. |
+
+#### Fallback
+
+[Fallback](../features/fallback.md) works as for Chat Completions, except:
+
+- a fallback model that doesn't serve the Responses API is skipped;
+- when streaming, the gateway falls back only before the first event reaches the client;
+- requests with `previous_response_id` never fall back, because only the provider that stored the response can continue it.
+
+#### Conversations across models
+
+Most agents send the whole conversation in `input` every turn. After a fallback, a [routing](../features/advanced-routing.md) decision or a configuration switch, that conversation can contain items produced by another provider, which the new model would reject. Before each attempt the gateway adapts `input` for the model about to receive it:
+
+- **Messages, tool calls and tool outputs always pass.**
+- **Reasoning passes only to the model that can recognise it as its own**; otherwise it is dropped and the model reasons again.
+- **Item ids pass only where they are accepted**; otherwise they are removed and the items stay.
+
+| Model in `config.yaml` | Reasoning it gets | Item ids |
+|---|---|---|
+| `openai/...` without `base_url` | only OpenAI's own | ids in another provider's format are removed |
+| `openai/...` with a `base_url` | none | removed |
+| `deepseek/...` | its own, and the readable summary of OpenAI's | kept |
+| any other model | none | kept |
+
+DeepSeek in thinking mode needs reasoning before each tool call of the current turn; when a tool call came from another model, the gateway adds the note `Reasoning not available: this step came from another model.` in its place.
+
+#### Route settings
+
+A route can force `store: false` and restrict the tools the provider runs: see [Responses API settings](../configuration/advanced-configuration.md#responses-api-settings).
 
 :::warning
 Only `POST /v1/responses` is served. Stored-response endpoints (`GET`/`DELETE /v1/responses/{id}`, `cancel`, `input_items`), `compact`, `input_tokens` and the Conversations API return `404`; `background: true` returns `400`.

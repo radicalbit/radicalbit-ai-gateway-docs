@@ -206,20 +206,6 @@ embedding_models:
 
 ---
 
-### Responses API support
-
-All providers serve [Chat Completions](../api-reference/endpoints.md#chat-completions). The [Responses API](../api-reference/endpoints.md#responses-api) is served by:
-
-| Model | Responses API |
-|---|---|
-| `openai/...` | Yes |
-| `openai/...` with a `base_url` | Yes, if the endpoint serves `/v1/responses`; otherwise you get the endpoint's own error |
-| `azure/...`, `azure_openai/...` | Yes |
-| `deepseek/...` | Yes |
-| `anthropic/...`, `google-genai/...`, `mistralai/...` | No: `400 ... does not serve the Responses API`. Anthropic and Gemini are reachable through OpenRouter. |
-
----
-
 ## Model Types
 
 ### Chat Models
