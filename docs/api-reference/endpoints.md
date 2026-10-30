@@ -269,7 +269,7 @@ Any other field of the Responses API is forwarded too.
 | `openai/...` with a `base_url` | Yes, if the endpoint serves `/v1/responses`; otherwise you get the endpoint's own error |
 | `azure/...`, `azure_openai/...` | Yes |
 | `deepseek/...` | Yes |
-| `anthropic/...`, `google-genai/...`, `mistralai/...` | No: `400 ... does not serve the Responses API`. Anthropic and Gemini are reachable through OpenRouter. |
+| `anthropic/...`, `google-genai/...`, `mistralai/...` | No: `400 ... does not serve the Responses API`. |
 
 #### Fallback
 
