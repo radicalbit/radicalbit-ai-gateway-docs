@@ -49,6 +49,18 @@ Two limits with the same category, window type and window are the same limit: ad
 
 ---
 
+## Limits Looser Than a Route
+
+A credential reaches the routes its group is associated with. When a credential limit allows more than one of those routes does, in the same category, the route limit is reached first and the credential limit never binds there. The gateway saves the limit anyway and returns a warning naming the route and both values:
+
+> acme/chat-prod: route allows 50 requests / 1 min, this credential 100 requests / 1 min. The route limit is reached first.
+
+Limits on different windows are compared by rate: 50 requests per minute is the same as 3,000 per hour. Input and output tokens are compared with the route's input and output token limits, a budget with the route's budget. Only routes of the published configurations count.
+
+The warning appears after adding limits, after changing a max, and after applying limits to a group, for each credential that received a limit. A conflict left on **Skip** keeps the credential's own max, so it gives no warning.
+
+---
+
 ## Expired Credentials
 
 The limits of an expired credential can no longer be added, edited or deleted. They stay listed, read-only.
@@ -111,7 +123,7 @@ Expired credentials in the group receive the limits too, even though they can't 
 1. Open **Groups**, then the row menu (⋮), or the menu of the group page, and choose **Apply limits to credentials**.
 2. Fill one row per limit, as when adding limits to a credential. Add more rows with **Add another limit**.
 3. The **Preview** lists every credential in the group with what it receives: **New** for a limit it doesn't have yet, the old and new max for a conflict. Choose **Skip** or **Overwrite** for each conflict, or all at once with **Skip all** / **Overwrite all**. Expired credentials are marked.
-4. Choose **Apply to N credentials**. The result says how many limits were added, overwritten and skipped.
+4. Choose **Apply to N credentials**. The result says how many limits were added, overwritten and skipped, and lists the [routes with a stricter limit](#limits-looser-than-a-route).
 
 ### With the API
 
@@ -138,7 +150,7 @@ curl -X POST http://localhost:9000/public/api/v1/groups/<group_uuid>/limits \
 | `algorithm` | No | `FIXED_WINDOW` (default) or `ALIGNED_FIXED_WINDOW` |
 | `windowSize` | Yes | The window, in any unit: `60` and `1 minute` are the same window |
 
-The response says, for each credential and each limit, what happened: `added`, `overwritten` or `skipped`. On a conflict it also gives the max the credential had before (`previousValue`).
+The response says, for each credential and each limit, what happened: `added`, `overwritten` or `skipped`. On a conflict it also gives the max the credential had before (`previousValue`). `warnings` lists the [routes with a stricter limit](#limits-looser-than-a-route) than the limits the credential received.
 
 ```json
 {
@@ -150,7 +162,8 @@ The response says, for each credential and each limit, what happened: `added`, `
       "limits": [
         { "category": "request_rate", "algorithm": "FIXED_WINDOW", "windowSize": "1 minute", "outcome": "skipped", "previousValue": 100.0, "newValue": 50.0 },
         { "category": "budget", "algorithm": "ALIGNED_FIXED_WINDOW", "windowSize": "1 day", "outcome": "added", "previousValue": null, "newValue": 20.0 }
-      ]
+      ],
+      "warnings": []
     }
   ]
 }
@@ -191,7 +204,26 @@ curl -X POST http://localhost:9000/public/api/v1/keys/<key_uuid>/limits \
 | `windowSize` | No | A window from the list above, as text (`"1 hour"`) or in seconds (`3600`). Default `1 minute` |
 | `value` | Yes | The max: requests, tokens, or USD for a budget |
 
-The response is the credential with its limits.
+The response is the credential with its limits (`key`), and the [routes with a stricter limit](#limits-looser-than-a-route) (`warnings`):
+
+```json
+{
+  "key": { "uuid": "3b9e…", "name": "billing-service", "limits": [ … ] },
+  "warnings": [
+    {
+      "category": "request_rate",
+      "algorithm": "FIXED_WINDOW",
+      "routeName": "acme/chat-prod",
+      "credentialValue": 5000.0,
+      "credentialWindowSize": "1 hour",
+      "routeValue": 50.0,
+      "routeWindowSize": "1 minute"
+    }
+  ]
+}
+```
+
+`routeName` is the project and the route. `warnings` is empty when no route the credential reaches is stricter.
 
 ### List Limits
 
@@ -223,7 +255,7 @@ curl -X PATCH http://localhost:9000/public/api/v1/keys/<key_uuid>/limits/<limit_
   -d '{ "value": 200 }'
 ```
 
-The body takes only `value`; any other field is refused. For `request_rate`, `token_input` and `token_output` the max must be a whole number. The response is the limit, with the max it had before:
+The body takes only `value`; any other field is refused. For `request_rate`, `token_input` and `token_output` the max must be a whole number. The response is the limit, with the max it had before and the [routes with a stricter limit](#limits-looser-than-a-route) than the new max:
 
 ```json
 {
@@ -233,6 +265,7 @@ The body takes only `value`; any other field is refused. For `request_rate`, `to
   "windowSize": "1 hour",
   "value": 200.0,
   "previousValue": 100.0,
+  "warnings": [],
   "createdAt": "2026-10-26 10:00:00+00:00",
   "updatedAt": "2026-10-29 09:30:00+00:00"
 }
