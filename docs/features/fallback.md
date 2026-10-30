@@ -70,13 +70,28 @@ routes:
 
 ## Responses API
 
-Fallback works on [`POST /v1/responses`](../api-reference/endpoints.md#responses-api) too, with three differences:
+Fallback works on [`POST /v1/responses`](../api-reference/endpoints.md#responses-api) too:
 
 - A fallback model that doesn't serve the Responses API is skipped.
 - When streaming, the gateway falls back only before the first event reaches the client.
 - Requests with `previous_response_id` never fall back: only the provider that stored the response can continue it.
 
-The fallback model gets the conversation rewritten for it. See [Switching models in the middle of a conversation](../api-reference/endpoints.md#switching-models-in-the-middle-of-a-conversation).
+### Conversations across models
+
+Most agents send the whole conversation in `input` every turn. After a fallback, a [routing](./advanced-routing.md) decision or a configuration switch, that conversation can contain items produced by another provider, which the new model would reject. Before each attempt the gateway adapts `input` for the model about to receive it:
+
+- **Messages, tool calls and tool outputs always pass.**
+- **Reasoning passes only to the model that can recognise it as its own**; otherwise it is dropped and the model reasons again.
+- **Item ids pass only where they are accepted**; otherwise they are removed and the items stay.
+
+| Model | Reasoning it gets | Item ids |
+|---|---|---|
+| `openai/...` without `base_url` | only OpenAI's own | ids in another provider's format are removed |
+| `openai/...` with a `base_url` | none | removed |
+| `deepseek/...` | its own, and the readable summary of OpenAI's | kept |
+| any other model | none | kept |
+
+DeepSeek in thinking mode needs reasoning before each tool call of the current turn; when a tool call came from another model, the gateway adds the note `Reasoning not available: this step came from another model.` in its place.
 
 ---
 

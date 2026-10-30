@@ -207,11 +207,7 @@ data: [DONE]
 
 **Endpoint:** `POST /v1/responses`
 
-**Description:** Creates a response with the [OpenAI Responses API](https://platform.openai.com/docs/api-reference/responses). The gateway forwards your request body to the provider as sent, and returns the provider's response, or its stream of events, unchanged. The only field it changes is `model`. Authentication, rate limits, budgets, guardrails, caching, cost tracking and tracing work as for Chat Completions.
-
-:::tip
-The `model` field works exactly like in Chat Completions: it is a **route name** from your `config.yaml`, not an upstream model name.
-:::
+**Description:** Creates a response with the [OpenAI Responses API](https://platform.openai.com/docs/api-reference/responses). The request is forwarded to the provider as sent, so every Responses API field is supported. Only some providers serve it: see [Responses API support](../configuration/models.md#responses-api-support).
 
 **Request Body:**
 ```json
@@ -219,14 +215,26 @@ The `model` field works exactly like in Chat Completions: it is a **route name**
   "model": "project-name/route-name",
   "input": "What is the capital of France?",
   "instructions": "You are a helpful assistant.",
-  "stream": false,
   "max_output_tokens": 200
 }
 ```
 
-Every Responses API field reaches the provider: typed `input` items, `tools`, `reasoning`, `include`, `store`, `previous_response_id`, `metadata` and the rest. The route's configured model parameters fill only the fields your request leaves out.
+**Parameters:**
 
-**Response:** the provider's response object, with `model` set to your route:
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | The route in `project-name/route-name` format |
+| `input` | string/array | Yes | A prompt, or the list of conversation items |
+| `instructions` | string | No | System instructions |
+| `stream` | boolean | No | Stream the response as events |
+| `max_output_tokens` | number | No | Maximum tokens to generate |
+| `tools` | array | No | Tools the model can call |
+| `store` | boolean | No | Whether the provider stores the response |
+| `previous_response_id` | string | No | Continue a response stored by the provider |
+
+Any other field of the Responses API is forwarded too.
+
+**Response:**
 ```json
 {
   "id": "resp_123",
@@ -253,52 +261,13 @@ Every Responses API field reaches the provider: typed `input` items, `tools`, `r
 }
 ```
 
-#### Which models serve it
-
-| Model in `config.yaml` | Served |
-|---|---|
-| `openai/...` (OpenAI) | Yes |
-| `openai/...` with a `base_url` (OpenRouter, vLLM, Mistral, any OpenAI-compatible endpoint) | Yes, if the endpoint serves `/v1/responses`. If it doesn't, you get the endpoint's own error. |
-| `azure/...`, `azure_openai/...` | Yes |
-| `deepseek/...` | Yes |
-| `anthropic/...`, `google-genai/...`, `mistralai/...` | No: `400 ... does not serve the Responses API`. Anthropic and Gemini are reachable through OpenRouter. |
-
-#### Conversations
-
-There are two ways to continue a conversation, both forwarded to the provider:
-
-- **The client sends the whole history in `input` every turn** (most agents do this, usually with `store: false`). Works with every model above, and with [fallback](../features/fallback.md).
-- **The client sends `previous_response_id`**, and the provider keeps the history. The gateway disables fallback for these requests, because only the provider that stored the response can continue it.
-
-To forbid stored conversations on a route, see [Responses API settings](../configuration/advanced-configuration.md#responses-api-settings).
-
-#### Switching models in the middle of a conversation
-
-When the history comes from the client, it can contain items produced by another provider: after a fallback, when a router picks another model, or after you switch the served configuration. A provider usually rejects another provider's items, so before each attempt the gateway rewrites `input` for the model about to receive it:
-
-- **Messages, tool calls and tool outputs always pass.** The model sees the whole visible conversation.
-- **Reasoning passes only when the model can recognise it as its own.** Otherwise it is dropped. Reasoning is the model's private scratchpad: without it the model thinks again, and the conversation continues.
-- **Item ids pass only when the model accepts them.** Otherwise they are removed, and the items stay.
-
-| Model in `config.yaml` | Reasoning it gets | Item ids |
-|---|---|---|
-| `openai/...` without `base_url` | only OpenAI's own reasoning | kept; ids in another provider's format are removed |
-| `openai/...` with a `base_url` | none | removed |
-| `deepseek/...` | its own reasoning, and the readable summary of OpenAI's reasoning | kept |
-| any other model | none | kept |
-
-DeepSeek in thinking mode needs reasoning before each tool call of the current turn. When a tool call came from another model and has none, the gateway adds a short note in its place: `Reasoning not available: this step came from another model.`
-
 :::note
-Behind a `base_url` the gateway can't tell which reasoning the endpoint produced itself, so it sends none, even on a route that uses only that endpoint. The conversation still works; the model reasons again.
+When a conversation moves to another model, the gateway adapts the history in `input` for it. See [Fallback on the Responses API](../features/fallback.md#responses-api).
 :::
 
-#### Limits
-
-- Only `POST /v1/responses` is served. The endpoints for stored responses (`GET`/`DELETE /v1/responses/{id}`, `cancel`, `input_items`), `compact`, `input_tokens` and the Conversations API return `404`, and `background: true` returns `400`.
-- Output guardrails read the reply's text only, not tool call arguments or reasoning.
-- With output guardrails, or when the reply comes from the cache, a stream is sent only once the whole reply is ready.
-- Fees of the provider's hosted tools (web search, file search, code interpreter) are not added to the cost; only tokens are counted.
+:::warning
+Only `POST /v1/responses` is served. Stored-response endpoints (`GET`/`DELETE /v1/responses/{id}`, `cancel`, `input_items`), `compact`, `input_tokens` and the Conversations API return `404`; `background: true` returns `400`.
+:::
 
 ### Decision Models
 
