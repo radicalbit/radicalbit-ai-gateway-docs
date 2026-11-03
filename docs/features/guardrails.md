@@ -49,6 +49,7 @@ Guardrails belong to one of two classes:
 | `behavior` | Action to take if triggered: `block`, `soft_block`, or `warn`. Not required for Redact types. |
 | `response_message` | Optional message returned to the user when the guardrail triggers |
 | `parameters` | A dictionary of settings specific to the guardrail type |
+| `include_reasoning` | Also read the model's reasoning, when the provider returns it. Default `false`. See [Model Reasoning](#model-reasoning) |
 
 ### Guardrail Types at a Glance
 
@@ -339,6 +340,50 @@ Each call is recorded on the request's trace: the model that answered, whether t
 
 :::warning
 The text sent to the decision model leaves the gateway and is stored in traces. Put a redact guardrail before the decision judge if that text may contain personal data. In Enterprise, the trace privacy plugin drops the text from stored traces.
+:::
+
+---
+
+## Model Reasoning
+
+Reasoning models can return their reasoning beside the answer. By default guardrails read only the answer and the messages, so a policy can be broken in the reasoning while the answer passes. Set `include_reasoning: true` on a guardrail to read the reasoning too:
+
+```yaml
+guardrails:
+  - name: no_internal_codenames
+    type: contains
+    where: output
+    behavior: block
+    include_reasoning: true
+    parameters:
+      values: ["project-zeus"]
+```
+
+The reasoning belongs to its assistant message. A guardrail with `include_reasoning` reads it whenever it reads that message, by the same rules:
+
+- **`where`**: on `output`, the reasoning of the reply; on `input`, the reasoning the client sends back in the conversation; on `io`, both.
+- **`message_roles`**: the reasoning is read only if the guardrail reads assistant messages. A judge reads only user messages on input unless `message_roles` includes `assistant`.
+- **`history`**: the reasoning goes with its message. It does not count as a message, so `last` and `last_n` pick the same messages as without it.
+
+What each guardrail type does with it:
+
+| Type | With `include_reasoning: true` |
+|------|-------------------------------|
+| Check (`contains`, `regex`, `presidio_analyzer`, ...) | Checks the reasoning as one more text of its message. The reason of a triggered guardrail points at that message. |
+| `judge`, `decision_judge` | The judge reads the reasoning, then the text. Reasoning is often long: the judge uses more tokens. |
+| `presidio_anonymizer` | Masks the reasoning too. The client gets the masked reasoning; on input, the model gets it. |
+
+Where the reasoning comes from:
+
+| API | Reasoning the guardrails read |
+|-----|-------------------------------|
+| Chat Completions | `reasoning_content` (DeepSeek) or `reasoning` (vLLM, Ollama, OpenRouter) on the assistant message |
+| Responses | The `summary_text` and `reasoning_text` of `reasoning` items. The reasoning before a message belongs to it; the reasoning before a tool call is read as a message of its own. |
+
+Encrypted reasoning (OpenAI's `encrypted_content`) cannot be read and is never checked or changed. OpenAI does not return its reasoning on Chat Completions, so there a guardrail has nothing more to read. When `encrypted_content` is a plain copy of the reasoning text (Ollama), the anonymizer masks the copy too.
+
+:::tip
+Leave `include_reasoning` off unless the policy needs it: reasoning is long, and a judge reading it costs more tokens and latency.
 :::
 
 ---

@@ -88,6 +88,23 @@ The gateway reads the [credential](../credentials.md) from the `Authorization: B
 }
 ```
 
+#### Model reasoning
+
+When the model returns its reasoning, the gateway returns it on the assistant message under both names in use, `reasoning_content` (DeepSeek) and `reasoning` (vLLM, Ollama, OpenRouter). When streaming, each delta carries both:
+
+```json
+"message": {
+  "role": "assistant",
+  "content": "Prime.",
+  "reasoning_content": "17 has no divisors other than 1 and itself...",
+  "reasoning": "17 has no divisors other than 1 and itself..."
+}
+```
+
+A client can send the reasoning back on assistant messages under either name. DeepSeek gets it back, as it needs within a tool-calling turn; other models do not. OpenAI does not return its reasoning on Chat Completions.
+
+[Guardrails](../features/guardrails.md#model-reasoning) with `include_reasoning: true` read the reasoning in the reply and in the conversation.
+
 ### Embeddings
 
 **Endpoint:** `POST /v1/embeddings`
