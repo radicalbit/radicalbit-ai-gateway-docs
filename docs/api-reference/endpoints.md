@@ -103,7 +103,7 @@ When the model returns its reasoning, the gateway returns it on the assistant me
 
 A client can send the reasoning back on assistant messages under either name. DeepSeek gets it back, as it needs within a tool-calling turn; other models do not. OpenAI does not return its reasoning on Chat Completions.
 
-[Guardrails](../features/guardrails.md#model-reasoning) with `include_reasoning: true` read the reasoning in the reply and in the conversation.
+[Guardrails](../features/guardrails.md#model-reasoning) with `read_reasoning: true` read the reasoning in the reply and in the conversation.
 
 ### Embeddings
 
