@@ -116,20 +116,15 @@ rate_limiting:
 ## Rate Limiting Behavior
 
 ### When Limits Are Exceeded
-- **HTTP 429**: Too Many Requests status code
-- **Retry-After**: Header indicating when to retry (if enabled)
-- **Error Message**: Descriptive error message
 
-### Response Headers (if exposed by the gateway)
-```
+The request is refused with `429 Too Many Requests`, code `request_rate_limited`. The message says how long to wait before retrying.
+
+The response carries `X-RB-AIGATEWAY-LIMIT-SCOPE: route`. A request limit on the [credential](./credential-limits.md) gives the same code with `credential` instead: see [which limit blocked the request](../api-reference/endpoints.md#which-limit-blocked-the-request).
+
+```text
 HTTP/1.1 429 Too Many Requests
-Retry-After: 60
-X-RateLimit-Limit: 100
-X-RateLimit-Remaining: 0
-X-RateLimit-Reset: 1640995200
+X-RB-AIGATEWAY-LIMIT-SCOPE: route
 ```
-
-> Header names/availability may vary depending on the deployment and gateway version.
 
 ---
 
