@@ -82,19 +82,15 @@ A request's own model call counts, and so do the calls the gateway makes on its 
 ## Budget Limiting Behavior
 
 ### When Limits Are Exceeded
-- **HTTP 429**: Too Many Requests status code
-- **Budget Exceeded**: Clear error message
-- **Retry Information**: When budget resets
 
-### Response Headers (if exposed by the gateway)
-```
+The request is refused with `429 Too Many Requests`, code `budget_limit_rate_limited`. The message says how long to wait before the budget window resets.
+
+The response carries `X-RB-AIGATEWAY-LIMIT-SCOPE: route`. A budget on the [credential](./credential-limits.md) or the [project](./project-budget.md) gives the same code with `credential` or `project` instead: see [which limit blocked the request](../api-reference/endpoints.md#which-limit-blocked-the-request).
+
+```text
 HTTP/1.1 429 Too Many Requests
-X-Budget-Limit: 100
-X-Budget-Remaining: 0
-X-Budget-Reset: 1640995200
+X-RB-AIGATEWAY-LIMIT-SCOPE: route
 ```
-
-> Header names/availability may vary depending on the deployment and gateway version.
 
 ---
 
