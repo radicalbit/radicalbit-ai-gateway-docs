@@ -4,7 +4,7 @@
 This feature is available exclusively in the **Enterprise edition** of the Radicalbit AI Gateway, with the [Keycloak IDP plugin](../access-control/keycloak-idp.md).
 :::
 
-With [Access Control](../access-control/index.md) enabled, every call to the management API must come from someone the gateway knows, with a role that allows it. The Enterprise package, `radicalbit-ai-gateway-enterprise-sdk`, is the [Python SDK](./index.md) with Keycloak sign-in built in: the methods, models, errors and options are the same, only the client changes.
+With [Access Control](../access-control/index.md) enabled, every call to the management API must come from someone the gateway knows, with a role that allows it. The Enterprise package, `radicalbit-ai-gateway-enterprise-sdk`, is the [Python SDK](./index.md) with Keycloak sign-in built in and the [Enterprise operations](#enterprise-operations): the methods, models, errors and options of the SDK are the same.
 
 ```python
 from radicalbit_gateway_enterprise import Gateway, errors
@@ -132,6 +132,39 @@ The SDK does not take a username and password. Use a service account for automat
 
 ---
 
+## Enterprise Operations
+
+Next to the methods of the [Reference](./reference.md), the Enterprise package manages users, project members and the audit log:
+
+| Method | What it does |
+|---|---|
+| `gw.users.list(role=, exclude_role=)` | List the users, people and service accounts, optionally by role |
+| `gw.users.me()` | The user the SDK is signed in as |
+| `gw.users.assign_role(user_uuid, role=)` | Give a user the `BUILDER` or the `AUDITOR` role (an ADMIN's role can't change) |
+| `gw.project_members.add(project_uuid, user_uuids=[...])` | Make users members of a project |
+| `gw.project_members.remove(project_uuid, user_uuid)` | Remove a member from a project |
+| `gw.project_members.list_associable(project_uuid)` | The users that can be added: BUILDERs and AUDITORs that are not members yet |
+| `gw.audit_logs.list(page=, size=, entity_type=, action=, actor_uuid=, entity_uuid=, from_=, to=)` | The audit log, newest first, up to 100 entries a page |
+| `gw.audit_logs.history(entity_uuid, page=, size=)` | The audit log of one project, credential, group, user or alert rule |
+
+A BUILDER service account can only work on projects it is a member of. An ADMIN pipeline can set that up in the same run:
+
+```python
+from radicalbit_gateway_enterprise import Gateway
+
+with Gateway() as gw:  # signed in as an ADMIN service account
+    project = gw.projects.create(name='payments')
+    builder = next(
+        u for u in gw.users.list(role='BUILDER')
+        if u.username == 'service-account-ci-builder'
+    )
+    gw.project_members.add(project.uuid, user_uuids=[builder.uuid])
+```
+
+Adding a user who is already a member raises `ConflictError` with `code` `user_already_in_project`.
+
+---
+
 ## What Each Role Can Do
 
 | SDK methods | ADMIN | BUILDER | AUDITOR |
@@ -142,6 +175,9 @@ The SDK does not take a username and password. Use a service account for automat
 | `configs.save`, `configs.upload`, `configs.approve`, `configs.cancel_approval` | Yes | Member projects | No |
 | `configs.serve`, `configs.unserve` | Yes | No | No |
 | `credentials.*`, `groups.*` | Yes | No | No |
+| `users.me` | Yes | Yes | Yes |
+| `users.list`, `users.assign_role`, `project_members.*` | Yes | No | No |
+| `audit_logs.*` | Yes | No | Yes |
 
 ---
 

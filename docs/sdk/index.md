@@ -15,7 +15,7 @@ pip install radicalbit-ai-gateway-sdk
 ```
 
 :::info[Enterprise Feature]{className="enterprise-badge"}
-With [Access Control](../access-control/index.md) enabled, use the Enterprise package instead: the same SDK, which also signs in to Keycloak for you. See **[Enterprise: Signing In](./enterprise.md)**.
+With [Access Control](../access-control/index.md) enabled, use the Enterprise package instead: the same SDK, which also signs in to Keycloak for you and manages users, project members and the audit log. See **[Enterprise: Signing In](./enterprise.md)**.
 :::
 
 ---
