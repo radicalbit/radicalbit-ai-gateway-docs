@@ -133,7 +133,7 @@ Clicking on a route row opens a detail panel, which includes the following secti
 * **Configuration:** Shows the YAML configuration for the selected route.
 * **Curl:** Provides a ready-to-use Curl command to test the route.
 * **Associations:** Lists the groups and API keys linked to the route.
-* **Alerts:** Displays a summary of the last 10 events relating to a specific feature.
+* **Alerts:** Displays a summary of the last 10 events relating to a specific feature. The **Limits** section lists the requests a limit blocked: **Blocked by** says whether the limit is on the route, the credential (named) or the project, with its category and window.
 
 ---
 

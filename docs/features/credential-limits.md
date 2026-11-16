@@ -67,6 +67,18 @@ The sync keeps the limits: when a user moves to another group and their credenti
 
 ---
 
+## When a Limit Blocks a Request
+
+The request is refused with `429 Too Many Requests` and the `code` of its category: `request_rate_limited`, `token_limit_rate_limited` or `budget_limit_rate_limited`. The response carries `X-RB-AIGATEWAY-LIMIT-SCOPE: credential`, so a client can tell a credential limit from a route limit or the project budget (see [which limit blocked the request](../api-reference/endpoints.md#which-limit-blocked-the-request)). The message names the credential, the limit and when to retry:
+
+```text
+Credential rate limit exceeded: 3 requests per 1 minute on credential "my-key". Please retry after 49 seconds.
+```
+
+In the UI, the route's **Events** tab lists the block in its **Limits** section: **Blocked by** reads `Credential "my-key"`, with the category and the window.
+
+---
+
 ## Managing Limits from the UI
 
 1. Open **Credentials**. The **Limits** column shows how many limits each credential has; hover it to see them.

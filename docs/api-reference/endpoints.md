@@ -437,7 +437,44 @@ Errors follow the OpenAI error format, so OpenAI SDKs raise them as regular API 
 | `401` | `key_invalid_unauthorized` | Unknown credential, a credential whose group is not linked to the route, or a [previous value](../credentials.md#after-the-grace-period) used after its grace period | Check the credential value and its group's routes |
 | `401` | `key_expired_unauthorized` | "API key has expired.": the credential's [expiry date](../credentials.md#expiration) has passed | Ask an Admin for a new credential |
 | `401` | `invalid_jwt_token` | Invalid identity provider token (Enterprise, see [Access Control](../access-control/index.md)) | Get a new token from the identity provider |
-| `429` | `request_rate_limited` | [Rate limit](../features/rate-limiting.md) exceeded | Retry later, or raise the limit |
-| `429` | `token_limit_rate_limited` | [Token limit](../features/token-limiting.md) exceeded | Retry later, or raise the limit |
-| `429` | `budget_limit_rate_limited` | [Budget limit](../features/budget-limiting.md) exceeded | Raise the budget, or wait for the next budget window |
+| `429` | `request_rate_limited` | A request limit is full: on the [route](../features/rate-limiting.md) or the [credential](../features/credential-limits.md). See [which limit blocked the request](#which-limit-blocked-the-request) | Retry later, or raise the limit |
+| `429` | `token_limit_rate_limited` | A token limit is full: on the [route](../features/token-limiting.md) or the [credential](../features/credential-limits.md) | Retry later, or raise the limit |
+| `429` | `budget_limit_rate_limited` | A budget is spent: on the [route](../features/budget-limiting.md), the [credential](../features/credential-limits.md) or the [project](../features/project-budget.md) | Raise the budget, or wait for the next budget window |
 | `502` | `model_invoker_bad_gateway` | No [decision model](../features/decision-models.md) answered, fallbacks included | Check Typesafe's status and the fallback configuration |
+
+### Which Limit Blocked the Request
+
+Route limits, [credential limits](../features/credential-limits.md) and the [project budget](../features/project-budget.md) all apply to every request, and the first one that is full blocks it. A `429` from a limit carries the `X-RB-AIGATEWAY-LIMIT-SCOPE` header, which says where that limit is set:
+
+| `X-RB-AIGATEWAY-LIMIT-SCOPE` | The limit is set on | Where to change it |
+|------------------------------|---------------------|--------------------|
+| `route` | The route, in the project configuration (`rate_limiting`, `token_limiting`, `duration_limiting`, `budget_limiting`) | The project configuration |
+| `credential` | The credential that sent the request | **Credentials** › **Manage limits**, or the [credential limits API](../features/credential-limits.md#managing-limits-with-the-api) |
+| `project` | The project budget | **Projects** › **Budget limits**, or the [project budget API](../features/project-budget.md#managing-the-budget-with-the-api) |
+
+The body and the `code` are the same as without the header: `code` says which kind of limit (requests, tokens, budget), the header says which one. Streaming transcriptions blocked by a limit carry the header too.
+
+```bash
+curl -i https://<gateway>/v1/chat/completions \
+  -H "Authorization: Bearer $GATEWAY_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "my-project/my-route", "messages": [{"role": "user", "content": "Hi"}]}'
+```
+
+```text
+HTTP/1.1 429 Too Many Requests
+X-RB-AIGATEWAY-LIMIT-SCOPE: credential
+
+{
+  "error": {
+    "message": "Credential rate limit exceeded: 3 requests per 1 minute on credential \"my-key\". Please retry after 49 seconds.",
+    "type": "rate_limit_error",
+    "param": "my-route",
+    "code": "request_rate_limited"
+  }
+}
+```
+
+HTTP header names are case-insensitive: some clients show it as `x-rb-aigateway-limit-scope`. A browser app calling the gateway from another origin may not be able to read it, like the other `X-RB-AIGATEWAY-*` headers.
+
+Each block is also recorded: the route's **Events** tab lists it in the **Limits** section, with who blocked it.
