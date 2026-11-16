@@ -153,6 +153,10 @@ Two different API keys never share a cached response, even on the same route wit
 
 ---
 
+## Messages API
+
+Both cache types also work on [Messages API](../api-reference/endpoints.md#cache) requests. Only complete answers are stored, and entries are not shared with Chat Completions.
+
 ## Best Practices
 
 ### TTL Configuration
