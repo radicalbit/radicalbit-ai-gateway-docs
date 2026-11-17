@@ -60,7 +60,7 @@ A request's own model call counts, and so do the calls the gateway makes on its 
 
 ## Error Handling
 
-When a token limit is exceeded, the gateway returns an HTTP **429 (Too Many Requests)** error.
+When a token limit is exceeded, the gateway returns an HTTP **429 (Too Many Requests)** error, code `token_limit_rate_limited`, with the `X-RB-AIGATEWAY-LIMIT-SCOPE: route` header. A token limit on the [credential](./credential-limits.md) gives the same code with `credential` instead: see [which limit blocked the request](../api-reference/endpoints.md#which-limit-blocked-the-request).
 
 ---
 
