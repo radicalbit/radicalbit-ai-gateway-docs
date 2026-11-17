@@ -32,11 +32,11 @@ graph LR
 
 Output guardrails need the whole reply. When a route has output guardrails, a streamed request (Chat Completions or Responses) is buffered: the gateway reads the full reply from the model, runs the output guardrails, then streams the result to the client. The client still gets a stream, but the first event arrives only when the model has finished.
 
-If a redact guardrail changes the reply, the masked text is sent whole, never split, because a masked value (an email, say) can cross the model's chunks. On Chat Completions the stream then carries:
+If a redact guardrail changes the reply, the masked text is sent whole, never split, because a masked value (an email, say) can cross the model's chunks. On Chat Completions the stream keeps the model's chunks, in their order:
 
-1. One chunk with the reasoning, when the model returned some. It is masked only if the guardrail has `read_reasoning: true`.
-2. One chunk with the masked answer.
-3. The model's other chunks: tool calls, finish reason and usage.
+- The first chunk with answer text carries the whole masked answer.
+- The first chunk with reasoning, when the model returned some, carries the whole reasoning. It is masked only if the guardrail has `read_reasoning: true`.
+- The later chunks carry no text, but keep their tool calls, finish reason and usage.
 
 The response also carries the headers `X-RB-AIGATEWAY-GUARDRAILS-WARN: true` and `X-RB-AIGATEWAY-GUARDRAILS-OUTPUT-WARN: true`, as a non-streamed redacted reply does.
 
