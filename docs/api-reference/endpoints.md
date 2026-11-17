@@ -1,6 +1,6 @@
 # API Reference
 
-The Radicalbit AI Gateway implements the OpenAI API specification — including Chat Completions, Embeddings, Audio Transcriptions, and the Responses API — making it compatible with existing OpenAI libraries and tools. It also proxies Typesafe's decision API for [decision models](#decision-models).
+The Radicalbit AI Gateway implements the OpenAI API specification — including Chat Completions, Embeddings, Audio Transcriptions, and the Responses API — making it compatible with existing OpenAI libraries and tools. It also serves the Anthropic [Messages API](#messages-api), so Anthropic SDKs and Claude Code work through it, and proxies Typesafe's decision API for [decision models](#decision-models).
 
 ## Base URL
 
@@ -18,6 +18,8 @@ curl -H "Authorization: Bearer your-api-key" \
 ```
 
 The gateway reads the [credential](../credentials.md) from the `Authorization: Bearer` header, which OpenAI SDKs and compatible libraries send for you. A credential past its [expiry date](../credentials.md#expiration) is rejected with `401` and code `key_expired_unauthorized`. After a [rotation](../credentials.md#rotation), the previous value works only until the grace period ends, and is then rejected with `401` and code `key_invalid_unauthorized`, like a wrong value.
+
+On the [Messages API](#messages-api) the gateway also reads the credential from the `x-api-key` header, which Anthropic SDKs send for you.
 
 ## Endpoints
 
@@ -304,6 +306,173 @@ A route can force `store: false` and restrict the tools the provider runs: see [
 Only `POST /v1/responses` is served. Stored-response endpoints (`GET`/`DELETE /v1/responses/{id}`, `cancel`, `input_items`), `compact`, `input_tokens` and the Conversations API return `404`; `background: true` returns `400`.
 :::
 
+### Messages API
+
+**Endpoint:** `POST /v1/messages`
+
+**Description:** Creates a message with the [Anthropic Messages API](https://docs.claude.com/en/api/messages). The request is forwarded to the provider as sent, so every Messages API field is supported: tools, images, documents, extended thinking and prompt caching (`cache_control`). The route's guardrails, routing, limits, budgets, cache and tracing apply to it, as they do to Chat Completions.
+
+:::tip
+Any Anthropic client works through the gateway. Point its base URL at the gateway, use a gateway API key, and set `model` to `project-name/route-name`.
+:::
+
+**Request:**
+```bash
+curl http://localhost:9000/v1/messages \
+  -H "x-api-key: your-api-key" \
+  -H "anthropic-version: 2023-06-01" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "project-name/route-name",
+    "max_tokens": 200,
+    "system": "You are a helpful assistant.",
+    "messages": [{"role": "user", "content": "What is the capital of France?"}]
+  }'
+```
+
+The credential goes in `x-api-key` or in `Authorization: Bearer`. The `anthropic-version` and `anthropic-beta` headers are forwarded to the provider. Your gateway credential never is.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | The route in `project-name/route-name` format |
+| `messages` | array | Yes | The conversation turns |
+| `max_tokens` | number | Yes | Maximum tokens to generate |
+| `system` | string/array | No | System prompt |
+| `stream` | boolean | No | Stream the answer as events |
+| `tools` | array | No | Tools the model can call |
+| `thinking` | object | No | Extended thinking settings |
+
+Any other field of the Messages API is forwarded too.
+
+**Response:**
+```json
+{
+  "id": "msg_123",
+  "type": "message",
+  "role": "assistant",
+  "model": "project-name/route-name",
+  "content": [
+    {
+      "type": "text",
+      "text": "The capital of France is Paris."
+    }
+  ],
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "usage": {
+    "input_tokens": 17,
+    "output_tokens": 9,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0
+  }
+}
+```
+
+`model` holds your route, not the provider's model name. The rest is the provider's answer.
+
+#### Supported providers
+
+| Model in `config.yaml` | Messages API |
+|---|---|
+| `anthropic/...` | Yes |
+| any other model | No: `400 ... does not serve the Messages API` |
+
+A request is never translated to another provider's format. Use [Chat Completions](#chat-completions) to reach the other providers.
+
+#### Guardrails
+
+[Guardrails](../features/guardrails.md) read the text of the request: the system prompt, the text of each message, and the text of tool results. Images, documents, tool calls and thinking are not read and go to the model untouched.
+
+| Guardrail result | What the client gets |
+|---|---|
+| Redact | The text is replaced in place. The rest of the request is unchanged |
+| Block | `400` with error type `invalid_request_error` |
+| Soft block | `200` with a normal message that holds the soft block text, and zero usage. The model is not called |
+
+Output guardrails read the text of the answer. LLM judges and decision judges work as on Chat Completions, and their calls count on the caller's limits.
+
+A system [`prompt` set on the model](../configuration/basic-setup.md) is added before the request's own `system`. It changes the start of the prompt, so it also changes what the provider's prompt cache can reuse.
+
+#### Streaming
+
+With `"stream": true` the gateway returns the Messages event stream (`message_start`, `content_block_delta`, `message_stop` and so on).
+
+- **No output guardrail on the route:** events are relayed as the model produces them.
+- **Output guardrails on the route:** the gateway waits for the whole answer, checks it, then sends it as a valid event stream. The client gets the answer in one go, not token by token.
+
+A soft block and a cache hit are also sent as a valid event stream.
+
+#### Routing and fallback
+
+[Routing](../features/advanced-routing.md) rules work as for Chat Completions. They run after redact guardrails, so they see the redacted text. If the chosen model does not serve the Messages API, the request fails with `400`.
+
+[Fallback](../features/fallback.md) works as for Chat Completions, except:
+
+- a fallback model that doesn't serve the Messages API ends the chain, and the request fails;
+- when streaming, the gateway falls back only before the first event reaches the client.
+
+#### Limits and cost
+
+[Rate](../features/rate-limiting.md), [token](../features/token-limiting.md) and [budget](../features/budget-limiting.md) limits apply on the route, the credential and the [project](../features/project-budget.md). A full limit returns `429` with error type `rate_limit_error`.
+
+Tokens are read from the provider's `usage`. Input tokens include prompt cache reads and prompt cache writes. Cost uses the price of each kind: input, cache read, cache write (5 minutes or 1 hour) and output. After a fallback, cost and limits use the prices of the model that answered.
+
+#### Cache
+
+[Exact and semantic caching](../features/caching.md) work on Messages requests.
+
+- The exact cache matches on the whole request body after guardrails. `stream` and `metadata` are ignored, so a streamed and a non-streamed request share one entry.
+- The semantic cache compares the text of the last user message.
+- Only complete answers are stored: stop reason `end_turn`, `stop_sequence` or `tool_use`. An answer cut by `max_tokens` is never stored.
+- A cached answer still passes the output guardrails. It does not count on token and budget limits.
+- Entries are not shared with Chat Completions or the Responses API.
+
+#### Observability
+
+Each request is traced like a chat request: the route, the model that answered, input and output tokens, prompt cache tokens, cost and stop reason. See [Monitoring](../operations/monitoring.md).
+
+#### Claude Code
+
+[Claude Code](https://docs.claude.com/en/docs/claude-code) can use a route as its model:
+
+```bash
+export ANTHROPIC_BASE_URL=http://localhost:9000
+export ANTHROPIC_AUTH_TOKEN=your-api-key
+export ANTHROPIC_MODEL=project-name/route-name
+export ANTHROPIC_SMALL_FAST_MODEL=project-name/route-name
+claude
+```
+
+#### Errors
+
+Errors on this endpoint use the Anthropic format, so Anthropic SDKs raise them as regular API errors:
+
+```json
+{
+  "type": "error",
+  "error": {
+    "type": "invalid_request_error",
+    "message": "The route name [my-project/my-route] was not found in the config"
+  }
+}
+```
+
+| Status | Error type |
+|--------|------------|
+| `400` | `invalid_request_error` (also for an invalid request body) |
+| `401` | `authentication_error` |
+| `404` | `not_found_error` |
+| `429` | `rate_limit_error` |
+| `5xx` | `api_error` |
+
+An error returned by the provider is forwarded unchanged. If a stream fails after it started, it ends with an `error` event.
+
+:::warning
+Only `POST /v1/messages` is served. Token counting (`/v1/messages/count_tokens`) and Message Batches return `404`.
+:::
+
 ### Decision Models
 
 **Endpoint:** `POST /v1/systemone`
@@ -411,7 +580,7 @@ The response is Typesafe's body, unchanged. `model` holds the Typesafe model tha
 
 ### Standard Error Format
 
-Errors follow the OpenAI error format, so OpenAI SDKs raise them as regular API errors:
+Errors follow the OpenAI error format, so OpenAI SDKs raise them as regular API errors. The [Messages API](#errors) uses the Anthropic format instead.
 
 ```json
 {
@@ -432,12 +601,49 @@ Errors follow the OpenAI error format, so OpenAI SDKs raise them as regular API 
 | Status | Code | Description | Solution |
 |--------|------|-------------|----------|
 | `400` | `gateway_bad_request` | Unknown route, or a route with no models of the requested kind | Check the `model` field (`project-name/route-name`) and the route configuration |
-| `400` | `guardrail_violation_bad_request` | Content blocked by a guardrail | Review the guardrail configuration |
+| `400` | `guardrail_violation_bad_request` | Content blocked by a guardrail. `param.reason.message_indices` says [which message triggered it](../features/guardrails.md#which-message-triggered) | Review the guardrail configuration |
 | `401` | `key_missing_unauthorized` | No credential in the request | Send the credential in the `Authorization: Bearer` header |
 | `401` | `key_invalid_unauthorized` | Unknown credential, a credential whose group is not linked to the route, or a [previous value](../credentials.md#after-the-grace-period) used after its grace period | Check the credential value and its group's routes |
 | `401` | `key_expired_unauthorized` | "API key has expired.": the credential's [expiry date](../credentials.md#expiration) has passed | Ask an Admin for a new credential |
 | `401` | `invalid_jwt_token` | Invalid identity provider token (Enterprise, see [Access Control](../access-control/index.md)) | Get a new token from the identity provider |
-| `429` | `request_rate_limited` | [Rate limit](../features/rate-limiting.md) exceeded | Retry later, or raise the limit |
-| `429` | `token_limit_rate_limited` | [Token limit](../features/token-limiting.md) exceeded | Retry later, or raise the limit |
-| `429` | `budget_limit_rate_limited` | [Budget limit](../features/budget-limiting.md) exceeded | Raise the budget, or wait for the next budget window |
+| `429` | `request_rate_limited` | A request limit is full: on the [route](../features/rate-limiting.md) or the [credential](../features/credential-limits.md). See [which limit blocked the request](#which-limit-blocked-the-request) | Retry later, or raise the limit |
+| `429` | `token_limit_rate_limited` | A token limit is full: on the [route](../features/token-limiting.md) or the [credential](../features/credential-limits.md) | Retry later, or raise the limit |
+| `429` | `budget_limit_rate_limited` | A budget is spent: on the [route](../features/budget-limiting.md), the [credential](../features/credential-limits.md) or the [project](../features/project-budget.md) | Raise the budget, or wait for the next budget window |
 | `502` | `model_invoker_bad_gateway` | No [decision model](../features/decision-models.md) answered, fallbacks included | Check Typesafe's status and the fallback configuration |
+
+### Which Limit Blocked the Request
+
+Route limits, [credential limits](../features/credential-limits.md) and the [project budget](../features/project-budget.md) all apply to every request, and the first one that is full blocks it. A `429` from a limit carries the `X-RB-AIGATEWAY-LIMIT-SCOPE` header, which says where that limit is set:
+
+| `X-RB-AIGATEWAY-LIMIT-SCOPE` | The limit is set on | Where to change it |
+|------------------------------|---------------------|--------------------|
+| `route` | The route, in the project configuration (`rate_limiting`, `token_limiting`, `duration_limiting`, `budget_limiting`) | The project configuration |
+| `credential` | The credential that sent the request | **Credentials** › **Manage limits**, or the [credential limits API](../features/credential-limits.md#managing-limits-with-the-api) |
+| `project` | The project budget | **Projects** › **Budget limits**, or the [project budget API](../features/project-budget.md#managing-the-budget-with-the-api) |
+
+The body and the `code` are the same as without the header: `code` says which kind of limit (requests, tokens, budget), the header says which one. Streaming transcriptions blocked by a limit carry the header too.
+
+```bash
+curl -i https://<gateway>/v1/chat/completions \
+  -H "Authorization: Bearer $GATEWAY_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "my-project/my-route", "messages": [{"role": "user", "content": "Hi"}]}'
+```
+
+```text
+HTTP/1.1 429 Too Many Requests
+X-RB-AIGATEWAY-LIMIT-SCOPE: credential
+
+{
+  "error": {
+    "message": "Credential rate limit exceeded: 3 requests per 1 minute on credential \"my-key\". Please retry after 49 seconds.",
+    "type": "rate_limit_error",
+    "param": "my-route",
+    "code": "request_rate_limited"
+  }
+}
+```
+
+HTTP header names are case-insensitive: some clients show it as `x-rb-aigateway-limit-scope`. A browser app calling the gateway from another origin may not be able to read it, like the other `X-RB-AIGATEWAY-*` headers.
+
+Each block is also recorded: the route's **Events** tab lists it in the **Limits** section, with who blocked it.

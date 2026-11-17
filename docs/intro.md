@@ -8,7 +8,7 @@ The **Radicalbit AI Gateway** is a centralized access point to the generative AI
 
 It sits between your AI applications and the underlying models — analyzing traffic, filtering information based on configurable conditions, and recording metrics and events to give you full visibility into every operation. The result is a single, controlled layer that makes your AI applications observable, governed, and cost-efficient.
 
-**The Gateway is application-agnostic and supports any model that adheres to the OpenAI standard**, making it compatible with the vast majority of AI applications and frameworks.
+**The Gateway is application-agnostic and supports any model that adheres to the OpenAI standard**, making it compatible with the vast majority of AI applications and frameworks. It also serves the Anthropic [Messages API](./api-reference/endpoints.md#messages-api), for Anthropic SDKs and Claude Code.
 
 ---
 

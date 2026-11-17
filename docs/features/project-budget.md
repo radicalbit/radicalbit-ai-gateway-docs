@@ -57,6 +57,14 @@ To go back to route budgets, delete every project budget first: once the project
 
 ---
 
+## When the Budget Blocks a Request
+
+The request is refused with `429 Too Many Requests`, code `budget_limit_rate_limited`, and the `X-RB-AIGATEWAY-LIMIT-SCOPE: project` header, so a client can tell the project budget from a route or credential limit (see [which limit blocked the request](../api-reference/endpoints.md#which-limit-blocked-the-request)). The message names the project, the budget and when to retry.
+
+In the UI, the route's **Events** tab lists the block in its **Limits** section, with **Blocked by** `Project`.
+
+---
+
 ## Alerts
 
 Alert rules with the **Project** scope watch the project's budgets, with limit and threshold events for each window. While a project has a budget, its routes no longer offer route budget events. See [Alerts](./alerts.md).
