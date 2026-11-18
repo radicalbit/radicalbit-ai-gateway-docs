@@ -34,9 +34,9 @@ Every method of the [Python SDK](./index.md), how arguments and answers work, th
 | `gw.groups.get(group_uuid, include_routes=, include_keys=)` | One group |
 | `gw.groups.delete(group_uuid)` | Delete a group; its credentials lose the routes it gave them |
 | `gw.groups.add_credentials(group_uuid, keys=)` | Add credentials to a group |
-| `gw.groups.remove_credential(group_uuid, key_uuid)` | Remove a credential from a group |
+| `gw.groups.remove_credential(group_uuid, key_uuid)` | Remove a credential from a group; `NotFoundError` (`key_not_found`) if it is not in that group |
 | `gw.groups.add_routes(group_uuid, project_uuid, routes=)` | Let the group's credentials call routes of a project's served configuration |
-| `gw.groups.remove_route(group_uuid, project_uuid, route_name)` | Remove a route from the group |
+| `gw.groups.remove_route(group_uuid, project_uuid, route_name)` | Remove a route from the group; `NotFoundError` (`route_not_found`) if the group does not have it |
 
 The management API calls credentials *keys* in its paths and fields; the SDK calls them credentials, except where it mirrors an API field (`key_uuid`, `add_credentials(..., keys=[...])`).
 
@@ -114,7 +114,7 @@ A failed call is sent again up to `max_retries` times (2 by default), only when 
 |---|:---:|:---:|
 | The request never reached the gateway (connection refused, connect timeout) | Retried | Retried |
 | The gateway refused it without processing it (429, 503) | Retried | Retried |
-| The answer was lost or the call failed midway (read timeout, 500, 502, 504) | Retried | **Not retried** |
+| The answer was lost or the call failed midway (read timeout, 408, 500, 502, 504) | Retried | **Not retried** |
 
 A write whose answer was lost may have happened: repeating it would answer "already exists" or "not found" for work already done, so the SDK raises instead and leaves the decision to you.
 
