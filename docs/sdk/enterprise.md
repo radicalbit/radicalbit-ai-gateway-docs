@@ -170,7 +170,7 @@ Adding a user who is already a member raises `ConflictError` with `code` `user_a
 | SDK methods | ADMIN | BUILDER | AUDITOR |
 |---|:---:|:---:|:---:|
 | `projects.list`, `projects.get` | Yes | Member projects | Member projects |
-| `projects.create` | Yes | No | No |
+| `projects.create`, `projects.delete` | Yes | No | No |
 | `configs.validate` | Yes | Yes | No |
 | `configs.save`, `configs.upload`, `configs.approve`, `configs.cancel_approval` | Yes | Member projects | No |
 | `configs.serve`, `configs.unserve` | Yes | No | No |
@@ -210,7 +210,7 @@ A service account just added to an RBAC group answers `user_has_no_role` until t
 
 ### Credentials owned by Keycloak
 
-Credentials and groups created by the [group and key sync](../access-control/keycloak-idp.md#group-and-key-sync) belong to Keycloak: who is in which group is managed there. Deleting or rotating such a credential, or adding credentials to or removing them from such a group, raises `ConflictError` (409) with `code` `key_externally_managed` or `group_externally_managed`. Change the membership in Keycloak instead; the next sync applies it. Which routes such a group can call is still yours to set, with `groups.add_routes` and `groups.remove_route`.
+Credentials and groups created by the [group and key sync](../access-control/keycloak-idp.md#group-and-key-sync) belong to Keycloak: who is in which group is managed there. Deleting or rotating such a credential, deleting such a group, or adding credentials to or removing them from it, raises `ConflictError` (409) with `code` `key_externally_managed` or `group_externally_managed`. Change the membership in Keycloak instead; the next sync applies it. Which routes such a group can call is still yours to set, with `groups.add_routes` and `groups.remove_route`.
 
 ```python
 try:

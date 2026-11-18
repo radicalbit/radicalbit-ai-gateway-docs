@@ -12,6 +12,7 @@ Every method of the [Python SDK](./index.md), how arguments and answers work, th
 | `gw.projects.create(name=, description=)` | Create a project, with two draft configuration slots (`A` and `B`) |
 | `gw.projects.list(filter=, include_limits=)` | List projects; `filter=` one of `'prod'`, `'dev'` (by [status](../configuration/projects.md#project-status)), `'active'`, `'with_usage'` |
 | `gw.projects.get(project_uuid, include_limits=)` | One project, with its configuration slots |
+| `gw.projects.delete(project_uuid)` | Delete a project; a served configuration stops serving with it, and its routes stop answering |
 | **Configurations** | |
 | `gw.configs.validate(config_file=)` | Check a YAML configuration against the schema, saving nothing |
 | `gw.configs.save(project_uuid, config_uuid, config_file=)` | Save YAML text into a draft slot |
@@ -31,6 +32,7 @@ Every method of the [Python SDK](./index.md), how arguments and answers work, th
 | `gw.groups.create(name=)` | Create a group |
 | `gw.groups.list(include_routes=, include_keys=)` | List groups |
 | `gw.groups.get(group_uuid, include_routes=, include_keys=)` | One group |
+| `gw.groups.delete(group_uuid)` | Delete a group; its credentials lose the routes it gave them |
 | `gw.groups.add_credentials(group_uuid, keys=)` | Add credentials to a group |
 | `gw.groups.remove_credential(group_uuid, key_uuid)` | Remove a credential from a group |
 | `gw.groups.add_routes(group_uuid, project_uuid, routes=)` | Let the group's credentials call routes of a project's served configuration |
