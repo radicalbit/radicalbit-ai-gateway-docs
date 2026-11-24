@@ -119,9 +119,8 @@ const sidebars: SidebarsConfig = {
       label: 'Python SDK',
       items: [
         'sdk/index',
-        'sdk/enterprise',
-        'sdk/reference',
         'sdk/examples',
+        'sdk/enterprise',
       ],
     },
 

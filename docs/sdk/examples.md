@@ -186,7 +186,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: '3.12' }
-      - run: pip install radicalbit-ai-gateway-enterprise-sdk
+      - run: pip install -r requirements.txt   # includes the Enterprise SDK
       - run: python scripts/deploy_config.py support-bot gateway/config.yaml
         env:
           RADICALBIT_GATEWAY_BASE_URL: ${{ vars.GATEWAY_URL }}
@@ -211,5 +211,5 @@ except errors.AuthorizationError as error:
 
 ## Next Steps
 
-- **[Reference](./reference.md)** — Every method, errors, retries and client options
-- **[Enterprise: Signing In](./enterprise.md)** — Service accounts, users, roles
+- **[Python SDK](./index.md#methods-arguments-and-errors)** — Every method, its arguments and errors, with `help()`
+- **[Enterprise: Signing In](./enterprise.md)** — Service accounts and users
