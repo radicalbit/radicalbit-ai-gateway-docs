@@ -119,18 +119,14 @@ curl https://gateway.example.com/v1/chat/completions \
 
 ## Make Setup Repeatable
 
-Running a setup script twice should not fail. "Already exists" is a `ConflictError` with its own `code`, so a script can reuse what is there:
+Running a setup script twice should not fail. Look up what is there before creating it:
 
 ```python
-from radicalbit_gateway import Gateway, errors
+from radicalbit_gateway import Gateway
 
 def ensure_group(gw: Gateway, name: str):
-    try:
-        return gw.groups.create(name=name)
-    except errors.ConflictError as error:
-        if error.code != 'group_already_exists':
-            raise
-        return next(g for g in gw.groups.list() if g.name == name)
+    existing = next((g for g in gw.groups.list() if g.name == name), None)
+    return existing or gw.groups.create(name=name)
 ```
 
 ---
@@ -146,8 +142,8 @@ with Gateway() as gw:
     try:
         credential = gw.credentials.rotate(key_uuid, grace_period='7 days')
     except errors.ConflictError as error:
-        if error.code == 'key_rotation_conflict':
-            print('A grace period is already running: end it first.')
+        # e.g. a grace period is already running: end it first
+        print(f'Cannot rotate the credential now: {error.message}')
         raise
     # Save the new credential.api_key now: no later response returns it
 ```
@@ -201,9 +197,7 @@ Serving is reserved to ADMINs. To keep a person in the loop, give the pipeline t
 ```python
 try:
     gw.configs.serve(project.uuid, target.uuid)
-except errors.AuthorizationError as error:
-    if error.code != 'role_not_allowed':
-        raise
+except errors.AuthorizationError:
     print(f'Slot {target.slot} is ready to serve: an ADMIN can publish it.')
 ```
 
