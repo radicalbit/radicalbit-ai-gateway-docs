@@ -113,6 +113,17 @@ const sidebars: SidebarsConfig = {
       ],
     },
 
+    // ── Manage the gateway from code ─────────────────────────────────────────
+    {
+      type: 'category',
+      label: 'Python SDK',
+      items: [
+        'sdk/index',
+        'sdk/examples',
+        'sdk/enterprise',
+      ],
+    },
+
     // ── Integrate with your stack ────────────────────────────────────────────
     {
       type: 'doc',
