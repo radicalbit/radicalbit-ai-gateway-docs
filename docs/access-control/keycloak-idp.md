@@ -37,6 +37,15 @@ When enabled, the plugin:
 | `KEYCLOAK_IDP_RBAC_GROUPS` | No | — | Groups whose members are synced as gateway users |
 | `KEYCLOAK_IDP_RBAC_ADMIN_GROUPS` | No | — | Groups whose members receive the ADMIN role |
 
+### Keycloak Permissions
+
+The admin user (`KEYCLOAK_IDP_ADMIN_USER`) needs two client roles of `realm-management` in its realm:
+
+- `view-users`: to read the groups and their members.
+- `view-clients`: to tell [service accounts](#service-accounts) from people.
+
+Without `view-clients`, the [user sync](#user-rbac-sync) adds no new users, people or service accounts, and logs a warning on every run until the role is granted. Users already in the gateway keep syncing their role changes and removals.
+
 ---
 
 ## Roles
@@ -111,6 +120,12 @@ Syncs users from RBAC groups into the gateway's user table:
 - Handles new users, role changes, and deletions
 
 Controlled by `KEYCLOAK_IDP_RBAC_CRON`, `KEYCLOAK_IDP_RBAC_GROUPS`, and `KEYCLOAK_IDP_RBAC_ADMIN_GROUPS`.
+
+### Service Accounts
+
+A Keycloak client with **Service accounts roles** enabled has a service-account user. Put that user in an RBAC group and the sync adds it to the gateway like a person: an ADMIN if the group is an admin group, otherwise with no role until an ADMIN assigns one.
+
+Service accounts are listed apart from people, in the **Service accounts** tab of the **Users** page, and named by their client ID. A CI pipeline signs in as one with the [Enterprise SDK](../sdk/enterprise.md#a-pipeline-service-account).
 
 ---
 
