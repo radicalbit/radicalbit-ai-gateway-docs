@@ -31,8 +31,8 @@ A pipeline signs in as a **service account**: a Keycloak client of its own, with
 
 1. **In Keycloak**, create a client for the pipeline (e.g. `ci-pipeline`) with **Client authentication** on and **Service accounts roles** enabled. Note its client secret.
 2. **In Keycloak**, add the client's service-account user (`service-account-ci-pipeline`) to one of the gateway's RBAC groups (`KEYCLOAK_IDP_RBAC_GROUPS`). In an admin group (`KEYCLOAK_IDP_RBAC_ADMIN_GROUPS`) it becomes an ADMIN at once.
-3. **Wait for the [user sync](../access-control/keycloak-idp.md#user-rbac-sync)**. The service account then appears on the **Users** page, marked as a service account.
-4. **In the gateway**, an ADMIN gives it a role on the **Users** page and, for a BUILDER, adds it to the projects it works on — as for a person.
+3. **Wait for the [user sync](../access-control/keycloak-idp.md#user-rbac-sync)**. The service account then appears on the **Users** page, in the **Service accounts** tab, named by its client ID (`ci-pipeline`). The sync adds it only if the gateway's Keycloak admin user can [read the clients](../access-control/keycloak-idp.md#keycloak-permissions).
+4. **In the gateway**, an ADMIN gives it a role in the **Service accounts** tab and, for a BUILDER, adds it to the projects it works on — as for a person.
 
 Give the pipeline the smallest role that does the job: a pipeline that only prepares configurations for review is a BUILDER; one that also publishes them must be an ADMIN.
 
@@ -62,7 +62,7 @@ For a script run by a person, pass their Keycloak tokens instead of a client sec
 
 A call refused by the access control raises `errors.AuthenticationError` (401) when the gateway does not know the caller, or the caller has no role yet, and `errors.AuthorizationError` (403) when the role does not allow the operation. The exception's `code` tells which case it is.
 
-A service account just added to an RBAC group is refused until the next user sync, and then until an ADMIN gives it a role.
+A service account just added to an RBAC group is refused until the next user sync, and then until an ADMIN gives it a role. If it never appears in the **Service accounts** tab, check the [Keycloak permissions](../access-control/keycloak-idp.md#keycloak-permissions) of the gateway's admin user.
 
 ---
 
